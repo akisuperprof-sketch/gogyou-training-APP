@@ -3,7 +3,7 @@
 import { Card, Element } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { ELEMENT_COLORS, ELEMENT_JP } from '@/lib/data';
+import { ELEMENT_COLORS, ELEMENT_JP, ELEMENT_READING } from '@/lib/data';
 import { Shield, Zap, Sparkles } from 'lucide-react';
 
 interface KampoCardProps {
@@ -62,7 +62,7 @@ export function KampoCard({ card, isDiscovered, onClick, className }: KampoCardP
                 <div className="flex items-center space-x-1">
                     <span className="text-[10px]">{ELEMENT_ICONS[card.element]}</span>
                     <span className={cn("text-[9px] font-black uppercase tracking-widest", theme.text)}>
-                        {ELEMENT_JP[card.element]}
+                        <ruby>{ELEMENT_JP[card.element]}<rt className="text-[6px] tracking-normal">{ELEMENT_READING[card.element]}</rt></ruby>
                     </span>
                 </div>
                 <span className="text-[9px] font-black text-slate-400 whitespace-nowrap">ID: {String(card.id).padStart(3, '0')}</span>
@@ -89,7 +89,7 @@ export function KampoCard({ card, isDiscovered, onClick, className }: KampoCardP
             {/* Content area */}
             <div className="px-3 pb-3 pt-1">
                 <h3 className="text-[12px] font-black text-slate-800 leading-tight mb-0.5 truncate">
-                    {card.name}
+                    <ruby>{card.name}<rt className="text-[7px] font-normal tracking-tight">{card.reading}</rt></ruby>
                 </h3>
                 <p className="text-[8px] text-slate-400 font-bold leading-tight line-clamp-2">
                     {card.flavor}

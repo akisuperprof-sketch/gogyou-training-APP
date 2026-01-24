@@ -11,6 +11,7 @@ export interface SpiritStats {
 export interface Spirit {
     id: string;
     name: string;
+    reading: string;
     element: Element;
     stats: SpiritStats;
     dialogueCode: string; // For greeting logic
@@ -21,6 +22,7 @@ export interface Spirit {
 export interface Card {
     id: number;
     name: string;
+    reading: string;
     element: Element;
     flavor: string;
     description: string;
