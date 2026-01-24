@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 五行精霊と漢方図鑑 (Gogyou Spirit & Kampo Dex)
 
-## Getting Started
+五行（木火土金水）を遊びながら学べる、モバイル向けWebアプリケーションです。
 
-First, run the development server:
+## 概要
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **コンセプト**: ライト層向け育成ゲーム
+- **技術スタック**: Next.js (App Router), TypeScript, Tailwind CSS (v4), Zustand
+- **主な機能**:
+  - 精霊の育成（3体：木・火・土）
+  - ミニゲーム（相生チェイン、相克ガード、連想仕分け）
+  - 漢方カードの収集と図鑑
+  - PWA対応（ホーム画面に追加可能）
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ファイル構成
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `/app`: ページ・ルーティング
+  - `/`: ホーム画面（精霊表示）
+  - `/play`: ゲーム選択
+  - `/dex`: 図鑑
+- `/lib`:
+  - `store.ts`: 状態管理 (Zustand) - 精霊、カード、進捗
+  - `data.ts`: 定数データ (漢方カード20種など)
+  - `types.ts`: 型定義
+- `/components`: 共通コンポーネント
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 起動手順
 
-## Learn More
+1. **依存関係のインストール**
+   ```bash
+   npm install
+   ```
+   (※既に実施済みの場合も確認してください)
 
-To learn more about Next.js, take a look at the following resources:
+2. **開発サーバーの起動**
+   ```bash
+   npm run dev
+   ```
+   ブラウザで `http://localhost:3001` を開いてください。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   > モバイルビュー（幅375px〜480px程度）での閲覧を推奨します。Chrome DevToolsのDevice Modeなどをご利用ください。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 遊び方（受け入れ確認）
 
-## Deploy on Vercel
+1. **ホーム画面**: 
+   - 精霊（モク・カ・ド）が表示されているか確認。
+   - ゲージ（元気など）が表示されているか。
+2. **「遊ぶ」**:
+   - 3つのゲームから選択。
+   - **相生チェイン**: 順番通り（木→火→土→金→水→木）につなぐ。
+   - **相克ガード**: 暴走する属性を、それを抑える属性（木は土に勝つ等）で止める。
+   - **連想仕分け**: キーワードを正しい属性にドラッグ。
+3. **リザルト**:
+   - スコアと報酬（カード）が表示されるか。
+4. **図鑑**:
+   - 獲得したカードが図鑑でカラーになり、タップで詳細が見れるか。
+5. **アイテム使用**:
+   - (V1仕様では自動成長または所持数管理のみ実装されています。拡張ポイントあり)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## メモ
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- データは `localStorage` に保存されます。リセットしたい場合はブラウザのデータをクリアしてください。
+- 課金機能はUI含め一切ありません。
+- 医療的な効能を保証するものではありません。
