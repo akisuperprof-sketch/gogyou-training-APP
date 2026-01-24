@@ -1,32 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-noto), 'Noto Sans JP', sans-serif;
+}
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 10%;
-    font-family: 'Noto Sans JP', sans-serif;
+    --background: 255 255 255;
+    --foreground: 15 23 42;
   }
 
   body {
-    @apply bg-slate-50 text-slate-900;
+    @apply bg-slate-50 text-slate-900 antialiased;
     user-select: none;
     -webkit-user-select: none;
-    font-family: 'Noto Sans JP', sans-serif;
   }
 }
 
 @layer utilities {
   .glass {
     @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-sm;
-  }
-
-  .glass-dark {
-    @apply bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-xl;
-  }
-
-  .card-shadow {
-    shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
   }
 
   .no-scrollbar::-webkit-scrollbar {
@@ -37,26 +30,26 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-
-  .perspective {
-    perspective: 1000px;
-  }
 }
 
 @keyframes float {
-  0% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
 
   50% {
     transform: translateY(-10px);
   }
-
-  100% {
-    transform: translateY(0px);
-  }
 }
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+input,
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
 }

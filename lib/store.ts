@@ -11,11 +11,12 @@ interface AppState {
     // Actions
     unlockSpirit: (id: string) => void;
     gainCard: (cardId: number, count?: number) => void;
-    useCard: (cardId: number, spiritId: string) => void;
+    useCard: (cardId: number) => void;
     gameCompleted: (score: number, mode: 'chain' | 'guard' | 'sort') => { gainedCards: number[], gainedExp: number, reaction: string };
     refreshRequest: () => void;
     setHasSeenStory: (val: boolean) => void;
     clearNewCardsFlag: () => void;
+    checkGenkiDecay: () => void;
 }
 
 export const useStore = create<AppState>()(
@@ -33,6 +34,7 @@ export const useStore = create<AppState>()(
                 currentRequest: null,
                 hasSeenStory: false,
                 hasNewCards: false,
+                lastGenkiUpdate: Date.now(),
             },
 
             unlockSpirit: (id) => set((state) => ({
@@ -51,33 +53,37 @@ export const useStore = create<AppState>()(
                 };
             }),
 
-            useCard: (cardId, spiritId) => set((state) => {
+            useCard: (cardId) => set((state) => {
                 const card = state.cards[cardId];
-                const spirit = state.spirits.find((s) => s.id === spiritId);
+                if (!card || card.ownedCount <= 0) return state;
 
-                if (!card || card.ownedCount <= 0 || !spirit) return state;
+                // MVP: Use card on the first spirit of matching element or first unlocked
+                const spirits = [...state.spirits];
+                let spiritIdx = spirits.findIndex(s => s.unlocked && s.element === card.element);
+                if (spiritIdx === -1) spiritIdx = spirits.findIndex(s => s.unlocked);
 
+                if (spiritIdx === -1) return state;
+
+                const spirit = spirits[spiritIdx];
                 const isMatch = card.element === spirit.element;
-                const bonus = isMatch ? 1.5 : 1.0;
-                const growth = Math.floor(card.effectValue * bonus);
+                const growth = Math.floor(card.effectValue * (isMatch ? 1.5 : 1.0));
+
+                spirits[spiritIdx] = {
+                    ...spirit,
+                    stats: {
+                        ...spirit.stats,
+                        jukuren: spirit.stats.jukuren + growth,
+                        genki: Math.min(100, spirit.stats.genki + 10),
+                        kizuna: Math.min(100, spirit.stats.kizuna + 5),
+                    }
+                };
 
                 return {
                     cards: {
                         ...state.cards,
                         [cardId]: { ...card, ownedCount: card.ownedCount - 1, usedCount: card.usedCount + 1 }
                     },
-                    spirits: state.spirits.map((s) => {
-                        if (s.id !== spiritId) return s;
-                        return {
-                            ...s,
-                            stats: {
-                                ...s.stats,
-                                jukuren: s.stats.jukuren + growth,
-                                genki: Math.min(100, s.stats.genki + 10),
-                                kizuna: Math.min(100, s.stats.kizuna + 5),
-                            }
-                        };
-                    })
+                    spirits
                 };
             }),
 
@@ -88,7 +94,7 @@ export const useStore = create<AppState>()(
 
                 let newMood: Mood = 'normal';
                 if (score >= 500) newMood = 'good';
-                else if (score < 100) newMood = 'bad';
+                else if (score < 150) newMood = 'bad';
 
                 let cardCount = Math.max(1, Math.floor(score / 200));
                 if (isRequestFulfilled) cardCount += 1;
@@ -100,7 +106,7 @@ export const useStore = create<AppState>()(
                     gainedCards.push(randomId);
                 }
 
-                const gainedExp = Math.floor(score / 10);
+                const gainedExp = Math.floor(score / 15);
 
                 set((current) => {
                     const newCards = { ...current.cards };
@@ -117,17 +123,16 @@ export const useStore = create<AppState>()(
                     const relatedElement: Record<string, Element> = { chain: 'Wood', guard: 'Fire', sort: 'Earth' };
                     const spiritToUpdate = current.spirits.find(s => s.element === relatedElement[mode]) || current.spirits[0];
 
-                    // Compute total rank/jukuren across all unlocked spirits
-                    const totalJukuren = current.spirits.reduce((acc, s) => acc + s.stats.jukuren, 0) + gainedExp;
+                    // Auto-unlock logic
+                    const nextTotalJukuren = current.spirits.reduce((acc, s) => acc + s.stats.jukuren, 0) + gainedExp;
 
                     return {
                         cards: newCards,
                         spirits: current.spirits.map(s => {
-                            const base = s.id === spiritToUpdate.id ? { ...s, mood: newMood, stats: { ...s.stats, jukuren: s.stats.jukuren + gainedExp } } : s;
-                            // Unlock Metal at 500 total, Water at 1000 total
-                            if (s.id === 'kon' && totalJukuren >= 500 && !s.unlocked) return { ...base, unlocked: true };
-                            if (s.id === 'sui' && totalJukuren >= 1000 && !s.unlocked) return { ...base, unlocked: true };
-                            return base;
+                            let updated = s.id === spiritToUpdate.id ? { ...s, mood: newMood, stats: { ...s.stats, jukuren: s.stats.jukuren + gainedExp } } : s;
+                            if (s.id === 'kon' && nextTotalJukuren >= 500 && !s.unlocked) return { ...updated, unlocked: true };
+                            if (s.id === 'sui' && nextTotalJukuren >= 1000 && !s.unlocked) return { ...updated, unlocked: true };
+                            return updated;
                         }),
                         gameProgress: {
                             ...current.gameProgress,
@@ -151,6 +156,7 @@ export const useStore = create<AppState>()(
 
             refreshRequest: () => set((state) => {
                 const unlockedSpirits = state.spirits.filter(s => s.unlocked);
+                if (unlockedSpirits.length === 0) return state;
                 const spirit = unlockedSpirits[Math.floor(Math.random() * unlockedSpirits.length)];
                 const types: ('chain' | 'guard' | 'sort')[] = ['chain', 'guard', 'sort'];
                 const gameType = types[Math.floor(Math.random() * types.length)];
@@ -176,10 +182,47 @@ export const useStore = create<AppState>()(
 
             clearNewCardsFlag: () => set((state) => ({
                 gameProgress: { ...state.gameProgress, hasNewCards: false }
-            }))
+            })),
+
+            checkGenkiDecay: () => set((state) => {
+                const now = Date.now();
+                const lastUpdate = state.gameProgress.lastGenkiUpdate || now;
+                const elapsedMs = now - lastUpdate;
+
+                // 1 day = 86400000 ms. Decay 5 points per day.
+                // 1 point per 17,280,000 ms (4.8 hours)
+                const decayAmount = Math.floor(elapsedMs / (1000 * 60 * 60 * 4.8));
+
+                if (decayAmount <= 0) return state;
+
+                const newSpirits = state.spirits.map(s => {
+                    if (!s.unlocked) return s;
+                    const newGenki = Math.max(0, s.stats.genki - decayAmount);
+
+                    // Also update mood if genki falls too low
+                    let newMood = s.mood;
+                    if (newGenki < 15) newMood = 'bad';
+                    else if (newGenki >= 70) newMood = 'good';
+                    else if (newGenki >= 15 && s.mood === 'bad') newMood = 'normal';
+
+                    return {
+                        ...s,
+                        mood: newMood,
+                        stats: { ...s.stats, genki: newGenki }
+                    };
+                });
+
+                return {
+                    spirits: newSpirits,
+                    gameProgress: {
+                        ...state.gameProgress,
+                        lastGenkiUpdate: now - (elapsedMs % (1000 * 60 * 60 * 4.8)) // Keep the remainder for next time
+                    }
+                };
+            })
         }),
         {
-            name: 'gogyou-storage-v4',
+            name: 'gogyou-storage-v6', // Incremented version to reset/update schema
             storage: createJSONStorage(() => localStorage),
         }
     )

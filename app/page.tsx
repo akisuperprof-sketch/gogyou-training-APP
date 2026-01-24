@@ -6,30 +6,38 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { SPIRIT_DATA } from '@/lib/data';
-import { Settings, HelpCircle, Sparkles } from 'lucide-react';
+import { HelpCircle, Sparkles } from 'lucide-react';
 import { StoryModal } from '@/components/StoryModal';
 
 export default function Home() {
-  const { spirits, gameProgress, refreshRequest, setHasSeenStory } = useStore();
+  const { spirits, gameProgress, setHasSeenStory, checkGenkiDecay } = useStore();
   const [mounted, setMounted] = useState(false);
-  const [focusedIdx, setFocusedIdx] = useState(0); // Set to 0 if we want to show unlocked ones clearly
+  const [focusedIdx, setFocusedIdx] = useState(0);
   const [storyOpen, setStoryOpen] = useState(false);
 
+  // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
-    if (!gameProgress.currentRequest) {
-      setTimeout(() => useStore.getState().refreshRequest(), 1000);
+    checkGenkiDecay();
+  }, [checkGenkiDecay]);
+
+  // Handle tutorial trigger after mount and store hydration
+  useEffect(() => {
+    if (mounted) {
+      if (!gameProgress.hasSeenStory) {
+        setStoryOpen(true);
+        setHasSeenStory(true);
+      }
+      // Initial request generation if none exists
+      if (!gameProgress.currentRequest) {
+        useStore.getState().refreshRequest();
+      }
     }
-    if (!gameProgress.hasSeenStory) {
-      setStoryOpen(true);
-      setHasSeenStory(true);
-    }
-  }, [gameProgress.currentRequest, gameProgress.hasSeenStory, setHasSeenStory]);
+  }, [mounted, gameProgress.hasSeenStory, gameProgress.currentRequest, setHasSeenStory]);
 
   if (!mounted) return <div className="min-h-screen bg-white" />;
 
   const unlockedSpirits = spirits.filter(s => s.unlocked);
-  const displaySpirits = unlockedSpirits;
   const currentRequest = gameProgress.currentRequest;
 
   const moodToJp = {
@@ -58,7 +66,7 @@ export default function Home() {
             <HelpCircle className="w-5 h-5" />
           </button>
           <div className="px-4 py-2 bg-slate-50 rounded-2xl text-[10px] font-black text-slate-600 border border-slate-100 shadow-sm flex flex-col items-center justify-center">
-            <span className="text-slate-300 mb-0.5 text-[8px]">習得度合計</span>
+            <span className="text-slate-300 mb-0.5 text-[8px] uppercase font-bold">習得度合計</span>
             <span className="text-base text-indigo-600 leading-none">
               {spirits.reduce((acc, s) => acc + s.stats.jukuren, 0)}
             </span>
@@ -67,9 +75,9 @@ export default function Home() {
       </header>
 
       {/* Spirit Carousel */}
-      <section className="flex-1 flex flex-col items-center justify-center space-y-6 z-10">
-        <div className="relative w-full h-80 flex items-center justify-center">
-          {displaySpirits.map((spirit, idx) => {
+      <section className="flex-1 flex flex-col items-center justify-center space-y-8 z-10">
+        <div className="relative w-full h-[340px] flex items-center justify-center">
+          {unlockedSpirits.map((spirit, idx) => {
             const isFocused = idx === focusedIdx;
             const spiritInfo = SPIRIT_DATA[spirit.id];
             const moodLine = spiritInfo.moodLines[spirit.mood][0];
@@ -80,14 +88,14 @@ export default function Home() {
                 layout
                 onClick={() => setFocusedIdx(idx)}
                 animate={{
-                  x: (idx - focusedIdx) * 110,
-                  scale: isFocused ? 1.15 : 0.8,
+                  x: (idx - focusedIdx) * 125,
+                  scale: isFocused ? 1.2 : 0.8,
                   opacity: isFocused ? 1 : 0.4,
                   rotate: (idx - focusedIdx) * 5,
                   zIndex: isFocused ? 20 : 10
                 }}
                 className={cn(
-                  "absolute w-44 h-64 rounded-[3rem] p-6 flex flex-col items-center justify-between border-2 transition-all cursor-pointer bg-white",
+                  "absolute w-44 h-72 rounded-[3.5rem] p-6 flex flex-col items-center justify-between border-2 transition-all cursor-pointer bg-white",
                   isFocused ? "shadow-2xl shadow-slate-200 border-white" : "border-slate-50 shadow-sm grayscale-[0.6]",
                   spirit.mood === 'good' && isFocused && "border-yellow-200 ring-4 ring-yellow-50",
                   spirit.mood === 'bad' && isFocused && "border-slate-200 opacity-80"
@@ -95,15 +103,15 @@ export default function Home() {
               >
                 <div className="flex flex-col items-center">
                   <motion.div
-                    animate={isFocused ? { y: [0, -8, 0] } : {}}
-                    transition={{ repeat: Infinity, duration: 3 }}
-                    className="text-6xl mb-4 drop-shadow-sm"
+                    animate={isFocused ? { y: [0, -10, 0] } : {}}
+                    transition={{ repeat: Infinity, duration: 3.5 }}
+                    className="text-7xl mb-4 drop-shadow-sm"
                   >
                     {spirit.element === 'Wood' ? '🌿' : spirit.element === 'Fire' ? '🔥' : spirit.element === 'Earth' ? '⛰️' : spirit.element === 'Metal' ? '💎' : '💧'}
                   </motion.div>
                   <h2 className="text-xl font-black text-slate-900">{spirit.name}</h2>
                   <div className={cn(
-                    "text-[10px] font-black px-3 py-1 mt-2 rounded-full tracking-wider border shadow-sm",
+                    "text-[10px] font-black px-4 py-1.5 mt-2 rounded-full tracking-wider border shadow-sm",
                     spirit.mood === 'good' ? "bg-yellow-50 text-yellow-600 border-yellow-100" :
                       spirit.mood === 'bad' ? "bg-slate-50 text-slate-400 border-slate-100" :
                         "bg-blue-50 text-blue-500 border-blue-100"
@@ -117,7 +125,7 @@ export default function Home() {
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="text-xs text-center bg-slate-50 text-slate-600 p-3 rounded-2xl border border-slate-100 w-full font-bold leading-snug"
+                      className="text-[11px] text-center bg-slate-50 text-slate-600 p-3.5 rounded-2xl border border-slate-100 w-full font-bold leading-relaxed"
                     >
                       {moodLine}
                     </motion.div>
@@ -125,11 +133,11 @@ export default function Home() {
                 </AnimatePresence>
 
                 <div className="w-full space-y-2">
-                  <div className="flex justify-between text-[10px] font-black text-slate-400 tracking-widest">
+                  <div className="flex justify-between text-[10px] font-black text-slate-400 tracking-widest uppercase">
                     <span>元気度</span>
                     <span>{spirit.stats.genki}%</span>
                   </div>
-                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden shadow-inner">
+                  <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden shadow-inner">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${spirit.stats.genki}%` }}
@@ -154,16 +162,16 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="w-full bg-indigo-50 border border-indigo-100 p-5 rounded-[2.5rem] flex items-center space-x-4 shadow-md"
+              className="w-full bg-indigo-50 border border-indigo-100 p-5 rounded-[2.5rem] flex items-center space-x-5 shadow-lg shadow-indigo-50"
             >
-              <div className="w-12 h-12 rounded-[1.25rem] bg-indigo-500 flex items-center justify-center text-2xl shrink-0 shadow-lg shadow-indigo-200">
+              <div className="w-14 h-14 rounded-[1.5rem] bg-indigo-500 flex items-center justify-center text-3xl shrink-0 shadow-xl shadow-indigo-100">
                 💬
               </div>
               <div className="flex-1">
-                <p className="text-[10px] text-indigo-400 font-black mb-1 tracking-widest uppercase">精霊のお願い</p>
+                <p className="text-[10px] text-indigo-400 font-black mb-1.5 tracking-widest uppercase">精霊のお願い</p>
                 <p className="text-sm font-black text-slate-800 leading-snug">{currentRequest.text}</p>
               </div>
-              <Link href={`/play/${currentRequest.gameType}`} className="shrink-0 bg-indigo-600 text-white px-5 py-2.5 rounded-2xl text-[10px] font-black shadow-lg shadow-indigo-100 active:scale-95 transition-transform">
+              <Link href={`/play/${currentRequest.gameType}`} className="shrink-0 bg-indigo-600 text-white px-6 py-3 rounded-2xl text-[11px] font-black shadow-xl shadow-indigo-100 active:scale-95 transition-all">
                 行く！
               </Link>
             </motion.div>
@@ -179,18 +187,18 @@ export default function Home() {
               exit={{ x: 50, opacity: 0 }}
               className="fixed bottom-32 right-6 z-30 flex flex-col items-end"
             >
-              <div className="bg-white border-2 border-slate-100 p-4 rounded-3xl shadow-2xl shadow-indigo-100 max-w-[200px] relative mb-2">
-                <p className="text-[11px] font-black text-slate-700 leading-relaxed">
+              <div className="bg-white border-2 border-slate-100 p-5 rounded-3xl shadow-2xl shadow-indigo-100 max-w-[210px] relative mb-3">
+                <p className="text-[11px] font-black text-slate-700 leading-relaxed text-center">
                   新しいカードをゲットしたよ！<br />
                   図鑑を確認してみてね。
                 </p>
                 <div className="absolute top-1/2 -right-2 -translate-y-1/2 w-4 h-4 bg-white border-r-2 border-t-2 border-slate-100 rotate-45" />
               </div>
-              <div className="w-20 h-20 relative mr-[-10px]">
+              <div className="w-24 h-24 relative mr-[-15px]">
                 <img src="/helper.png" alt="Helper" className="w-full h-full object-contain" />
                 <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ repeat: Infinity, duration: 1 }}
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{ repeat: Infinity, duration: 1.2 }}
                   className="absolute -top-1 -left-1"
                 >
                   <Sparkles className="w-6 h-6 text-yellow-500 fill-current" />
@@ -208,13 +216,15 @@ export default function Home() {
           <Link href="/play" className="flex flex-col items-center flex-1 group py-1">
             <div className="relative">
               <span className="text-3xl group-hover:scale-110 transition-transform block">🎮</span>
-              <motion.div
-                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-                className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"
-              />
+              {gameProgress.currentRequest && (
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white"
+                />
+              )}
             </div>
-            <span className="text-[11px] font-black mt-1 text-slate-600">修行する</span>
+            <span className="text-[11px] font-black mt-1 text-slate-800">修行する</span>
           </Link>
 
           <div className="relative group px-2">
@@ -228,17 +238,16 @@ export default function Home() {
               <span className="text-3xl group-hover:scale-110 transition-transform block">📜</span>
               {gameProgress.hasNewCards && (
                 <motion.div
-                  animate={{ scale: [1, 1.5, 1], rotate: [0, 10, -10, 0] }}
+                  animate={{ scale: [1, 1.5, 1], rotate: [0, 15, -15, 0] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}
-                  className="absolute -top-1 -right-1"
+                  className="absolute -top-2 -right-2"
                 >
-                  <Sparkles className="w-5 h-5 text-yellow-400 fill-current" />
+                  <Sparkles className="w-6 h-6 text-yellow-500 fill-current" />
                 </motion.div>
               )}
             </div>
-            <span className="text-[11px] font-black mt-1 text-slate-600">図鑑を見る</span>
+            <span className="text-[11px] font-black mt-1 text-slate-800">図鑑を見る</span>
           </Link>
-
         </div>
       </footer>
     </div>

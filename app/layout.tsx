@@ -1,10 +1,24 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
+
+const noto = Noto_Sans_JP({
+  subsets: ["latin"],
+  variable: '--font-noto',
+  weight: ['400', '700', '900'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: "五行精霊と漢方図鑑",
-  description: "楽しく五行を学ぶ",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0",
+  description: "楽しく五行を学ぶ漢方アプリ",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -14,8 +28,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className={`bg-slate-50 min-h-screen text-slate-900 overflow-x-hidden font-sans`}>
-        <main className="max-w-[480px] mx-auto min-h-screen relative shadow-sm bg-white">
+      <body className={`${noto.variable} font-sans bg-slate-50 min-h-screen text-slate-900 overflow-x-hidden antialiased`}>
+        <main className="max-w-[480px] mx-auto min-h-screen relative shadow-sm bg-white border-x border-slate-100">
           {children}
         </main>
       </body>

@@ -4,7 +4,8 @@ import { Card as CardType } from '@/lib/types';
 import { ELEMENT_COLORS, ELEMENT_JP } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles } from 'lucide-react';
+import { X, Sparkles, Zap } from 'lucide-react';
+import { useStore } from '@/lib/store';
 
 interface CardModalProps {
     card: CardType | null;
@@ -12,7 +13,12 @@ interface CardModalProps {
 }
 
 export function CardModal({ card, onClose }: CardModalProps) {
+    const { useCard } = useStore();
     if (!card) return null;
+
+    const handleUse = () => {
+        useCard(card.id);
+    };
 
     return (
         <AnimatePresence>
@@ -20,64 +26,111 @@ export function CardModal({ card, onClose }: CardModalProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/50 backdrop-blur-lg"
+                className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md"
                 onClick={onClose}
             >
                 <motion.div
                     initial={{ scale: 0.9, y: 30 }}
                     animate={{ scale: 1, y: 0 }}
                     exit={{ scale: 0.9, y: 30 }}
-                    className="relative w-full max-w-sm bg-white rounded-[3.5rem] shadow-3xl overflow-hidden border border-white"
+                    className="relative w-full max-w-sm bg-white rounded-[3.5rem] shadow-3xl overflow-hidden border-2 border-slate-50"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}
                     <div className={cn(
-                        "h-56 w-full flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br",
-                        card.element === 'Wood' ? "from-green-400 to-emerald-500" :
-                            card.element === 'Fire' ? "from-red-400 to-orange-500" :
-                                card.element === 'Earth' ? "from-yellow-400 to-amber-500" :
-                                    card.element === 'Metal' ? "from-slate-300 to-zinc-400" :
-                                        "from-blue-400 to-indigo-500"
+                        "h-64 w-full flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br transition-all duration-700",
+                        card.element === 'Wood' ? "from-emerald-50 to-green-100" :
+                            card.element === 'Fire' ? "from-red-50 to-orange-100" :
+                                card.element === 'Earth' ? "from-yellow-50 to-amber-100" :
+                                    card.element === 'Metal' ? "from-slate-50 to-zinc-200" :
+                                        "from-blue-50 to-indigo-100"
                     )}>
-                        <div className="absolute top-8 right-8 text-white/20 text-8xl font-black z-0 uppercase tracking-tighter">
-                            {ELEMENT_JP[card.element]}
+                        {/* Decorative Background Icon */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] select-none pointer-events-none">
+                            <span className="text-[20rem] font-black">{ELEMENT_JP[card.element]}</span>
                         </div>
-                        <div className="z-10 text-8xl drop-shadow-2xl animate-float">🌿</div>
 
-                        <button onClick={onClose} className="absolute top-8 left-8 p-4 bg-white/20 backdrop-blur-md rounded-[1.25rem] hover:bg-white/30 transition text-white">
-                            <X className="w-6 h-6" />
-                        </button>
+                        <div className="absolute top-8 left-8 p-3 bg-white/80 backdrop-blur-md rounded-[1.25rem] hover:bg-white transition shadow-sm z-50">
+                            <button onClick={onClose} className="text-slate-400 hover:text-slate-900">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        {/* Card Emblem */}
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: 'spring', damping: 15 }}
+                            className="z-10 text-9xl drop-shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative"
+                        >
+                            <span className="relative z-10">
+                                {card.element === 'Wood' ? '🌿' : card.element === 'Fire' ? '🔥' : card.element === 'Earth' ? '⛰️' : card.element === 'Metal' ? '💎' : '💧'}
+                            </span>
+                        </motion.div>
                     </div>
 
-                    <div className="p-10 space-y-8">
-                        <div className="text-center">
-                            <div className="inline-block px-4 py-1.5 bg-slate-50 text-slate-500 text-[10px] font-black tracking-widest rounded-full mb-3 border border-slate-100">
-                                {ELEMENT_JP[card.element]}の力
+                    <div className="p-8 pb-10 space-y-8">
+                        <div className="text-center relative">
+                            <div className={cn(
+                                "inline-block px-5 py-2 text-[10px] font-black tracking-[0.2em] rounded-full mb-4 border uppercase",
+                                card.element === 'Wood' ? "bg-green-50 text-green-600 border-green-100" :
+                                    card.element === 'Fire' ? "bg-red-50 text-red-600 border-red-100" :
+                                        card.element === 'Earth' ? "bg-yellow-50 text-yellow-600 border-yellow-100" :
+                                            card.element === 'Metal' ? "bg-slate-50 text-slate-600 border-slate-100" :
+                                                "bg-blue-50 text-blue-600 border-blue-100"
+                            )}>
+                                {ELEMENT_JP[card.element]}属性・NO.{String(card.id).padStart(3, '0')}
                             </div>
-                            <h3 className="text-4xl font-black text-slate-900 tracking-tight">{card.name}</h3>
-                            <p className="text-base font-bold text-slate-400 italic mt-3 leading-tight">"{card.flavor}"</p>
+                            <h3 className="text-3xl font-black text-slate-900 tracking-tight leading-none mb-3">{card.name}</h3>
+                            <p className="text-sm font-bold text-slate-400 italic leading-relaxed px-4">"{card.flavor}"</p>
                         </div>
 
-                        <div className="p-6 bg-slate-50 rounded-[2.5rem] border border-slate-100">
-                            <div className="flex items-center justify-center space-x-2 mb-3">
-                                <Sparkles className="w-4 h-4 text-indigo-300" />
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">漢方解説</h4>
+                        {/* Description Box */}
+                        <div className="relative group">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-slate-100 to-slate-50 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                            <div className="relative p-7 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <Sparkles className="w-4 h-4 text-indigo-400" />
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">漢方マメ知識</h4>
+                                </div>
+                                <p className="text-[13px] font-bold text-slate-600 leading-relaxed text-center">
+                                    {card.description}
+                                </p>
                             </div>
-                            <p className="text-sm font-bold text-slate-600 leading-relaxed text-center">
-                                {card.description}
-                            </p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-5">
-                            <div className="bg-slate-50 p-5 rounded-[2rem] border border-slate-100 text-center shadow-sm">
-                                <p className="text-[10px] font-black text-slate-400 tracking-widest mb-1 uppercase">所持数</p>
-                                <span className="text-3xl font-black text-slate-900">{card.ownedCount}</span>
+                        {/* Stats & Power */}
+                        <div className="grid grid-cols-3 gap-3">
+                            <div className="bg-slate-50/50 p-4 rounded-3xl border border-slate-100 text-center">
+                                <p className="text-[9px] font-black text-slate-300 tracking-widest mb-1 uppercase">回復力</p>
+                                <div className="flex items-center justify-center space-x-1">
+                                    <Zap className="w-3 h-3 text-yellow-500 fill-current" />
+                                    <span className="text-xl font-black text-slate-900">{card.effectValue}</span>
+                                </div>
                             </div>
-                            <div className="bg-slate-50 p-5 rounded-[2rem] border border-slate-100 text-center shadow-sm">
-                                <p className="text-[10px] font-black text-slate-400 tracking-widest mb-1 uppercase">使用回数</p>
-                                <span className="text-3xl font-black text-slate-900">{card.usedCount}</span>
+                            <div className="bg-slate-50/50 p-4 rounded-3xl border border-slate-100 text-center">
+                                <p className="text-[9px] font-black text-slate-300 tracking-widest mb-1 uppercase">所持</p>
+                                <span className="text-xl font-black text-slate-900">{card.ownedCount}</span>
+                            </div>
+                            <div className="bg-slate-50/50 p-4 rounded-3xl border border-slate-100 text-center">
+                                <p className="text-[9px] font-black text-slate-300 tracking-widest mb-1 uppercase">使用</p>
+                                <span className="text-xl font-black text-slate-900">{card.usedCount}</span>
                             </div>
                         </div>
+
+                        <button
+                            disabled={card.ownedCount <= 0}
+                            onClick={handleUse}
+                            className={cn(
+                                "w-full py-6 rounded-[2rem] font-black text-lg transition-all shadow-2xl active:scale-95 flex items-center justify-center space-x-3",
+                                card.ownedCount > 0
+                                    ? "bg-slate-900 text-white shadow-indigo-100"
+                                    : "bg-slate-100 text-slate-300 shadow-none cursor-not-allowed"
+                            )}
+                        >
+                            <Zap className={cn("w-6 h-6", card.ownedCount > 0 ? "text-yellow-400 fill-current" : "")} />
+                            <span>このカードを処方する</span>
+                        </button>
                     </div>
                 </motion.div>
             </motion.div>

@@ -48,4 +48,5 @@ export interface GameProgress {
     currentRequest: SpiritRequest | null;
     hasSeenStory: boolean;
     hasNewCards: boolean;
+    lastGenkiUpdate?: number;
 }

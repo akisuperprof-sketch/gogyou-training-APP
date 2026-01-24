@@ -24,7 +24,6 @@ export const MOOD_COLORS: Record<Mood, string> = {
     bad: 'border-slate-300 grayscale-[0.3]',
 };
 
-// 相生: Wood -> Fire -> Earth -> Metal -> Water -> Wood
 export const SOUSEI: Record<Element, Element> = {
     Wood: 'Fire',
     Fire: 'Earth',
@@ -33,7 +32,6 @@ export const SOUSEI: Record<Element, Element> = {
     Water: 'Wood',
 };
 
-// 相克: Wood -> Earth -> Water -> Fire -> Metal -> Wood
 export const SOUKOKU: Record<Element, Element> = {
     Wood: 'Earth',
     Earth: 'Water',
@@ -134,46 +132,46 @@ export const INITIAL_SPIRITS: Spirit[] = [
         id: 'moku',
         name: 'モク',
         element: 'Wood',
-        stats: { genki: 100, chowa: 10, jukuren: 1, kizuna: 0 },
+        stats: { genki: 20, chowa: 10, jukuren: 1, kizuna: 0 },
         dialogueCode: 'impatient',
         unlocked: true,
-        mood: 'normal',
+        mood: 'bad',
     },
     {
         id: 'ka',
         name: 'カ',
         element: 'Fire',
-        stats: { genki: 100, chowa: 10, jukuren: 1, kizuna: 0 },
+        stats: { genki: 30, chowa: 10, jukuren: 1, kizuna: 0 },
         dialogueCode: 'loud',
         unlocked: true,
-        mood: 'normal',
+        mood: 'bad',
     },
     {
         id: 'do',
         name: 'ド',
         element: 'Earth',
-        stats: { genki: 100, chowa: 10, jukuren: 1, kizuna: 0 },
+        stats: { genki: 10, chowa: 10, jukuren: 1, kizuna: 0 },
         dialogueCode: 'gentle',
         unlocked: true,
-        mood: 'normal',
+        mood: 'bad',
     },
     {
         id: 'kon',
         name: 'コン',
         element: 'Metal',
-        stats: { genki: 100, chowa: 10, jukuren: 1, kizuna: 0 },
+        stats: { genki: 10, chowa: 10, jukuren: 1, kizuna: 0 },
         dialogueCode: 'sharp',
         unlocked: false,
-        mood: 'normal',
+        mood: 'bad',
     },
     {
         id: 'sui',
         name: 'スイ',
         element: 'Water',
-        stats: { genki: 100, chowa: 10, jukuren: 1, kizuna: 0 },
+        stats: { genki: 10, chowa: 10, jukuren: 1, kizuna: 0 },
         dialogueCode: 'calm',
         unlocked: false,
-        mood: 'normal',
+        mood: 'bad',
     },
 ];
 
