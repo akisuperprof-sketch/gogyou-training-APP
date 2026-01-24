@@ -18,11 +18,11 @@ export function GameResult({ score, gainedExp, gainedCardIds, reaction, onRetry 
     const { cards } = useStore();
 
     return (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/95 backdrop-blur-3xl p-6">
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/95 backdrop-blur-3xl p-4 sm:p-6 overflow-y-auto no-scrollbar">
             <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="text-center space-y-8 max-w-sm w-full"
+                className="text-center space-y-4 sm:space-y-8 max-w-sm w-full py-8"
             >
                 <div className="relative">
                     {/* Decorative Animations */}
@@ -39,9 +39,9 @@ export function GameResult({ score, gainedExp, gainedCardIds, reaction, onRetry 
                         />
                     </div>
 
-                    <div className="bg-white/90 backdrop-blur-md rounded-[3.5rem] p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-white">
+                    <div className="bg-white/90 backdrop-blur-md rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-white">
                         <h2 className="text-sm font-black text-slate-400 tracking-[0.4em] mb-4 uppercase">修行結果</h2>
-                        <p className="text-9xl font-black text-slate-900 tabular-nums tracking-tighter leading-none">
+                        <p className="text-7xl sm:text-9xl font-black text-slate-900 tabular-nums tracking-tighter leading-none">
                             {score}
                         </p>
                     </div>
@@ -62,14 +62,14 @@ export function GameResult({ score, gainedExp, gainedCardIds, reaction, onRetry 
                     </p>
                 </motion.div>
 
-                <div className="grid grid-cols-2 gap-5">
-                    <div className="bg-white p-6 rounded-[2.5rem] border-2 border-slate-50 shadow-sm text-center">
+                <div className="grid grid-cols-2 gap-3 sm:gap-5">
+                    <div className="bg-white p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-slate-50 shadow-sm text-center">
                         <p className="text-[10px] text-slate-400 font-bold tracking-widest mb-1.5 uppercase">習得度</p>
-                        <p className="text-4xl font-black text-indigo-600">+{gainedExp}</p>
+                        <p className="text-3xl sm:text-4xl font-black text-indigo-600">+{gainedExp}</p>
                     </div>
-                    <div className="bg-white p-6 rounded-[2.5rem] border-2 border-slate-50 shadow-sm text-center">
+                    <div className="bg-white p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-slate-50 shadow-sm text-center">
                         <p className="text-[10px] text-slate-400 font-bold tracking-widest mb-1.5 uppercase">獲得カード</p>
-                        <p className="text-4xl font-black text-blue-500">+{gainedCardIds.length}</p>
+                        <p className="text-3xl sm:text-4xl font-black text-blue-500">+{gainedCardIds.length}</p>
                     </div>
                 </div>
 
@@ -107,18 +107,18 @@ export function GameResult({ score, gainedExp, gainedCardIds, reaction, onRetry 
                     )}
                 </AnimatePresence>
 
-                <div className="grid grid-cols-2 gap-5 pt-10">
+                <div className="grid grid-cols-2 gap-3 sm:gap-5 pt-6 sm:pt-10">
                     <button
                         onClick={onRetry}
-                        className="flex items-center justify-center space-x-3 p-6 bg-slate-100 text-slate-600 rounded-3xl font-black hover:bg-slate-200 active:scale-95 transition-all shadow-sm"
+                        className="flex items-center justify-center space-x-2 sm:space-x-3 p-4 sm:p-6 bg-slate-100 text-slate-600 rounded-2xl sm:rounded-3xl font-black hover:bg-slate-200 active:scale-95 transition-all shadow-sm"
                     >
-                        <RotateCcw className="w-6 h-6" />
-                        <span>修行へ</span>
+                        <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="text-sm sm:text-base">修行へ</span>
                     </button>
                     <Link href="/" className="w-full">
-                        <button className="w-full flex items-center justify-center space-x-3 p-6 bg-slate-900 text-white rounded-3xl font-black shadow-2xl shadow-indigo-100 active:scale-95 transition-all">
-                            <Home className="w-6 h-6" />
-                            <span>里に帰る</span>
+                        <button className="w-full flex items-center justify-center space-x-2 sm:space-x-3 p-4 sm:p-6 bg-slate-900 text-white rounded-2xl sm:rounded-3xl font-black shadow-2xl shadow-indigo-100 active:scale-95 transition-all">
+                            <Home className="w-5 h-5 sm:w-6 sm:h-6" />
+                            <span className="text-sm sm:text-base">里に帰る</span>
                         </button>
                     </Link>
                 </div>

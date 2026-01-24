@@ -36,8 +36,8 @@ export default function ChainGame() {
         for (let i = 0; i < NODE_COUNT; i++) {
             newNodes.push({
                 id: Math.random(),
-                x: Math.random() * 80 + 10,
-                y: Math.random() * 65 + 15,
+                x: Math.random() * 75 + 10,
+                y: Math.random() * 55 + 20,
                 element: elements[i % elements.length]
             });
         }
@@ -100,8 +100,8 @@ export default function ChainGame() {
 
                     remaining.push({
                         id: Math.random(),
-                        x: Math.random() * 80 + 10,
-                        y: Math.random() * 65 + 15,
+                        x: Math.random() * 75 + 10,
+                        y: Math.random() * 55 + 20,
                         element: newElement
                     });
                     return remaining;
@@ -119,7 +119,7 @@ export default function ChainGame() {
     };
 
     return (
-        <div className="min-h-screen bg-white relative overflow-hidden touch-none select-none font-sans text-slate-900">
+        <div className="min-h-[100dvh] bg-white relative overflow-hidden touch-none select-none font-sans text-slate-900">
             <TutorialOverlay
                 gameType="chain"
                 isOpen={gameState === 'TUTORIAL'}
@@ -127,14 +127,14 @@ export default function ChainGame() {
             />
 
             {/* HUD */}
-            <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-10">
-                <div className="bg-slate-50 border border-slate-100 px-5 py-3 rounded-[1.5rem] shadow-sm">
+            <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-start z-10">
+                <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 sm:px-5 py-2 sm:py-3 rounded-[1.5rem] shadow-sm">
                     <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">スコア</p>
-                    <p className="text-3xl font-black tabular-nums text-slate-900">{score}</p>
+                    <p className="text-2xl sm:text-3xl font-black tabular-nums text-slate-900">{score}</p>
                 </div>
-                <div className="bg-slate-50 border border-slate-100 px-5 py-3 rounded-[1.5rem] text-right shadow-sm">
+                <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 sm:px-5 py-2 sm:py-3 rounded-[1.5rem] text-right shadow-sm">
                     <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">残り時間</p>
-                    <p className={cn("text-3xl font-black tabular-nums", timeLeft < 10 ? "text-red-500 animate-pulse" : "text-blue-500")}>
+                    <p className={cn("text-2xl sm:text-3xl font-black tabular-nums", timeLeft < 10 ? "text-red-500 animate-pulse" : "text-blue-500")}>
                         {timeLeft}秒
                     </p>
                 </div>
@@ -192,13 +192,13 @@ export default function ChainGame() {
                             whileTap={{ scale: 1.15 }}
                             onPointerDown={() => handleNodeClick(node)}
                             className={cn(
-                                "absolute w-20 h-20 rounded-[2rem] shadow-2xl flex items-center justify-center text-3xl font-black border-4 border-white transition-all ring-8 ring-slate-50/50",
+                                "absolute w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl flex items-center justify-center text-2xl sm:text-3xl font-black border-[3px] sm:border-4 border-white transition-all ring-4 sm:ring-8 ring-slate-50/50 -translate-x-1/2 -translate-y-1/2",
                                 ELEMENT_COLORS[node.element]
                             )}
                             style={{ left: `${node.x}%`, top: `${node.y}%` }}
                         >
                             <span className="drop-shadow-md z-10">{ELEMENT_JP[node.element]}</span>
-                            <div className="absolute inset-0 bg-white/10 rounded-[2rem] opacity-30" />
+                            <div className="absolute inset-0 bg-white/10 rounded-[1.5rem] sm:rounded-[2rem] opacity-30" />
                         </motion.button>
                     ))}
                 </div>

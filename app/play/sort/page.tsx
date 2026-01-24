@@ -94,7 +94,7 @@ export default function SortGame() {
     };
 
     return (
-        <div className="min-h-screen bg-white overflow-hidden flex flex-col relative text-slate-900 font-sans">
+        <div className="min-h-[100dvh] bg-white overflow-hidden flex flex-col relative text-slate-900 font-sans">
             <TutorialOverlay
                 gameType="sort"
                 isOpen={gameState === 'TUTORIAL'}
@@ -102,14 +102,14 @@ export default function SortGame() {
             />
 
             {/* HUD */}
-            <div className="p-6 flex justify-between z-10">
-                <div className="bg-slate-50 border border-slate-100 px-5 py-3 rounded-[1.5rem] shadow-sm">
+            <div className="p-4 sm:p-6 flex justify-between z-10">
+                <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 sm:px-5 py-2 sm:py-3 rounded-[1.5rem] shadow-sm">
                     <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">スコア</p>
-                    <p className="text-3xl font-black tracking-tight tabular-nums text-slate-900">{score}</p>
+                    <p className="text-2xl sm:text-3xl font-black tracking-tight tabular-nums text-slate-900">{score}</p>
                 </div>
-                <div className="bg-slate-50 border border-slate-100 px-5 py-3 rounded-[1.5rem] text-right shadow-sm">
+                <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 sm:px-5 py-2 sm:py-3 rounded-[1.5rem] text-right shadow-sm">
                     <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">残り時間</p>
-                    <p className={cn("text-3xl font-black tabular-nums", timeLeft < 10 ? "text-red-500 animate-pulse" : "text-green-600")}>
+                    <p className={cn("text-2xl sm:text-3xl font-black tabular-nums", timeLeft < 10 ? "text-red-500 animate-pulse" : "text-green-600")}>
                         {timeLeft}秒
                     </p>
                 </div>
@@ -118,17 +118,17 @@ export default function SortGame() {
             {gameState === 'PLAYING' && (
                 <div className="flex-1 flex flex-col items-center justify-center relative px-6">
                     {/* Zones Visualization */}
-                    <div className="absolute inset-x-6 inset-y-12 pointer-events-none opacity-40">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 border-4 border-dashed border-red-200 rounded-[2.5rem] flex flex-col items-center justify-center bg-red-50/50">
-                            <span className="text-4xl mb-1">🔥</span>
+                    <div className="absolute inset-x-2 sm:inset-x-6 inset-y-12 pointer-events-none opacity-40">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 sm:w-32 sm:h-32 border-4 border-dashed border-red-200 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center bg-red-50/50">
+                            <span className="text-3xl sm:text-4xl mb-1">🔥</span>
                             <span className="text-[10px] font-black uppercase text-red-400">火</span>
                         </div>
-                        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-32 h-32 border-4 border-dashed border-green-200 rounded-[2.5rem] flex flex-col items-center justify-center bg-green-50/50">
-                            <span className="text-4xl mb-1">🌿</span>
+                        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-24 h-24 sm:w-32 sm:h-32 border-4 border-dashed border-green-200 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center bg-green-50/50">
+                            <span className="text-3xl sm:text-4xl mb-1">🌿</span>
                             <span className="text-[10px] font-black uppercase text-green-400">木</span>
                         </div>
-                        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-32 h-32 border-4 border-dashed border-yellow-200 rounded-[2.5rem] flex flex-col items-center justify-center bg-yellow-50/50">
-                            <span className="text-4xl mb-1">⛰️</span>
+                        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-24 h-24 sm:w-32 sm:h-32 border-4 border-dashed border-yellow-200 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center bg-yellow-50/50">
+                            <span className="text-3xl sm:text-4xl mb-1">⛰️</span>
                             <span className="text-[10px] font-black uppercase text-yellow-600">土</span>
                         </div>
                     </div>
@@ -144,21 +144,21 @@ export default function SortGame() {
                                 onDragEnd={handleDragEnd}
                                 animate={controls}
                                 whileDrag={{ scale: 1.1, rotate: 5, zIndex: 50 }}
-                                className="w-64 h-80 bg-white rounded-[3.5rem] shadow-2xl flex flex-col items-center justify-center p-10 z-20 cursor-grab active:cursor-grabbing text-slate-900 border-[12px] border-slate-50 relative"
+                                className="w-48 h-64 sm:w-64 sm:h-80 bg-white rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl flex flex-col items-center justify-center p-6 sm:p-10 z-20 cursor-grab active:cursor-grabbing text-slate-900 border-[8px] sm:border-[12px] border-slate-50 relative"
                             >
-                                <div className="absolute top-8 left-1/2 -translate-x-1/2">
-                                    <div className="p-2 bg-slate-50 rounded-xl">
-                                        <LayoutGrid className="w-6 h-6 text-slate-300" />
+                                <div className="absolute top-6 sm:top-8 left-1/2 -translate-x-1/2">
+                                    <div className="p-1.5 sm:p-2 bg-slate-50 rounded-lg sm:rounded-xl">
+                                        <LayoutGrid className="w-5 h-5 sm:w-6 sm:h-6 text-slate-300" />
                                     </div>
                                 </div>
-                                <p className="text-[10px] text-slate-300 font-black uppercase tracking-[0.2em] mb-4">正しい属性へ</p>
-                                <h3 className="text-5xl font-black text-center break-keep leading-tight tracking-tighter">
+                                <p className="text-[9px] sm:text-[10px] text-slate-300 font-black uppercase tracking-[0.2em] mb-3 sm:mb-4">正しい属性へ</p>
+                                <h3 className="text-3xl sm:text-5xl font-black text-center break-keep leading-tight tracking-tighter">
                                     {currentCard.term}
                                 </h3>
-                                <div className="mt-12 flex items-center space-x-2">
-                                    <div className="w-2 h-2 rounded-full bg-slate-100 animate-bounce" />
-                                    <div className="w-2 h-2 rounded-full bg-slate-100 animate-bounce [animation-delay:0.2s]" />
-                                    <div className="w-2 h-2 rounded-full bg-slate-100 animate-bounce [animation-delay:0.4s]" />
+                                <div className="mt-8 sm:mt-12 flex items-center space-x-2">
+                                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-100 animate-bounce" />
+                                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-100 animate-bounce [animation-delay:0.2s]" />
+                                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-100 animate-bounce [animation-delay:0.4s]" />
                                 </div>
                             </motion.div>
                         )}

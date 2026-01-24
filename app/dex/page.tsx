@@ -45,15 +45,15 @@ export default function DexPage() {
     }, [allCards, filter, sortBy]);
 
     return (
-        <div className="min-h-screen flex flex-col bg-slate-50 p-6 pb-12 font-sans text-slate-900">
-            <header className="flex items-center justify-between mb-8 sticky top-0 bg-slate-50/80 backdrop-blur-xl z-20 py-2">
-                <div className="flex items-center space-x-6">
-                    <Link href="/" className="p-4 bg-white border border-slate-100 rounded-[1.25rem] shadow-sm hover:bg-slate-50 transition-all active:scale-90">
-                        <ArrowLeft className="w-6 h-6 text-slate-700" />
+        <div className="min-h-[100dvh] flex flex-col bg-slate-50 p-4 sm:p-6 pb-12 font-sans text-slate-900">
+            <header className="flex items-center justify-between mb-4 sm:mb-8 sticky top-0 bg-slate-50/80 backdrop-blur-xl z-20 py-2">
+                <div className="flex items-center space-x-3 sm:space-x-6">
+                    <Link href="/" className="p-3 sm:p-4 bg-white border border-slate-100 rounded-[1.25rem] shadow-sm hover:bg-slate-50 transition-all active:scale-90">
+                        <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-slate-700" />
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-black text-slate-900 tracking-tight">漢方図鑑</h1>
-                        <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">Collection History</p>
+                        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">漢方図鑑</h1>
+                        <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase truncate max-w-[100px] sm:max-w-none">Collection History</p>
                     </div>
                 </div>
                 <Link href="/" className="p-4 bg-white border border-slate-100 rounded-[1.25rem] shadow-sm hover:bg-slate-50">
@@ -62,9 +62,9 @@ export default function DexPage() {
             </header>
 
             {/* Stats Card */}
-            <section className="mb-8 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center space-x-7">
-                <div className="w-20 h-20 rounded-[1.5rem] bg-indigo-500 flex items-center justify-center shadow-xl shadow-indigo-100 shrink-0">
-                    <Trophy className="w-10 h-10 text-white" />
+            <section className="mb-6 sm:mb-8 bg-white p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center space-x-4 sm:space-x-7">
+                <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-[1.25rem] sm:rounded-[1.5rem] bg-indigo-500 flex items-center justify-center shadow-xl shadow-indigo-100 shrink-0">
+                    <Trophy className="w-7 h-7 sm:w-10 sm:h-10 text-white" />
                 </div>
                 <div className="flex-1">
                     <div className="flex justify-between items-end mb-3">
@@ -125,7 +125,7 @@ export default function DexPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6 pb-20">
+            <div className="grid grid-cols-2 gap-3 sm:gap-6 pb-20">
                 <AnimatePresence mode="popLayout">
                     {filteredCards.map((card) => (
                         <motion.div

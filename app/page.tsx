@@ -47,7 +47,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen p-6 pb-24 space-y-6 relative overflow-hidden bg-white font-sans text-slate-900">
+    <div className="flex flex-col min-h-[100dvh] p-4 sm:p-6 pb-24 space-y-4 sm:space-y-6 relative overflow-hidden bg-white font-sans text-slate-900">
       <StoryModal isOpen={storyOpen} onClose={() => setStoryOpen(false)} />
 
       {/* Header */}
@@ -75,8 +75,8 @@ export default function Home() {
       </header>
 
       {/* Spirit Carousel */}
-      <section className="flex-1 flex flex-col items-center justify-center space-y-8 z-10">
-        <div className="relative w-full h-[340px] flex items-center justify-center">
+      <section className="flex-1 flex flex-col items-center justify-center space-y-4 sm:space-y-8 z-10 min-h-0">
+        <div className="relative w-full h-[300px] sm:h-[340px] flex items-center justify-center">
           {unlockedSpirits.map((spirit, idx) => {
             const isFocused = idx === focusedIdx;
             const spiritInfo = SPIRIT_DATA[spirit.id];
@@ -88,14 +88,14 @@ export default function Home() {
                 layout
                 onClick={() => setFocusedIdx(idx)}
                 animate={{
-                  x: (idx - focusedIdx) * 125,
-                  scale: isFocused ? 1.2 : 0.8,
+                  x: (idx - focusedIdx) * 110,
+                  scale: isFocused ? 1.15 : 0.75,
                   opacity: isFocused ? 1 : 0.4,
                   rotate: (idx - focusedIdx) * 5,
                   zIndex: isFocused ? 20 : 10
                 }}
                 className={cn(
-                  "absolute w-44 h-72 rounded-[3.5rem] p-6 flex flex-col items-center justify-between border-2 transition-all cursor-pointer bg-white",
+                  "absolute w-40 sm:w-44 h-64 sm:h-72 rounded-[3rem] sm:rounded-[3.5rem] p-5 sm:p-6 flex flex-col items-center justify-between border-2 transition-all cursor-pointer bg-white",
                   isFocused ? "shadow-2xl shadow-slate-200 border-white" : "border-slate-50 shadow-sm grayscale-[0.6]",
                   spirit.mood === 'good' && isFocused && "border-yellow-200 ring-4 ring-yellow-50",
                   spirit.mood === 'bad' && isFocused && "border-slate-200 opacity-80"

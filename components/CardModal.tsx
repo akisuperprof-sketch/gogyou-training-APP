@@ -26,19 +26,19 @@ export function CardModal({ card, onClose }: CardModalProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md"
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md"
                 onClick={onClose}
             >
                 <motion.div
                     initial={{ scale: 0.9, y: 30 }}
                     animate={{ scale: 1, y: 0 }}
                     exit={{ scale: 0.9, y: 30 }}
-                    className="relative w-full max-w-sm bg-white rounded-[3.5rem] shadow-3xl overflow-hidden border-2 border-slate-50"
+                    className="relative w-full max-w-sm bg-white rounded-[2.5rem] sm:rounded-[3.5rem] shadow-3xl overflow-hidden border-2 border-slate-50 flex flex-col max-h-[90dvh]"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}
                     <div className={cn(
-                        "h-64 w-full flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br transition-all duration-700",
+                        "h-48 sm:h-64 w-full flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br transition-all duration-700 shrink-0",
                         card.element === 'Wood' ? "from-emerald-50 to-green-100" :
                             card.element === 'Fire' ? "from-red-50 to-orange-100" :
                                 card.element === 'Earth' ? "from-yellow-50 to-amber-100" :
@@ -61,7 +61,7 @@ export function CardModal({ card, onClose }: CardModalProps) {
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ type: 'spring', damping: 15 }}
-                            className="z-10 text-9xl drop-shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative"
+                            className="z-10 text-7xl sm:text-9xl drop-shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative"
                         >
                             <span className="relative z-10">
                                 {card.element === 'Wood' ? '🌿' : card.element === 'Fire' ? '🔥' : card.element === 'Earth' ? '⛰️' : card.element === 'Metal' ? '💎' : '💧'}
@@ -69,7 +69,7 @@ export function CardModal({ card, onClose }: CardModalProps) {
                         </motion.div>
                     </div>
 
-                    <div className="p-8 pb-10 space-y-8">
+                    <div className="flex-1 overflow-y-auto p-6 sm:p-8 pb-10 space-y-6 sm:space-y-8 no-scrollbar">
                         <div className="text-center relative">
                             <div className={cn(
                                 "inline-block px-5 py-2 text-[10px] font-black tracking-[0.2em] rounded-full mb-4 border uppercase",
@@ -81,8 +81,8 @@ export function CardModal({ card, onClose }: CardModalProps) {
                             )}>
                                 {ELEMENT_JP[card.element]}属性・NO.{String(card.id).padStart(3, '0')}
                             </div>
-                            <h3 className="text-3xl font-black text-slate-900 tracking-tight leading-none mb-3">{card.name}</h3>
-                            <p className="text-sm font-bold text-slate-400 italic leading-relaxed px-4">"{card.flavor}"</p>
+                            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-none mb-3">{card.name}</h3>
+                            <p className="text-xs sm:text-sm font-bold text-slate-400 italic leading-relaxed px-4">"{card.flavor}"</p>
                         </div>
 
                         {/* Description Box */}

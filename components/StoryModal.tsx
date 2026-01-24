@@ -51,15 +51,15 @@ export function StoryModal({ isOpen, onClose }: StoryModalProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-md"
+                className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-md"
             >
                 <motion.div
                     initial={{ scale: 0.9, y: 30 }}
                     animate={{ scale: 1, y: 0 }}
-                    className="relative w-full max-w-sm bg-white rounded-[3rem] shadow-3xl overflow-hidden border border-white"
+                    className="relative w-full max-w-sm bg-white rounded-[2.5rem] sm:rounded-[3rem] shadow-3xl overflow-hidden border border-white flex flex-col max-h-[90dvh]"
                 >
                     {/* Character Image Background/Side */}
-                    <div className="relative h-64 w-full bg-slate-50 flex items-center justify-center overflow-hidden">
+                    <div className="relative h-48 sm:h-64 w-full bg-slate-50 flex items-center justify-center overflow-hidden shrink-0">
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white" />
                         <motion.div
                             key={step}
@@ -76,13 +76,13 @@ export function StoryModal({ isOpen, onClose }: StoryModalProps) {
 
                         <button
                             onClick={onClose}
-                            className="absolute top-6 right-6 p-3 bg-white/50 backdrop-blur-md rounded-2xl hover:bg-white transition z-20"
+                            className="absolute top-4 sm:top-6 right-4 sm:right-6 p-3 bg-white/50 backdrop-blur-md rounded-2xl hover:bg-white transition z-20"
                         >
                             <X className="w-5 h-5 text-slate-900" />
                         </button>
                     </div>
 
-                    <div className="p-8 space-y-8">
+                    <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6 sm:space-y-8 no-scrollbar">
                         <div className="min-h-[100px]">
                             <AnimatePresence mode="wait">
                                 <motion.p
