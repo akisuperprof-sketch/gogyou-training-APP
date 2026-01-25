@@ -12,7 +12,7 @@ interface AppState {
     unlockSpirit: (id: string) => void;
     gainCard: (cardId: number, count?: number) => void;
     useCard: (cardId: number) => void;
-    gameCompleted: (score: number, mode: 'chain' | 'guard' | 'sort') => { gainedCards: number[], gainedExp: number, reaction: string };
+    gameCompleted: (score: number, mode: 'chain' | 'guard' | 'sort', level?: number) => { gainedCards: number[], gainedExp: number, reaction: string };
     refreshRequest: () => void;
     setHasSeenStory: (val: boolean) => void;
     clearNewCardsFlag: () => void;
@@ -21,6 +21,7 @@ interface AppState {
     unlockChainLevel: (level: number) => void;
     lastHealSpiritId: string | null;
     clearHealNotification: () => void;
+    clearUnlockNotification: () => void;
 }
 
 export const useStore = create<AppState>()(
@@ -44,6 +45,9 @@ export const useStore = create<AppState>()(
                 chainLevelsUnlocked: 1,
                 gamesUnlockedCount: 1,
                 totalSessionsPlayed: 0,
+                chainEasyClears: 0,
+                chainMediumClears: 0,
+                unlockNotification: null,
             },
 
             unlockSpirit: (id) => set((state) => ({
@@ -104,7 +108,7 @@ export const useStore = create<AppState>()(
 
             clearHealNotification: () => set({ lastHealSpiritId: null }),
 
-            gameCompleted: (score, mode) => {
+            gameCompleted: (score, mode, level) => {
                 const state = get();
                 const request = state.gameProgress.currentRequest;
                 const isRequestFulfilled = request && request.gameType === mode;
@@ -113,7 +117,9 @@ export const useStore = create<AppState>()(
                 if (score >= 500) newMood = 'good';
                 else if (score < 150) newMood = 'bad';
 
-                let cardCount = Math.max(1, Math.floor(score / 200));
+                // Balanced reward scaling
+                const baseCardCount = Math.floor(score / 3500); // 1 card per 3500 pts
+                let cardCount = Math.max(1, Math.min(5, baseCardCount)); // Max 5 cards
                 if (isRequestFulfilled) cardCount += 1;
 
                 const gainedCards: number[] = [];
@@ -123,7 +129,7 @@ export const useStore = create<AppState>()(
                     gainedCards.push(randomId);
                 }
 
-                const gainedExp = Math.floor(score / 15);
+                const gainedExp = Math.floor(score / 60); // Max ~100 exp for 6000 pts
 
                 set((current) => {
                     const newCards = { ...current.cards };
@@ -142,10 +148,50 @@ export const useStore = create<AppState>()(
 
                     const newTotalSessions = current.gameProgress.totalSessionsPlayed + 1;
                     let newUnlockedCount = current.gameProgress.gamesUnlockedCount;
-                    if (newTotalSessions >= 1 && newUnlockedCount < 2) newUnlockedCount = 2;
-                    if (newTotalSessions >= 2 && newUnlockedCount < 3) newUnlockedCount = 3;
+                    let newNotify = null;
+
+                    if (newTotalSessions === 1 && newUnlockedCount < 2) {
+                        newUnlockedCount = 2;
+                        newNotify = {
+                            title: "あたらしい修行！",
+                            message: "お見事！新しい修行「相克ガード」ができるようになったよ。力の調和を学ぼう！"
+                        };
+                    } else if (newTotalSessions === 2 && newUnlockedCount < 3) {
+                        newUnlockedCount = 3;
+                        newNotify = {
+                            title: "修行の広がり",
+                            message: "修行が板についてきたね！「連想仕分け」も解放されたよ。万物の繋がりを見極めてごらん。"
+                        };
+                    }
 
                     const nextTotalJukuren = current.spirits.reduce((acc, s) => acc + s.stats.jukuren, 0) + gainedExp;
+
+                    // Level Clear logic for Chain Game
+                    let newEasyClears = current.gameProgress.chainEasyClears;
+                    let newMediumClears = current.gameProgress.chainMediumClears;
+                    let newChainLevelsUnlocked = current.gameProgress.chainLevelsUnlocked;
+
+                    if (mode === 'chain') {
+                        if (level === 9) {
+                            newEasyClears += 1;
+                            if (newEasyClears === 1 && newChainLevelsUnlocked < 2) {
+                                newChainLevelsUnlocked = 2;
+                                newNotify = {
+                                    title: "中級解放！",
+                                    message: "「相生チェイン」の中級に挑戦できるようになったよ。もっと速く、正確に繋いでみてね！"
+                                };
+                            }
+                        } else if (level === 18) {
+                            newMediumClears += 1;
+                            if (newMediumClears === 5 && newChainLevelsUnlocked < 3) {
+                                newChainLevelsUnlocked = 3;
+                                newNotify = {
+                                    title: "上級解放！",
+                                    message: "素晴らしい集中力だ！「相生チェイン」の上級が解放されたよ。これぞ究極の修行だ！"
+                                };
+                            }
+                        }
+                    }
 
                     return {
                         cards: newCards,
@@ -164,7 +210,11 @@ export const useStore = create<AppState>()(
                             currentRequest: isRequestFulfilled ? null : current.gameProgress.currentRequest,
                             hasNewCards: gainedCards.length > 0,
                             gamesUnlockedCount: newUnlockedCount,
-                            totalSessionsPlayed: newTotalSessions
+                            totalSessionsPlayed: newTotalSessions,
+                            chainEasyClears: newEasyClears,
+                            chainMediumClears: newMediumClears,
+                            chainLevelsUnlocked: newChainLevelsUnlocked,
+                            unlockNotification: newNotify || current.gameProgress.unlockNotification
                         }
                     };
                 });
@@ -249,7 +299,15 @@ export const useStore = create<AppState>()(
                             acc[cid] = { ...state.cards[cid], ownedCount: Math.max(state.cards[cid].ownedCount, 99), discovered: true };
                             return acc;
                         }, {} as Record<number, Card>),
-                        gameProgress: { ...state.gameProgress, isMasterMode: true, chainLevelsUnlocked: 3, gamesUnlockedCount: 3, totalSessionsPlayed: 10 }
+                        gameProgress: {
+                            ...state.gameProgress,
+                            isMasterMode: true,
+                            chainLevelsUnlocked: 3,
+                            gamesUnlockedCount: 3,
+                            totalSessionsPlayed: 10,
+                            chainEasyClears: 1,
+                            chainMediumClears: 5
+                        }
                     };
                 } else {
                     return {
@@ -263,10 +321,14 @@ export const useStore = create<AppState>()(
                     ...state.gameProgress,
                     chainLevelsUnlocked: Math.max(state.gameProgress.chainLevelsUnlocked, level)
                 }
+            })),
+
+            clearUnlockNotification: () => set((state) => ({
+                gameProgress: { ...state.gameProgress, unlockNotification: null }
             }))
         }),
         {
-            name: 'gogyou-storage-v8',
+            name: 'gogyou-storage-v10',
             storage: createJSONStorage(() => localStorage),
         }
     )

@@ -1,16 +1,16 @@
 'use client';
 
-import { useStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useStore } from '@/lib/store';
 import { SPIRIT_DATA } from '@/lib/data';
-import { HelpCircle, Sparkles, Crown, Book, History, Info } from 'lucide-react';
+import { HelpCircle, Sparkles, Crown, Book, History, Info, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
 import { StoryModal } from '@/components/StoryModal';
 
 export default function Home() {
-  const { spirits, gameProgress, setHasSeenStory, checkGenkiDecay, toggleMasterMode, lastHealSpiritId, clearHealNotification } = useStore();
+  const { spirits, cards, gameProgress, setHasSeenStory, checkGenkiDecay, toggleMasterMode, lastHealSpiritId, clearHealNotification, clearUnlockNotification } = useStore();
   const [mounted, setMounted] = useState(false);
   const [focusedIdx, setFocusedIdx] = useState(0);
   const [storyOpen, setStoryOpen] = useState(false);
@@ -22,19 +22,13 @@ export default function Home() {
     checkGenkiDecay();
   }, [checkGenkiDecay]);
 
-  // Handle tutorial trigger after mount and store hydration
+  // Story / Tutorial auto-open
   useEffect(() => {
-    if (mounted) {
-      if (!gameProgress.hasSeenStory) {
-        setStoryOpen(true);
-        setHasSeenStory(true);
-      }
-      // Initial request generation if none exists
-      if (!gameProgress.currentRequest) {
-        useStore.getState().refreshRequest();
-      }
+    if (mounted && !gameProgress.hasSeenStory) {
+      setStoryOpen(true);
+      setHasSeenStory(true);
     }
-  }, [mounted, gameProgress.hasSeenStory, gameProgress.currentRequest, setHasSeenStory]);
+  }, [mounted, gameProgress.hasSeenStory, setHasSeenStory]);
 
   // Handle glow animation for healed spirit
   useEffect(() => {
@@ -43,7 +37,7 @@ export default function Home() {
       const timer = setTimeout(() => {
         setIsGlowActive(false);
         clearHealNotification();
-      }, 3000); // Animation duration
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [lastHealSpiritId, focusedIdx, spirits, clearHealNotification]);
@@ -51,7 +45,10 @@ export default function Home() {
   if (!mounted) return <div className="min-h-screen bg-white" />;
 
   const unlockedSpirits = spirits.filter(s => s.unlocked);
-  const currentRequest = gameProgress.currentRequest;
+  const spirit = unlockedSpirits[focusedIdx] || spirits[0];
+
+  const totalExp = spirits.reduce((acc, s) => acc + s.stats.jukuren, 0);
+  const totalCards = Object.values(cards).reduce((acc, c) => acc + c.ownedCount, 0);
 
   const moodToJp = {
     good: '絶好調',
@@ -59,263 +56,233 @@ export default function Home() {
     bad: 'お疲れ'
   };
 
+  const nextSpirit = () => setFocusedIdx((prev) => (prev + 1) % unlockedSpirits.length);
+  const prevSpirit = () => setFocusedIdx((prev) => (prev - 1 + unlockedSpirits.length) % unlockedSpirits.length);
+
   return (
-    <div className="flex flex-col h-[100dvh] p-4 pb-20 sm:p-6 sm:pb-24 space-y-3 sm:space-y-6 relative overflow-hidden bg-white font-sans text-slate-900">
+    <div className="min-h-screen bg-slate-50 relative overflow-hidden font-sans text-slate-900 pb-20">
+      {/* Unlock Notification Overlay */}
+      <AnimatePresence>
+        {gameProgress.unlockNotification && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="bg-white rounded-[3rem] p-8 max-w-sm w-full shadow-3xl border-4 border-yellow-200 flex flex-col items-center relative overflow-visible"
+            >
+              {/* Announcer character effect */}
+              <div className="absolute -top-16 -right-4 w-32 h-32 z-10">
+                <motion.div
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ repeat: Infinity, duration: 3 }}
+                  className="w-full h-full bg-yellow-100 rounded-full border-4 border-white shadow-xl flex items-center justify-center overflow-hidden"
+                >
+                  <Sparkles className="w-16 h-16 text-yellow-500 fill-current opacity-80" />
+                </motion.div>
+              </div>
+
+              <div className="w-full space-y-4 pt-4 text-center">
+                <div className="inline-block px-4 py-1.5 bg-yellow-400 text-white text-[10px] font-black rounded-full shadow-sm uppercase tracking-widest">
+                  Unlock Achievement
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 leading-tight">
+                  {gameProgress.unlockNotification.title}
+                </h3>
+                <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 relative">
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-50 border-l border-t border-slate-100 rotate-45" />
+                  <p className="text-sm font-bold text-slate-600 leading-relaxed italic">
+                    "{gameProgress.unlockNotification.message}"
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={clearUnlockNotification}
+                className="w-full mt-8 py-5 bg-slate-900 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all text-lg hover:bg-slate-800"
+              >
+                修行に励む！
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <StoryModal isOpen={storyOpen} onClose={() => setStoryOpen(false)} />
 
       {/* Header */}
-      <header className="flex justify-between items-center z-10">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            五行精霊と漢方図鑑
-          </h1>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Wu Xing Spirits & Kampo</p>
+      <header className="fixed top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-50 bg-slate-50/80 backdrop-blur-md border-b border-slate-100/50">
+        <div className="flex items-center space-x-4">
+          <div className="px-4 py-2 bg-white rounded-2xl shadow-sm border border-slate-100">
+            <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest leading-none mb-1">習得経験値</p>
+            <div className="flex items-center space-x-2">
+              <Zap className="w-3 h-3 text-indigo-500 fill-current" />
+              <span className="text-lg font-black tabular-nums">{totalExp}</span>
+            </div>
+          </div>
+          <div className="px-4 py-2 bg-white rounded-2xl shadow-sm border border-slate-100">
+            <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest leading-none mb-1">所持カード</p>
+            <div className="flex items-center space-x-2">
+              <Book className="w-3 h-3 text-emerald-500 fill-current" />
+              <span className="text-lg font-black tabular-nums">{totalCards}</span>
+            </div>
+          </div>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex items-center space-x-3">
           <button
             onClick={toggleMasterMode}
             className={cn(
-              "p-3 rounded-2xl border transition shadow-sm",
-              gameProgress.isMasterMode
-                ? "bg-yellow-400 border-yellow-500 text-white shadow-yellow-200"
-                : "bg-slate-50 border-slate-100 text-slate-300 hover:text-slate-400"
+              "p-3 rounded-2xl transition-all active:scale-90 border flex flex-col items-center justify-center space-y-0.5",
+              gameProgress.isMasterMode ? "bg-amber-100 border-amber-200 text-amber-600" : "bg-white border-slate-100 text-slate-300"
             )}
-            title="マスターモード"
           >
-            <div className="flex items-center space-x-2">
-              <Crown className="w-5 h-5 fill-current" />
-              {gameProgress.isMasterMode && <span className="text-[10px] font-black uppercase tracking-tighter">Master</span>}
-            </div>
+            <Crown className="w-5 h-5" />
+            <span className="text-[7px] font-black uppercase leading-none">Master</span>
           </button>
           <button
             onClick={() => setStoryOpen(true)}
-            className="p-3 bg-slate-50 border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-slate-600 transition"
+            className="p-3 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-slate-600 active:scale-90"
           >
             <HelpCircle className="w-5 h-5" />
           </button>
-          <div className="px-4 py-2 bg-slate-50 rounded-2xl text-[10px] font-black text-slate-600 border border-slate-100 shadow-sm flex flex-col items-center justify-center">
-            <span className="text-slate-300 mb-0.5 text-[8px] uppercase font-bold">習得度合計</span>
-            <span className="text-base text-indigo-600 leading-none">
-              {spirits.reduce((acc, s) => acc + s.stats.jukuren, 0)}
-            </span>
-          </div>
         </div>
       </header>
 
-      {/* Spirit Carousel */}
-      <section className="flex-1 flex flex-col items-center justify-center space-y-2 sm:space-y-8 z-10 min-h-0 overflow-hidden">
-        <div className="relative w-full h-[260px] sm:h-[340px] flex items-center justify-center">
-          {unlockedSpirits.map((spirit, idx) => {
-            const isFocused = idx === focusedIdx;
-            const spiritInfo = SPIRIT_DATA[spirit.id];
-            const moodLine = spiritInfo.moodLines[spirit.mood][0];
-            const isCurrentHealedSpirit = isFocused && isGlowActive;
+      <main className="pt-24 sm:pt-32 px-4 flex flex-col items-center">
+        {/* Spirit Selector / Display */}
+        <div className="w-full max-w-lg relative flex items-center justify-center h-[400px]">
+          <button onClick={prevSpirit} className="absolute left-0 z-30 p-2 bg-white/50 backdrop-blur-md rounded-full shadow-sm hover:bg-white transition">
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <button onClick={nextSpirit} className="absolute right-0 z-30 p-2 bg-white/50 backdrop-blur-md rounded-full shadow-sm hover:bg-white transition">
+            <ChevronRight className="w-6 h-6" />
+          </button>
 
-            return (
-              <motion.div
-                key={spirit.id}
-                layout
-                onClick={() => setFocusedIdx(idx)}
-                animate={{
-                  x: (idx - focusedIdx) * 110,
-                  scale: isFocused ? 1.15 : 0.75,
-                  opacity: isFocused ? 1 : 0.4,
-                  rotate: (idx - focusedIdx) * 5,
-                  zIndex: isFocused ? 20 : 10,
-                  boxShadow: isCurrentHealedSpirit ? "0 0 50px rgba(250, 204, 21, 0.8)" : (isFocused ? "0 25px 50px -12px rgba(0, 0, 0, 0.1)" : "0 1px 2px 0 rgba(0, 0, 0, 0.05)")
-                }}
-                className={cn(
-                  "absolute w-36 sm:w-44 h-56 sm:h-72 rounded-[2.5rem] sm:rounded-[3.5rem] p-4 sm:p-6 flex flex-col items-center justify-between border-2 transition-all cursor-pointer bg-white",
-                  isCurrentHealedSpirit ? "border-yellow-400 scale-[1.02]" : (isFocused ? "shadow-2xl shadow-slate-200 border-white" : "border-slate-50 shadow-sm grayscale-[0.6]"),
-                  spirit.mood === 'good' && isFocused && "border-yellow-200 ring-4 ring-yellow-50",
-                  spirit.mood === 'bad' && isFocused && "border-slate-200 opacity-80"
-                )}
-              >
-                {isCurrentHealedSpirit && (
-                  <div className="absolute inset-0 z-0 pointer-events-none">
-                    {[...Array(20)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{
-                          opacity: [0, 1, 0],
-                          scale: [0.5, 1.2, 0.5],
-                          y: [0, -200],
-                          x: (Math.random() - 0.5) * 300
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          delay: Math.random() * 2
-                        }}
-                        className="absolute bottom-0 left-1/2 text-yellow-400"
-                      >
-                        <Sparkles className="w-4 h-4 fill-current" />
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-                <div className="flex flex-col items-center">
-                  <motion.div
-                    animate={isFocused ? { y: [0, -5, 0] } : {}}
-                    transition={{ repeat: Infinity, duration: 3.5 }}
-                    className="relative w-24 h-24 sm:w-32 sm:h-32 mb-2 sm:mb-4 flex items-center justify-center"
-                  >
-                    {gameProgress.isMasterMode ? (
-                      <div className="relative w-full h-full">
-                        <img
-                          src={spiritInfo.illustration}
-                          alt={spirit.name}
-                          className="w-full h-full object-contain drop-shadow-xl"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent pointer-events-none" />
-                      </div>
-                    ) : (
-                      <span className="text-5xl sm:text-7xl drop-shadow-sm">
-                        {spirit.element === 'Wood' ? '🌿' : spirit.element === 'Fire' ? '🔥' : spirit.element === 'Earth' ? '⛰️' : spirit.element === 'Metal' ? '💎' : '💧'}
-                      </span>
-                    )}
-                  </motion.div>
-                  <h2 className="text-lg sm:text-xl font-black text-slate-900 leading-none">{spirit.name}</h2>
-                  <div className={cn(
-                    "text-[8px] sm:text-[10px] font-black px-3 py-1 sm:px-4 sm:py-1.5 mt-1.5 rounded-full tracking-wider border shadow-sm",
-                    spirit.mood === 'good' ? "bg-yellow-50 text-yellow-600 border-yellow-100" :
-                      spirit.mood === 'bad' ? "bg-slate-50 text-slate-400 border-slate-100" :
-                        "bg-blue-50 text-blue-500 border-blue-100"
-                  )}>
-                    {moodToJp[spirit.mood]}
-                  </div>
-                </div>
+          <AnimatePresence mode="popLayout">
+            {unlockedSpirits.map((spirit, idx) => {
+              const isFocused = idx === focusedIdx;
+              const spiritInfo = SPIRIT_DATA[spirit.id];
+              const moodLine = spiritInfo.moodLines[spirit.mood][0];
+              const isCurrentHealedSpirit = isFocused && isGlowActive;
 
-                <AnimatePresence mode="wait">
-                  {isFocused && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="text-[10px] sm:text-[11px] text-center bg-slate-50 text-slate-600 p-2 sm:p-3.5 rounded-xl sm:rounded-2xl border border-slate-100 w-full font-bold leading-tight"
-                    >
-                      {moodLine}
-                    </motion.div>
+              return (
+                <motion.div
+                  key={spirit.id}
+                  initial={{ opacity: 0, scale: 0.8, x: (idx - focusedIdx) * 100 }}
+                  animate={{
+                    opacity: isFocused ? 1 : 0.3,
+                    scale: isFocused ? 1.15 : 0.8,
+                    x: (idx - focusedIdx) * 200,
+                    zIndex: isFocused ? 20 : 10,
+                    boxShadow: isCurrentHealedSpirit ? "0 0 60px rgba(250, 204, 21, 0.8)" : (isFocused ? "0 25px 50px -12px rgba(0, 0, 0, 0.1)" : "none")
+                  }}
+                  transition={{ type: 'spring', damping: 20 }}
+                  className={cn(
+                    "absolute w-44 sm:w-56 h-72 sm:h-80 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 flex flex-col items-center justify-between border-2 transition-all bg-white",
+                    isCurrentHealedSpirit ? "border-yellow-400" : (isFocused ? "border-white" : "border-slate-50 grayscale")
                   )}
-                </AnimatePresence>
+                >
+                  {isCurrentHealedSpirit && (
+                    <div className="absolute inset-0 z-0 pointer-events-none">
+                      {[...Array(15)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{
+                            opacity: [0, 1, 0],
+                            scale: [0.5, 1.2, 0.5],
+                            y: [0, -250],
+                            x: (Math.random() - 0.5) * 200
+                          }}
+                          transition={{ duration: 2, repeat: Infinity, delay: Math.random() * 2 }}
+                          className="absolute bottom-0 left-1/2 text-yellow-500"
+                        >
+                          <Sparkles className="w-5 h-5 fill-current" />
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
 
-                <div className="w-full space-y-2">
-                  <div className="flex justify-between text-[10px] font-black text-slate-400 tracking-widest uppercase">
-                    <span>元気度</span>
-                    <span>{spirit.stats.genki}%</span>
-                  </div>
-                  <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden shadow-inner">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${spirit.stats.genki}%` }}
-                      className={cn(
-                        "h-full rounded-full transition-all duration-1000",
-                        spirit.element === 'Wood' ? "bg-green-400" :
-                          spirit.element === 'Fire' ? "bg-red-400" :
-                            spirit.element === 'Earth' ? "bg-yellow-400" :
-                              spirit.element === 'Metal' ? "bg-slate-400" : "bg-blue-400"
+                  <div className="flex flex-col items-center relative z-10 w-full">
+                    <div className="text-center mb-4">
+                      <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-none">{spirit.name}</h2>
+                      <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest mt-1">{spirit.element} Element</p>
+                    </div>
+
+                    <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-6">
+                      {gameProgress.isMasterMode ? (
+                        <img src={spiritInfo.illustration} alt={spirit.name} className="w-full h-full object-contain" />
+                      ) : (
+                        <div className="text-6xl sm:text-7xl flex items-center justify-center h-full">
+                          {spirit.element === 'Wood' ? '🌿' : spirit.element === 'Fire' ? '🔥' : spirit.element === 'Earth' ? '⛰️' : spirit.element === 'Metal' ? '💎' : '💧'}
+                        </div>
                       )}
-                    />
+                    </div>
+
+                    <div className="w-full space-y-2">
+                      <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-400 tracking-tighter">
+                        <span>ごきげん</span>
+                        <span className={cn(
+                          "px-2 py-0.5 rounded-full text-[8px]",
+                          spirit.mood === 'good' ? 'bg-yellow-100 text-yellow-600' :
+                            spirit.mood === 'bad' ? 'bg-slate-100 text-slate-400' : 'bg-blue-50 text-blue-500'
+                        )}>{moodToJp[spirit.mood]}</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${spirit.stats.genki}%` }}
+                          className={cn(
+                            "h-full transition-all duration-1000",
+                            spirit.stats.genki > 70 ? "bg-yellow-400" : spirit.stats.genki > 15 ? "bg-indigo-500" : "bg-slate-300"
+                          )}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            );
-          })}
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         </div>
 
-        {/* Request Box */}
-        <AnimatePresence>
-          {currentRequest && (
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="w-full bg-indigo-50 border border-indigo-100 p-4 sm:p-5 rounded-[2rem] sm:rounded-[2.5rem] flex items-center space-x-3 sm:space-x-5 shadow-lg shadow-indigo-50 shrink-0"
-            >
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl sm:rounded-[1.5rem] bg-indigo-500 flex items-center justify-center text-xl sm:text-3xl shrink-0 shadow-xl shadow-indigo-100">
-                💬
-              </div>
-              <div className="flex-1">
-                <p className="text-[8px] sm:text-[10px] text-indigo-400 font-black mb-0.5 sm:mb-1.5 tracking-widest uppercase">精霊のお願い</p>
-                <p className="text-[11px] sm:text-sm font-black text-slate-800 leading-tight sm:leading-snug">{currentRequest.text}</p>
-              </div>
-              <Link href={`/play/${currentRequest.gameType}`} className="shrink-0 bg-indigo-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-[1rem] sm:rounded-2xl text-[10px] sm:text-[11px] font-black shadow-xl shadow-indigo-100 active:scale-95 transition-all">
-                行く！
-              </Link>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Message Bubble */}
+        <motion.div
+          key={spirit.id}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-8 bg-white p-6 rounded-[2rem] shadow-xl border border-slate-100 max-w-sm w-full relative"
+        >
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white border-l border-t border-slate-100 rotate-45" />
+          <p className="text-center font-bold text-slate-600 italic leading-relaxed">
+            "{SPIRIT_DATA[spirit.id].moodLines[spirit.mood][0]}"
+          </p>
+        </motion.div>
 
-        {/* New Card Notification from Helper */}
-        <AnimatePresence>
-          {gameProgress.hasNewCards && (
-            <motion.div
-              initial={{ x: 50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 50, opacity: 0 }}
-              className="fixed bottom-32 right-6 z-30 flex flex-col items-end"
-            >
-              <div className="bg-white border-2 border-slate-100 p-5 rounded-3xl shadow-2xl shadow-indigo-100 max-w-[210px] relative mb-3">
-                <p className="text-[11px] font-black text-slate-700 leading-relaxed text-center">
-                  新しいカードをゲットしたよ！<br />
-                  図鑑を確認してみてね。
-                </p>
-                <div className="absolute top-1/2 -right-2 -translate-y-1/2 w-4 h-4 bg-white border-r-2 border-t-2 border-slate-100 rotate-45" />
-              </div>
-              <div className="w-24 h-24 relative mr-[-15px]">
-                <img src="/helper.png" alt="Helper" className="w-full h-full object-contain" />
-                <motion.div
-                  animate={{ scale: [1, 1.3, 1] }}
-                  transition={{ repeat: Infinity, duration: 1.2 }}
-                  className="absolute -top-1 -left-1"
-                >
-                  <Sparkles className="w-6 h-6 text-yellow-500 fill-current" />
-                </motion.div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </section>
-
-      {/* Footer Nav */}
-      <footer className="fixed bottom-4 sm:bottom-6 inset-x-4 sm:inset-x-6 z-20">
-        <div className="bg-white/95 backdrop-blur-xl rounded-[2.5rem] sm:rounded-[3rem] p-2 sm:p-4 flex justify-between items-center shadow-2xl border border-slate-100">
-
-          <Link href="/play" className="flex flex-col items-center flex-1 group py-1">
-            <div className="relative">
-              <span className="text-2xl sm:text-3xl group-hover:scale-110 transition-transform block">🎮</span>
-              {gameProgress.currentRequest && (
-                <motion.div
-                  animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"
-                />
-              )}
+        {/* Navigation Buttons */}
+        <div className="grid grid-cols-2 gap-4 w-full max-w-sm mt-12">
+          <Link href="/play" className="group">
+            <div className="bg-slate-900 p-6 rounded-[2rem] flex flex-col items-center justify-center space-y-2 shadow-2xl transition-all active:scale-95 hover:bg-slate-800">
+              <History className="w-8 h-8 text-indigo-400" />
+              <span className="text-white font-black text-sm">修行する</span>
             </div>
-            <span className="text-[10px] sm:text-[11px] font-black mt-0.5 sm:mt-1 text-slate-800 leading-none">修行する</span>
           </Link>
-
-          <div className="relative group px-1 sm:px-2">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-tr from-green-400 via-blue-500 to-indigo-600 rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center shadow-xl shadow-indigo-100 -mt-8 sm:-mt-14 border-4 border-white active:scale-95 transition-transform">
-              <span className="text-2xl sm:text-3xl">🏠</span>
+          <Link href="/dex" className="group">
+            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 flex flex-col items-center justify-center space-y-2 shadow-xl transition-all active:scale-95 hover:border-indigo-100">
+              <Book className="w-8 h-8 text-emerald-500" />
+              <span className="text-slate-900 font-black text-sm">漢方図鑑</span>
             </div>
-          </div>
-
-          <Link href="/dex" className="flex flex-col items-center flex-1 group py-1 relative">
-            <div className="relative px-2">
-              <span className="text-2xl sm:text-3xl group-hover:scale-110 transition-transform block">📜</span>
-              {gameProgress.hasNewCards && (
-                <motion.div
-                  animate={{ scale: [1, 1.5, 1], rotate: [0, 15, -15, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                  className="absolute -top-1 -right-1"
-                >
-                  <Sparkles className="w-4 h-4 text-yellow-500 fill-current" />
-                </motion.div>
-              )}
-            </div>
-            <span className="text-[10px] sm:text-[11px] font-black mt-0.5 sm:mt-1 text-slate-800 leading-none">図鑑を見る</span>
           </Link>
         </div>
+      </main>
+
+      {/* Footer / Info */}
+      <footer className="mt-20 pb-12 text-center">
+        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Gogyou Training App v1.2</p>
       </footer>
     </div>
   );

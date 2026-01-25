@@ -55,4 +55,7 @@ export interface GameProgress {
     chainLevelsUnlocked: number;
     gamesUnlockedCount: number;
     totalSessionsPlayed: number;
+    chainEasyClears: number;
+    chainMediumClears: number;
+    unlockNotification: { title: string; message: string } | null;
 }

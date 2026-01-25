@@ -76,6 +76,19 @@ export default function ChainGame() {
         if (chain.length === 0) {
             setChain([node]);
             setNodes(prev => prev.filter(n => n.id !== node.id));
+
+            // Ensure next element exists
+            const nextNeeded = SOUSEI[node.element];
+            setNodes(prev => {
+                const hasNext = prev.some(n => n.element === nextNeeded);
+                if (!hasNext && prev.length > 0) {
+                    const idxToReplace = Math.floor(Math.random() * prev.length);
+                    const newNodes = [...prev];
+                    newNodes[idxToReplace] = { ...newNodes[idxToReplace], element: nextNeeded, id: Math.random() };
+                    return newNodes;
+                }
+                return prev;
+            });
         } else {
             const lastNode = chain[chain.length - 1];
             const nextNeeded = SOUSEI[lastNode.element];
@@ -84,11 +97,21 @@ export default function ChainGame() {
                 setChain([...chain, node]);
                 setNodes(prev => {
                     const elements: Element[] = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'];
-                    return prev.map(n => n.gridIndex === node.gridIndex ? {
+                    const nextAfterThis = SOUSEI[node.element];
+
+                    const newNodes = prev.map(n => n.gridIndex === node.gridIndex ? {
                         ...n,
                         id: Math.random(),
                         element: elements[Math.floor(Math.random() * elements.length)]
                     } : n);
+
+                    // Ensure the one after THIS exists too
+                    const hasNext = newNodes.some(n => n.element === nextAfterThis);
+                    if (!hasNext && newNodes.length > 0) {
+                        const idxToReplace = Math.floor(Math.random() * newNodes.length);
+                        newNodes[idxToReplace] = { ...newNodes[idxToReplace], element: nextAfterThis, id: Math.random() };
+                    }
+                    return newNodes;
                 });
                 setScore(s => {
                     const multiplier = selectedLevel === 36 ? 3 : selectedLevel === 18 ? 2 : 1;
@@ -106,13 +129,8 @@ export default function ChainGame() {
     };
 
     const handleGameFinished = () => {
-        const rewards = gameCompleted(score, 'chain');
+        const rewards = gameCompleted(score, 'chain', selectedLevel || 9);
         setResultData(rewards);
-
-        if (score > 1000) {
-            if (selectedLevel === 9) unlockChainLevel(2);
-            if (selectedLevel === 18) unlockChainLevel(3);
-        }
     };
 
     useEffect(() => {
