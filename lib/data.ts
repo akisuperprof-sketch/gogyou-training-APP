@@ -241,6 +241,11 @@ export const INITIAL_CRUDE_DRUGS: Omit<CrudeDrug, 'ownedCount' | 'usedCount' | '
     { id: 23, name: '沢瀉', reading: 'たくしゃ', element: 'Water', flavor: 'むくみを流す', description: '余分な水分を尿として出し、めまいを抑える。', effectValue: 5 },
     { id: 24, name: '山薬', reading: 'さんやく', element: 'Water', flavor: '滋養強壮', description: '消化器を助け、腎のエネルギーを蓄える。', effectValue: 6 },
     { id: 25, name: '杜仲', reading: 'とちゅう', element: 'Water', flavor: '足腰を丈夫に', description: '筋骨を強くし、老化による足腰の弱りを防ぐ。', effectValue: 6 },
+    { id: 26, name: '半夏', reading: 'はんげ', element: 'Metal', flavor: '痰を除き吐き気を止める', description: '体内の余分な水分をさばき、気の逆流を抑える。', effectValue: 5 },
+    { id: 27, name: '五味子', reading: 'ごみし', element: 'Water', flavor: '咳と汗を収める', description: '体から漏れ出すエネルギーを繋ぎ止め、肺を潤す。', effectValue: 4 },
+    { id: 28, name: '乾姜', reading: 'かんきょう', element: 'Fire', flavor: 'お腹の芯を熱くする', description: '生姜を乾燥させたもの。深い部分の冷えを強力に飛ばす。', effectValue: 6 },
+    { id: 29, name: '細辛', reading: 'さいしん', element: 'Metal', flavor: '深部の寒さを貫く', description: '温める力が強く、頑固な冷えや鼻詰まりを解消する。', effectValue: 4 },
+    { id: 30, name: '木香', reading: 'もっこう', element: 'Wood', flavor: 'お腹の巡りを整える', description: '滞った気を動かし、腹痛やお腹の張りを和らげる。', effectValue: 5 },
 ];
 
 export const INITIAL_FORMULAS: Omit<Formula, 'ownedCount' | 'usedCount' | 'discovered'>[] = [
@@ -487,6 +492,86 @@ export const INITIAL_FORMULAS: Omit<Formula, 'ownedCount' | 'usedCount' | 'disco
             { crudeDrugId: 10, count: 1 }, // 生姜
             { crudeDrugId: 13, count: 1 }, // 大棗
             { crudeDrugId: 4, count: 2 },  // 川キュウ
+        ]
+    },
+    {
+        id: 116,
+        name: '小青龍湯',
+        reading: 'しょうせいりゅうとう',
+        element: 'Water',
+        description: '水のような鼻水、アレルギー性鼻炎に。',
+        flavor: '体内の溢れる水をさばく導き',
+        effectValue: 50,
+        recipe: [
+            { crudeDrugId: 16, count: 2 }, // 麻黄
+            { crudeDrugId: 2, count: 2 },  // 芍薬
+            { crudeDrugId: 27, count: 1 }, // 五味子
+            { crudeDrugId: 26, count: 1 }, // 半夏
+            { crudeDrugId: 6, count: 1 },  // 桂枝
+            { crudeDrugId: 29, count: 1 }, // 細辛
+            { crudeDrugId: 28, count: 1 }, // 乾姜
+            { crudeDrugId: 12, count: 1 }, // 甘草
+        ]
+    },
+    {
+        id: 117,
+        name: '半夏厚朴湯',
+        reading: 'はんげこうぼくとう',
+        element: 'Metal',
+        description: '喉のつかえ感、不安感、気分が塞ぐ時に。',
+        flavor: '淀んだ雲を吹き飛ばす清風',
+        effectValue: 35,
+        recipe: [
+            { crudeDrugId: 26, count: 2 }, // 半夏
+            { crudeDrugId: 22, count: 2 }, // 茯苓
+            { crudeDrugId: 10, count: 1 }, // 生姜
+        ]
+    },
+    {
+        id: 118,
+        name: '麦門冬湯',
+        reading: 'ばくもんどうとう',
+        element: 'Metal',
+        description: '激しい咳き込み、喉の乾燥に。',
+        flavor: '乾いた肺を潤す雫',
+        effectValue: 45,
+        recipe: [
+            { crudeDrugId: 26, count: 1 }, // 半夏
+            { crudeDrugId: 11, count: 1 }, // 人参
+            { crudeDrugId: 12, count: 1 }, // 甘草
+            { crudeDrugId: 13, count: 1 }, // 大棗
+        ]
+    },
+    {
+        id: 119,
+        name: '苓桂朮甘湯',
+        reading: 'りょうけいじゅつかんとう',
+        element: 'Earth',
+        description: 'めまい、立ちくらみ、動悸に。',
+        flavor: '揺れる大地を鎮める安定の理',
+        effectValue: 35,
+        recipe: [
+            { crudeDrugId: 22, count: 2 }, // 茯苓
+            { crudeDrugId: 6, count: 1 },  // 桂枝
+            { crudeDrugId: 14, count: 1 }, // 白朮
+            { crudeDrugId: 12, count: 1 }, // 甘草
+        ]
+    },
+    {
+        id: 120,
+        name: '八味地黄丸',
+        reading: 'はちみじおうがん',
+        element: 'Water',
+        description: '足腰の冷え、痛み、夜間尿など老化の諸症状に。',
+        flavor: '生命の火を焚きつける根本の力',
+        effectValue: 55,
+        recipe: [
+            { crudeDrugId: 21, count: 2 }, // 地黄
+            { crudeDrugId: 24, count: 1 }, // 山薬
+            { crudeDrugId: 12, count: 1 }, // 甘草
+            { crudeDrugId: 23, count: 1 }, // 沢瀉
+            { crudeDrugId: 22, count: 1 }, // 茯苓
+            { crudeDrugId: 6, count: 1 },  // 桂枝
         ]
     }
 ];
