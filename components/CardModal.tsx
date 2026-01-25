@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card as CardType } from '@/lib/types';
+import { CrudeDrug, Formula } from '@/lib/types';
 import { ELEMENT_COLORS, ELEMENT_JP } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,12 +10,12 @@ import { useStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 
 interface CardModalProps {
-    card: CardType | null;
+    card: CrudeDrug | Formula | null;
     onClose: () => void;
 }
 
 export function CardModal({ card, onClose }: CardModalProps) {
-    const { useCard, spirits } = useStore();
+    const { healSpirit, spirits } = useStore();
     const router = useRouter();
     const [isHealing, setIsHealing] = useState(false);
     const [healAmount, setHealAmount] = useState(0);
@@ -23,16 +23,17 @@ export function CardModal({ card, onClose }: CardModalProps) {
     if (!card) return null;
 
     const handleUse = () => {
-        // Calculate potential heal for UI
+        if (!card || !('recipe' in card)) return; // Only formulas can be used for healing
+
         const spirit = spirits.find(s => s.unlocked && s.element === card.element) || spirits.find(s => s.unlocked);
         if (!spirit) return;
 
         const isMatch = card.element === spirit.element;
-        const amount = Math.floor(card.effectValue * (isMatch ? 1.5 : 1.0) / 2);
+        const amount = Math.floor(card.effectValue * (isMatch ? 1.5 : 1.0));
 
         setHealAmount(amount);
         setIsHealing(true);
-        useCard(card.id);
+        healSpirit(spirit.id, card.id);
 
         setTimeout(() => {
             setIsHealing(false);
@@ -175,22 +176,24 @@ export function CardModal({ card, onClose }: CardModalProps) {
                             </div>
                         </div>
 
-                        <button
-                            disabled={card.ownedCount <= 0 || isHealing}
-                            onClick={handleUse}
-                            className={cn(
-                                "w-full py-6 rounded-[2rem] font-black text-lg transition-all shadow-2xl active:scale-95 flex items-center justify-center space-x-3",
-                                card.ownedCount > 0 && !isHealing
-                                    ? "bg-slate-900 text-white shadow-indigo-100"
-                                    : "bg-slate-100 text-slate-300 shadow-none cursor-not-allowed"
-                            )}
-                        >
-                            <div className="flex flex-col items-center">
-                                <Zap className={cn("w-6 h-6 mb-1", card.ownedCount > 0 && !isHealing ? "text-yellow-400 fill-current" : "")} />
-                                <span className="leading-none">{isHealing ? '回復中...' : 'このアイテムを飲む'}</span>
-                                <span className="text-[10px] font-bold opacity-50 mt-1">精霊のごきげんを回復します</span>
-                            </div>
-                        </button>
+                        {'recipe' in card && (
+                            <button
+                                disabled={card.ownedCount <= 0 || isHealing}
+                                onClick={handleUse}
+                                className={cn(
+                                    "w-full py-6 rounded-[2rem] font-black text-lg transition-all shadow-2xl active:scale-95 flex items-center justify-center space-x-3",
+                                    card.ownedCount > 0 && !isHealing
+                                        ? "bg-slate-900 text-white shadow-indigo-100"
+                                        : "bg-slate-100 text-slate-300 shadow-none cursor-not-allowed"
+                                )}
+                            >
+                                <div className="flex flex-col items-center">
+                                    <Zap className={cn("w-6 h-6 mb-1", card.ownedCount > 0 && !isHealing ? "text-yellow-400 fill-current" : "")} />
+                                    <span className="leading-none">{isHealing ? '回復中...' : 'この漢方を煎じて飲む'}</span>
+                                    <span className="text-[10px] font-bold opacity-50 mt-1">精霊のごきげんを回復します</span>
+                                </div>
+                            </button>
+                        )}
                     </div>
                 </motion.div>
             </motion.div>

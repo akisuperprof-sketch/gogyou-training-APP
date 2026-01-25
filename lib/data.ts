@@ -1,4 +1,4 @@
-import { Card, Element, Spirit, Mood } from './types';
+import { CrudeDrug, Formula, Element, Spirit, Mood } from './types';
 
 export const ELEMENTS: Element[] = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'];
 
@@ -206,25 +206,122 @@ export const INITIAL_SPIRITS: Spirit[] = [
     },
 ];
 
-export const INITIAL_CARDS: Omit<Card, 'ownedCount' | 'usedCount' | 'discovered'>[] = [
-    { id: 1, name: '葛根湯', reading: 'かっこんとう', element: 'Wood', flavor: '首の凝りに効きそう', description: '体を温め、風邪の初期症状や肩こりに用いられる。', effectValue: 20 },
-    { id: 2, name: '小柴胡湯', reading: 'しょうさいことう', element: 'Wood', flavor: 'イライラによさげ', description: '胸脇苦満があり、食欲不振や吐き気がある時に。', effectValue: 20 },
-    { id: 3, name: '抑肝散', reading: 'よくかんさん', element: 'Wood', flavor: '怒りを鎮める', description: '神経の高ぶりを抑え、イライラや不眠に。', effectValue: 25 },
-    { id: 4, name: '桂枝湯', reading: 'けいしとう', element: 'Fire', flavor: '優しい風邪薬', description: '体力が低下した人の風邪の初期に。', effectValue: 20 },
-    { id: 5, name: '黄連解毒湯', reading: 'おうれんげどくとう', element: 'Fire', flavor: '熱を冷ます', description: 'のぼせ気味で顔色が赤く、イライラする人に。', effectValue: 25 },
-    { id: 6, name: '白虎湯', reading: 'びゃっことう', element: 'Fire', flavor: '激しい熱と渇きに', description: '高熱で口の渇きが激しい時に。', effectValue: 30 },
-    { id: 7, name: '六君子湯', reading: 'りっくんしとう', element: 'Earth', flavor: '胃腸を元気に', description: '胃腸が弱く、食欲がなく、みぞおちがつかえる時に。', effectValue: 20 },
-    { id: 8, name: '補中益気湯', reading: 'ほちゅうえっきとう', element: 'Earth', flavor: '元気を補う', description: '体力虚弱で、元気がなく、胃腸の働きが衰えている時に。', effectValue: 25 },
-    { id: 9, name: '平胃散', reading: 'へいいさん', element: 'Earth', flavor: '食べ過ぎた時に', description: '胃がもたれて消化不良の時に。', effectValue: 15 },
-    { id: 10, name: '当帰芍薬散', reading: 'とうきしゃくやくさん', element: 'Earth', flavor: '女性の味方', description: '月経不順や冷え性、貧血気味の女性に。', effectValue: 20 },
-    { id: 11, name: '八味地黄丸', reading: 'はちみじおうがん', element: 'Water', flavor: '夜トイレに近いなら', description: '疲れやすく、手足が冷えやすい高齢者の頻尿などに。', effectValue: 25 },
-    { id: 12, name: '六味地黄丸', reading: 'ろくみじおうがん', element: 'Water', flavor: '潤いを与える', description: '排尿困難やむくみ、かゆみなどに。', effectValue: 20 },
-    { id: 13, name: '牛車腎気丸', reading: 'ごしゃじんきがん', element: 'Water', flavor: '足腰のしびれに', description: '疲れやすく、手足が冷えて、腰痛やしびれがある時に。', effectValue: 25 },
-    { id: 14, name: '真武湯', reading: 'しんぶとう', element: 'Water', flavor: '冷えとめまいに', description: '新陳代謝が低下し、冷えやめまいがある時に。', effectValue: 20 },
-    { id: 15, name: '麻黄湯', reading: 'まおうとう', element: 'Metal', flavor: 'ガツンと効く', description: '体力があり、寒気がして節々が痛む風邪に。', effectValue: 30 },
-    { id: 16, name: '小青竜湯', reading: 'しょうせいりゅうとう', element: 'Metal', flavor: '鼻水が止まらない', description: 'うすい水様の鼻水が出る花粉症や鼻炎に。', effectValue: 20 },
-    { id: 17, name: '五苓散', reading: 'ごれいさん', element: 'Water', flavor: '水の巡りを整える', description: '喉が渇いて尿量が少なく、頭痛やむくみがある時に。', effectValue: 20 },
-    { id: 18, name: '防風通聖散', reading: 'ぼうふうつうしょうさん', element: 'Fire', flavor: 'お腹の脂肪に', description: '腹部に皮下脂肪が多く、便秘がちな人に。', effectValue: 25 },
-    { id: 19, name: '半夏厚朴湯', reading: 'はんげこうぼくとう', element: 'Earth', flavor: '喉のつまりに', description: '気分がふさいで、喉に異物感がある時に。', effectValue: 20 },
-    { id: 20, name: '十全大補湯', reading: 'じゅうぜんだいほとう', element: 'Earth', flavor: '全てを補う', description: '病後で体力が著しく低下している時に。', effectValue: 30 },
+export const INITIAL_CRUDE_DRUGS: Omit<CrudeDrug, 'ownedCount' | 'usedCount' | 'discovered'>[] = [
+    // Wood
+    { id: 1, name: '柴胡', reading: 'さいこ', element: 'Wood', flavor: 'イライラを流す', description: '肝の気の滞りを解消し、ストレスや炎症を和らげる。', effectValue: 5 },
+    { id: 2, name: '芍薬', reading: 'しゃくやく', element: 'Wood', flavor: '筋肉の緊張をほぐす', description: '血を養い、痛みや筋肉のこわばりを和らげる。', effectValue: 5 },
+    { id: 3, name: '当帰', reading: 'とうき', element: 'Wood', flavor: '血を巡らせる', description: '血を補い、巡りを良くする女性の強い味方。', effectValue: 5 },
+    { id: 4, name: '川キュウ', reading: 'せんきゅう', element: 'Wood', flavor: '頭の巡りを良くする', description: '血行を促進し、頭痛や月経トラブルに用いられる。', effectValue: 5 },
+    { id: 5, name: '薄荷', reading: 'はっか', element: 'Wood', flavor: 'スッと通りを良くする', description: '体表の熱を飛ばし、気の巡りを改善する。', effectValue: 3 },
+
+    // Fire
+    { id: 6, name: '桂枝', reading: 'けいし', element: 'Fire', flavor: '体を芯から温める', description: '発汗を促し、血行を良くして冷えを除く。', effectValue: 5 },
+    { id: 7, name: '黄連', reading: 'おうれん', element: 'Fire', flavor: '強い熱を冷ます', description: '心火を鎮め、イライラや不眠、炎症を抑える。', effectValue: 8 },
+    { id: 8, name: '黄ゴン', reading: 'おうごん', element: 'Fire', flavor: '熱と湿りを除く', description: '上半身の熱を冷まし、解毒を助ける。', effectValue: 5 },
+    { id: 9, name: '山梔子', reading: 'さんしし', element: 'Fire', flavor: 'イライラの熱を消す', description: '精神的な興奮や充血、炎症を鎮める。', effectValue: 5 },
+    { id: 10, name: '生姜', reading: 'しょうきょう', element: 'Fire', flavor: 'お腹を温める', description: '胃腸を温め、吐き気を止める。', effectValue: 3 },
+
+    // Earth
+    { id: 11, name: '人参', reading: 'にんじん', element: 'Earth', flavor: '元気を強力に補う', description: '消化器を丈夫にし、エネルギーを全身に満たす。', effectValue: 10 },
+    { id: 12, name: '甘草', reading: 'かんぞう', element: 'Earth', flavor: '調和の要', description: '諸薬の毒を和らげ、全体のバランスを整える。', effectValue: 2 },
+    { id: 13, name: '大棗', reading: 'たいそう', element: 'Earth', flavor: '胃腸に優しい甘み', description: '胃を保護し、精神を安定させるナツメの実。', effectValue: 3 },
+    { id: 14, name: '白朮', reading: 'びゃくじゅつ', element: 'Earth', flavor: '湿気を取り除く', description: '胃腸を丈夫にし、体内の余分な水分を排出する。', effectValue: 5 },
+    { id: 15, name: '陳皮', reading: 'ちんぴ', element: 'Earth', flavor: '気の巡りを助ける', description: '胃腸の働きを助け、吐き気や痰を除く。', effectValue: 4 },
+
+    // Metal
+    { id: 16, name: '麻黄', reading: 'まおう', element: 'Metal', flavor: 'ガツンと汗を出す', description: '寒気を飛ばし、喘息や関節の痛みを和らげる。', effectValue: 8 },
+    { id: 17, name: '杏仁', reading: 'きょうにん', element: 'Metal', flavor: '咳を鎮める', description: '肺を潤し、咳や痰を止める。', effectValue: 5 },
+    { id: 18, name: '桔梗', reading: 'ききょう', element: 'Metal', flavor: '喉の通りを良くする', description: '喉の痛みを和らげ、排膿を促す。', effectValue: 5 },
+    { id: 19, name: '葛根', reading: 'かっこん', element: 'Metal', flavor: '筋肉のこわばりに', description: '首筋や背中のこわばりをほぐし、熱を下げる。', effectValue: 5 },
+    { id: 20, name: '石膏', reading: 'せっこう', element: 'Metal', flavor: '強烈な熱を鎮める', description: '肺や胃の激しい熱を冷まし、喉の渇きを止める。', effectValue: 7 },
+
+    // Water
+    { id: 21, name: '地黄', reading: 'じおう', element: 'Water', flavor: '生命の源を潤す', description: '精を強め、体液や血を補う。', effectValue: 8 },
+    { id: 22, name: '茯苓', reading: 'ぶくりょう', element: 'Water', flavor: '水の配分を整える', description: '水分の巡りを良くし、心を穏やかにする。', effectValue: 5 },
+    { id: 23, name: '沢瀉', reading: 'たくしゃ', element: 'Water', flavor: 'むくみを流す', description: '余分な水分を尿として出し、めまいを抑える。', effectValue: 5 },
+    { id: 24, name: '山薬', reading: 'さんやく', element: 'Water', flavor: '滋養強壮', description: '消化器を助け、腎のエネルギーを蓄える。', effectValue: 6 },
+    { id: 25, name: '杜仲', reading: 'とちゅう', element: 'Water', flavor: '足腰を丈夫に', description: '筋骨を強くし、老化による足腰の弱りを防ぐ。', effectValue: 6 },
+];
+
+export const INITIAL_FORMULAS: Omit<Formula, 'ownedCount' | 'usedCount' | 'discovered'>[] = [
+    {
+        id: 101,
+        name: '葛根湯',
+        reading: 'かっこんとう',
+        element: 'Metal',
+        description: '背筋のぞくぞくする風邪の初期に。',
+        flavor: '風を払う鋭い力',
+        effectValue: 40,
+        recipe: [
+            { crudeDrugId: 19, count: 2 }, // 葛根
+            { crudeDrugId: 16, count: 2 }, // 麻黄
+            { crudeDrugId: 6, count: 1 },  // 桂枝
+            { crudeDrugId: 2, count: 1 },  // 芍薬
+            { crudeDrugId: 12, count: 1 }, // 甘草
+            { crudeDrugId: 10, count: 1 }, // 生姜
+            { crudeDrugId: 13, count: 1 }, // 大棗
+        ]
+    },
+    {
+        id: 102,
+        name: '補中益気湯',
+        reading: 'ほちゅうえっきとう',
+        element: 'Earth',
+        description: '胃腸が弱く、元気が乏しい時に。',
+        flavor: '大地を潤す恵み',
+        effectValue: 45,
+        recipe: [
+            { crudeDrugId: 11, count: 2 }, // 人参
+            { crudeDrugId: 14, count: 1 }, // 白朮
+            { crudeDrugId: 12, count: 1 }, // 甘草
+            { crudeDrugId: 3, count: 1 },  // 当帰
+            { crudeDrugId: 15, count: 1 }, // 陳皮
+            { crudeDrugId: 1, count: 1 },  // 柴胡
+        ]
+    },
+    {
+        id: 103,
+        name: '黄連解毒湯',
+        reading: 'おうれんげどくとう',
+        element: 'Fire',
+        description: 'イライラ、のぼせ、炎症に。',
+        flavor: '静まる火の情動',
+        effectValue: 35,
+        recipe: [
+            { crudeDrugId: 7, count: 1 }, // 黄連
+            { crudeDrugId: 8, count: 1 }, // 黄ゴン
+            { crudeDrugId: 9, count: 1 }, // 山梔子
+        ]
+    },
+    {
+        id: 104,
+        name: '六味丸',
+        reading: 'ろくみがん',
+        element: 'Water',
+        description: '体内の潤いが不足し、火照る時に。',
+        flavor: '静謐な水の癒やし',
+        effectValue: 40,
+        recipe: [
+            { crudeDrugId: 21, count: 2 }, // 地黄
+            { crudeDrugId: 24, count: 1 }, // 山薬
+            { crudeDrugId: 12, count: 1 }, // 甘草
+            { crudeDrugId: 23, count: 1 }, // 沢瀉
+            { crudeDrugId: 22, count: 1 }, // 茯苓
+        ]
+    },
+    {
+        id: 105,
+        name: '四物湯',
+        reading: 'しもつとう',
+        element: 'Wood',
+        description: '血を補い、巡りを整える基本。',
+        flavor: '伸びゆく芽の生命力',
+        effectValue: 35,
+        recipe: [
+            { crudeDrugId: 21, count: 1 }, // 地黄
+            { crudeDrugId: 2, count: 1 },  // 芍薬
+            { crudeDrugId: 4, count: 1 },  // 川キュウ
+            { crudeDrugId: 3, count: 1 },  // 当帰
+        ]
+    }
 ];

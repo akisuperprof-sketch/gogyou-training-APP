@@ -19,7 +19,7 @@ export interface Spirit {
     mood: Mood;
 }
 
-export interface Card {
+export interface CrudeDrug {
     id: number;
     name: string;
     reading: string;
@@ -29,6 +29,20 @@ export interface Card {
     effectValue: number;
     ownedCount: number;
     usedCount: number;
+    discovered: boolean;
+}
+
+export interface Formula {
+    id: number;
+    name: string;
+    reading: string;
+    element: Element;
+    description: string;
+    flavor: string; // Added
+    effectValue: number;
+    recipe: { crudeDrugId: number; count: number }[];
+    ownedCount: number;
+    usedCount: number; // Added
     discovered: boolean;
 }
 
@@ -59,6 +73,8 @@ export interface GameProgress {
     chainMediumClears: number;
     unlockNotification: { title: string; message: string } | null;
     unlockedWisdomIds: string[];
+    unlockedFormulaIds: number[];
+    isPremiumUnlocked: boolean;
 }
 
 export interface DailyWisdom {

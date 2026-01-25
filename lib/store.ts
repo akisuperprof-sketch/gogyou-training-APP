@@ -1,21 +1,22 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Card, GameProgress, Spirit, Element, Mood, SpiritRequest } from './types';
-import { INITIAL_CARDS, INITIAL_SPIRITS, SPIRIT_DATA } from './data';
+import { CrudeDrug, Formula, GameProgress, Spirit, Element, Mood, SpiritRequest } from './types';
+import { INITIAL_CRUDE_DRUGS, INITIAL_FORMULAS, INITIAL_SPIRITS, SPIRIT_DATA } from './data';
 
 interface AppState {
     spirits: Spirit[];
-    cards: Record<number, Card>;
+    crudeDrugs: Record<number, CrudeDrug>;
+    formulas: Record<number, Formula>;
     gameProgress: GameProgress;
 
     // Actions
     unlockSpirit: (id: string) => void;
-    gainCard: (cardId: number, count?: number) => void;
-    useCard: (cardId: number) => void;
+    gainCrudeDrug: (drugId: number, count?: number) => void;
     gameCompleted: (score: number, mode: 'chain' | 'guard' | 'sort', level?: number) => { gainedCards: number[], gainedExp: number, reaction: string };
+    healSpirit: (spiritId: string, formulaId: number) => void;
+    craftFormula: (formulaId: number) => { success: boolean, message: string };
     refreshRequest: () => void;
     setHasSeenStory: (val: boolean) => void;
-    clearNewCardsFlag: () => void;
     checkGenkiDecay: () => void;
     toggleMasterMode: () => void;
     unlockChainLevel: (level: number) => void;
@@ -23,6 +24,7 @@ interface AppState {
     clearHealNotification: () => void;
     clearUnlockNotification: () => void;
     unlockWisdom: (id: string) => void;
+    purchasePremium: () => void;
 }
 
 export const useStore = create<AppState>()(
@@ -30,10 +32,14 @@ export const useStore = create<AppState>()(
         (set, get) => ({
             spirits: INITIAL_SPIRITS,
             lastHealSpiritId: null,
-            cards: INITIAL_CARDS.reduce((acc, card) => {
-                acc[card.id] = { ...card, ownedCount: 0, usedCount: 0, discovered: false };
+            crudeDrugs: INITIAL_CRUDE_DRUGS.reduce((acc, drug) => {
+                acc[drug.id] = { ...drug, ownedCount: 0, usedCount: 0, discovered: false };
                 return acc;
-            }, {} as Record<number, Card>),
+            }, {} as Record<number, CrudeDrug>),
+            formulas: INITIAL_FORMULAS.reduce((acc, formula) => {
+                acc[formula.id] = { ...formula, ownedCount: 0, usedCount: 0, discovered: false };
+                return acc;
+            }, {} as Record<number, Formula>),
             gameProgress: {
                 bestScores: { chain: 0, guard: 0, sort: 0 },
                 dailyStreak: 0,
@@ -50,37 +56,37 @@ export const useStore = create<AppState>()(
                 chainMediumClears: 0,
                 unlockNotification: null,
                 unlockedWisdomIds: [],
+                unlockedFormulaIds: [],
+                isPremiumUnlocked: false,
             },
 
             unlockSpirit: (id) => set((state) => ({
                 spirits: state.spirits.map((s) => s.id === id ? { ...s, unlocked: true } : s)
             })),
 
-            gainCard: (cardId, count = 1) => set((state) => {
-                const card = state.cards[cardId];
-                if (!card) return state;
+            gainCrudeDrug: (drugId, count = 1) => set((state) => {
+                const drug = state.crudeDrugs[drugId];
+                if (!drug) return state;
                 return {
-                    cards: {
-                        ...state.cards,
-                        [cardId]: { ...card, ownedCount: card.ownedCount + count, discovered: true }
+                    crudeDrugs: {
+                        ...state.crudeDrugs,
+                        [drugId]: { ...drug, ownedCount: drug.ownedCount + count, discovered: true }
                     },
                     gameProgress: { ...state.gameProgress, hasNewCards: true }
                 };
             }),
 
-            useCard: (cardId) => set((state) => {
-                const card = state.cards[cardId];
-                if (!card || card.ownedCount <= 0) return state;
+            healSpirit: (spiritId, formulaId) => set((state) => {
+                const formula = state.formulas[formulaId];
+                if (!formula || formula.ownedCount <= 0) return state;
 
                 const spirits = [...state.spirits];
-                let spiritIdx = spirits.findIndex(s => s.unlocked && s.element === card.element);
-                if (spiritIdx === -1) spiritIdx = spirits.findIndex(s => s.unlocked);
-
+                const spiritIdx = spirits.findIndex(s => s.id === spiritId);
                 if (spiritIdx === -1) return state;
 
                 const spirit = spirits[spiritIdx];
-                const isMatch = card.element === spirit.element;
-                const recoveryAmount = Math.floor(card.effectValue * (isMatch ? 1.5 : 1.0) / 2);
+                const isMatch = formula.element === spirit.element;
+                const recoveryAmount = Math.floor(formula.effectValue * (isMatch ? 1.5 : 1.0));
 
                 const newGenki = Math.min(100, spirit.stats.genki + recoveryAmount);
                 let newMood = spirit.mood;
@@ -99,9 +105,9 @@ export const useStore = create<AppState>()(
                 };
 
                 return {
-                    cards: {
-                        ...state.cards,
-                        [cardId]: { ...card, ownedCount: card.ownedCount - 1, usedCount: card.usedCount + 1 }
+                    formulas: {
+                        ...state.formulas,
+                        [formulaId]: { ...formula, ownedCount: formula.ownedCount - 1 }
                     },
                     spirits,
                     lastHealSpiritId: spirit.id
@@ -125,21 +131,21 @@ export const useStore = create<AppState>()(
                 if (isRequestFulfilled) cardCount += 1;
 
                 const gainedCards: number[] = [];
-                const cardIds = Object.keys(state.cards).map(Number);
+                const drugIds = Object.keys(state.crudeDrugs).map(Number);
                 for (let i = 0; i < cardCount; i++) {
-                    const randomId = cardIds[Math.floor(Math.random() * cardIds.length)];
+                    const randomId = drugIds[Math.floor(Math.random() * drugIds.length)];
                     gainedCards.push(randomId);
                 }
 
                 const gainedExp = Math.floor(score / 60); // Max ~100 exp for 6000 pts
 
                 set((current) => {
-                    const newCards = { ...current.cards };
+                    const newDrugs = { ...current.crudeDrugs };
                     gainedCards.forEach(id => {
-                        if (newCards[id]) {
-                            newCards[id] = {
-                                ...newCards[id],
-                                ownedCount: newCards[id].ownedCount + 1,
+                        if (newDrugs[id]) {
+                            newDrugs[id] = {
+                                ...newDrugs[id],
+                                ownedCount: newDrugs[id].ownedCount + 1,
                                 discovered: true
                             };
                         }
@@ -196,7 +202,7 @@ export const useStore = create<AppState>()(
                     }
 
                     return {
-                        cards: newCards,
+                        crudeDrugs: newDrugs,
                         spirits: current.spirits.map(s => {
                             let updated = s.id === spiritToUpdate.id ? { ...s, mood: newMood, stats: { ...s.stats, jukuren: s.stats.jukuren + gainedExp } } : s;
                             if (s.id === 'kon' && nextTotalJukuren >= 500 && !s.unlocked) return { ...updated, unlocked: true };
@@ -255,10 +261,6 @@ export const useStore = create<AppState>()(
                 gameProgress: { ...state.gameProgress, hasSeenStory: val }
             })),
 
-            clearNewCardsFlag: () => set((state) => ({
-                gameProgress: { ...state.gameProgress, hasNewCards: false }
-            })),
-
             checkGenkiDecay: () => set((state) => {
                 const now = Date.now();
                 const lastUpdate = state.gameProgress.lastGenkiUpdate || now;
@@ -296,11 +298,16 @@ export const useStore = create<AppState>()(
                 if (isMaster) {
                     return {
                         spirits: state.spirits.map(s => ({ ...s, unlocked: true })),
-                        cards: Object.keys(state.cards).reduce((acc, id) => {
+                        crudeDrugs: Object.keys(state.crudeDrugs).reduce((acc, id) => {
                             const cid = Number(id);
-                            acc[cid] = { ...state.cards[cid], ownedCount: Math.max(state.cards[cid].ownedCount, 99), discovered: true };
+                            acc[cid] = { ...state.crudeDrugs[cid], ownedCount: Math.max(state.crudeDrugs[cid].ownedCount, 99), discovered: true };
                             return acc;
-                        }, {} as Record<number, Card>),
+                        }, {} as Record<number, CrudeDrug>),
+                        formulas: Object.keys(state.formulas).reduce((acc, id) => {
+                            const fid = Number(id);
+                            acc[fid] = { ...state.formulas[fid], ownedCount: Math.max(state.formulas[fid].ownedCount, 99), discovered: true };
+                            return acc;
+                        }, {} as Record<number, Formula>),
                         gameProgress: {
                             ...state.gameProgress,
                             isMasterMode: true,
@@ -309,15 +316,54 @@ export const useStore = create<AppState>()(
                             totalSessionsPlayed: 10,
                             chainEasyClears: 1,
                             chainMediumClears: 5,
-                            unlockedWisdomIds: ['w1', 'w2', 'w3', 'w4', 'w5', 'w6', 'w7', 'w8', 'w9', 'w10']
+                            unlockedWisdomIds: ['w1', 'w2', 'w3', 'w4', 'w5', 'w6', 'w7', 'w8', 'w9', 'w10'],
+                            unlockedFormulaIds: Object.keys(state.formulas).map(Number),
+                            isPremiumUnlocked: true
                         }
                     };
                 } else {
                     return {
-                        gameProgress: { ...state.gameProgress, isMasterMode: false }
+                        gameProgress: { ...state.gameProgress, isMasterMode: false, isPremiumUnlocked: false }
                     };
                 }
             }),
+
+            purchasePremium: () => set((state) => ({
+                gameProgress: { ...state.gameProgress, isPremiumUnlocked: true }
+            })),
+
+            craftFormula: (formulaId) => {
+                const state = get();
+                const formula = state.formulas[formulaId];
+                if (!formula) return { success: false, message: "レシピが見つかりません" };
+
+                const hasIngredients = formula.recipe.every(item =>
+                    state.crudeDrugs[item.crudeDrugId] && state.crudeDrugs[item.crudeDrugId].ownedCount >= item.count
+                );
+
+                if (!hasIngredients) return { success: false, message: "生薬が足りません" };
+
+                set(current => {
+                    const newDrugs = { ...current.crudeDrugs };
+                    formula.recipe.forEach(item => {
+                        newDrugs[item.crudeDrugId].ownedCount -= item.count;
+                    });
+
+                    return {
+                        crudeDrugs: newDrugs,
+                        formulas: {
+                            ...current.formulas,
+                            [formulaId]: {
+                                ...current.formulas[formulaId],
+                                ownedCount: current.formulas[formulaId].ownedCount + 1,
+                                discovered: true
+                            }
+                        }
+                    };
+                });
+
+                return { success: true, message: `${formula.name} を調合しました！` };
+            },
 
             unlockChainLevel: (level) => set((state) => ({
                 gameProgress: {
@@ -343,15 +389,16 @@ export const useStore = create<AppState>()(
             }))
         }),
         {
-            name: 'gogyou-storage-v12',
+            name: 'gogyou-storage-v13',
             storage: createJSONStorage(() => localStorage),
             partialize: (state) => ({
-                cards: state.cards,
+                crudeDrugs: state.crudeDrugs,
+                formulas: state.formulas,
                 spirits: state.spirits,
                 gameProgress: {
                     ...state.gameProgress,
-                    // Ensure unlockedWisdomIds is initialized as an empty array if not present
                     unlockedWisdomIds: state.gameProgress.unlockedWisdomIds || [],
+                    unlockedFormulaIds: state.gameProgress.unlockedFormulaIds || [],
                 },
             }),
         }

@@ -12,19 +12,23 @@ interface StoryModalProps {
 
 const STORY_STEPS = [
     {
-        text: "こんにちは。五行の世界へようこそ。\nここでは「万物は5つの要素から成る」という古くからの知恵を学ぶことができます。",
+        title: "万物の調和",
+        text: "この世界は「陰」と「陽」、そして5つの巡る力「五行」で成り立っています。\n木、火、土、金、水…。これらが互いに響き合い、世界の命は紡がれてきました。",
         image: "/helper.png"
     },
     {
-        text: "木、火、土、金、水…。これら5つが互いに助け合う「相生（そうせい）」、時に抑え合う「相克（そうこく）」によって、世界のバランスは保たれているのです。",
+        title: "揺らぐ均衡",
+        text: "しかし、長きにわたる不摂生や心のざわつきにより、今、五行の精霊たちの命の火が弱まり、世界の均衡が崩れようとしています。",
         image: "/helper.png"
     },
     {
-        text: "最近、精霊たちの調子が少し不安定のようです。\nあなたの手で修行（ゲーム）を行い、彼らとの絆を深めてあげてください。",
+        title: "あなたの使命",
+        text: "若き薬師であるあなたの使命は、様々な「修行」を通じて古代の知恵を学び直し、大地に眠る「生薬」を集めることです。",
         image: "/helper.png"
     },
     {
-        text: "修行のご褒美には、古の知恵が詰まった「漢方カード」を差し上げます。\nさあ、図鑑を埋めながら、五行のマスターを目指しましょう！",
+        title: "漢方の力",
+        text: "集めた生薬を正しく調合し、伝説の「漢方」を紡ぎ出しましょう。\nその一滴が、精霊たちのごきげんを癒やし、再び世界に光を取り戻すでしょう。",
         image: "/helper.png"
     }
 ];
@@ -83,17 +87,22 @@ export function StoryModal({ isOpen, onClose }: StoryModalProps) {
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6 sm:space-y-8 no-scrollbar">
-                        <div className="min-h-[100px]">
+                        <div className="min-h-[150px] flex flex-col justify-center">
                             <AnimatePresence mode="wait">
-                                <motion.p
+                                <motion.div
                                     key={step}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
-                                    className="text-base font-black text-slate-700 leading-relaxed text-center whitespace-pre-wrap"
+                                    className="space-y-4"
                                 >
-                                    {STORY_STEPS[step].text}
-                                </motion.p>
+                                    <h3 className="text-2xl font-black text-slate-900 text-center tracking-tighter">
+                                        {STORY_STEPS[step].title}
+                                    </h3>
+                                    <p className="text-base font-bold text-slate-600 leading-relaxed text-center whitespace-pre-wrap">
+                                        {STORY_STEPS[step].text}
+                                    </p>
+                                </motion.div>
                             </AnimatePresence>
                         </div>
 

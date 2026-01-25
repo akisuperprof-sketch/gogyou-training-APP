@@ -13,7 +13,7 @@ import { DAILY_WISDOM } from '@/lib/wisdomData';
 import { DailyWisdom } from '@/lib/types';
 
 export default function Home() {
-  const { spirits, cards, gameProgress, setHasSeenStory, checkGenkiDecay, toggleMasterMode, lastHealSpiritId, clearHealNotification, clearUnlockNotification } = useStore();
+  const { spirits, crudeDrugs, formulas, gameProgress, setHasSeenStory, checkGenkiDecay, toggleMasterMode, lastHealSpiritId, clearHealNotification, clearUnlockNotification } = useStore();
   const [mounted, setMounted] = useState(false);
   const [focusedIdx, setFocusedIdx] = useState(0);
   const [storyOpen, setStoryOpen] = useState(false);
@@ -66,7 +66,8 @@ export default function Home() {
   const spirit = unlockedSpirits[focusedIdx] || spirits[0];
 
   const totalExp = spirits.reduce((acc, s) => acc + s.stats.jukuren, 0);
-  const totalCards = Object.values(cards).reduce((acc, c) => acc + c.ownedCount, 0);
+  const totalDrugs = Object.values(crudeDrugs).reduce((acc, c) => acc + c.ownedCount, 0);
+  const totalFormulaInStock = Object.values(formulas).reduce((acc, f) => acc + f.ownedCount, 0);
 
   const moodToJp = {
     good: '絶好調',
@@ -184,10 +185,17 @@ export default function Home() {
               </div>
             </div>
             <div className="flex-1 px-3 py-2 bg-white/50 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
-              <p className="text-[7px] text-slate-400 font-black uppercase tracking-widest">所持カード</p>
+              <p className="text-[7px] text-slate-400 font-black uppercase tracking-widest">所持生薬</p>
               <div className="flex items-center space-x-1.5">
                 <Book className="w-3 h-3 text-emerald-500 fill-current" />
-                <span className="text-sm font-black tabular-nums">{totalCards}</span>
+                <span className="text-sm font-black tabular-nums">{totalDrugs}</span>
+              </div>
+            </div>
+            <div className="flex-1 px-3 py-2 bg-white/50 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
+              <p className="text-[7px] text-slate-400 font-black uppercase tracking-widest">所持漢方</p>
+              <div className="flex items-center space-x-1.5">
+                <Sparkles className="w-3 h-3 text-amber-500 fill-current" />
+                <span className="text-sm font-black tabular-nums">{totalFormulaInStock}</span>
               </div>
             </div>
           </div>
@@ -420,7 +428,7 @@ export default function Home() {
           <Link href="/dex" className="group">
             <div className="bg-white p-6 rounded-[2rem] border border-slate-100 flex flex-col items-center justify-center space-y-2 shadow-xl transition-all active:scale-95 hover:border-indigo-100">
               <Book className="w-8 h-8 text-emerald-500" />
-              <span className="text-slate-900 font-black text-sm">漢方図鑑</span>
+              <span className="text-slate-900 font-black text-sm">生薬図鑑</span>
             </div>
           </Link>
         </div>
@@ -430,6 +438,6 @@ export default function Home() {
       <footer className="mt-20 pb-12 text-center">
         <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Gogyou Training App v1.2</p>
       </footer>
-    </div>
+    </div >
   );
 }

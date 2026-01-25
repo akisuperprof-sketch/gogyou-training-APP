@@ -15,7 +15,15 @@ interface GameResultProps {
 }
 
 export function GameResult({ score, gainedExp, gainedCardIds, reaction, onRetry }: GameResultProps) {
-    const { cards } = useStore();
+    const { crudeDrugs } = useStore();
+
+    const ELEMENT_ICONS = {
+        Wood: '🌿',
+        Fire: '🔥',
+        Earth: '⛰️',
+        Metal: '💎',
+        Water: '💧',
+    };
 
     return (
         <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/95 backdrop-blur-3xl p-4 sm:p-6 overflow-y-auto no-scrollbar">
@@ -68,7 +76,7 @@ export function GameResult({ score, gainedExp, gainedCardIds, reaction, onRetry 
                         <p className="text-xl sm:text-2xl font-black text-indigo-600">+{gainedExp}</p>
                     </div>
                     <div className="bg-white p-4 sm:p-5 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-slate-50 shadow-sm text-center">
-                        <p className="text-[9px] text-slate-400 font-bold tracking-widest mb-1 uppercase">獲得カード</p>
+                        <p className="text-[9px] text-slate-400 font-bold tracking-widest mb-1 uppercase">獲得生薬</p>
                         <p className="text-xl sm:text-2xl font-black text-blue-500">+{gainedCardIds.length}</p>
                     </div>
                 </div>
@@ -78,8 +86,8 @@ export function GameResult({ score, gainedExp, gainedCardIds, reaction, onRetry 
                     {gainedCardIds.length > 0 && (
                         <div className="flex justify-center space-x-[-20px] pt-2 px-10">
                             {gainedCardIds.slice(0, 5).map((id, idx) => {
-                                const card = cards[id];
-                                if (!card) return null;
+                                const drug = crudeDrugs[id];
+                                if (!drug) return null;
                                 return (
                                     <motion.div
                                         key={`${id}-${idx}`}
@@ -89,16 +97,16 @@ export function GameResult({ score, gainedExp, gainedCardIds, reaction, onRetry 
                                         style={{ zIndex: idx }}
                                         className={cn(
                                             "w-22 h-32 bg-white rounded-2xl shadow-2xl flex flex-col items-center justify-center border-t-8 shadow-slate-200 border border-slate-50",
-                                            card.element === 'Wood' ? "border-green-400" :
-                                                card.element === 'Fire' ? "border-red-400" :
-                                                    card.element === 'Earth' ? "border-yellow-400" :
-                                                        card.element === 'Metal' ? "border-slate-300" :
+                                            drug.element === 'Wood' ? "border-green-400" :
+                                                drug.element === 'Fire' ? "border-red-400" :
+                                                    drug.element === 'Earth' ? "border-yellow-400" :
+                                                        drug.element === 'Metal' ? "border-slate-300" :
                                                             "border-blue-400"
                                         )}
                                     >
-                                        <span className="text-5xl mb-3 drop-shadow-sm">🌿</span>
+                                        <span className="text-5xl mb-3 drop-shadow-sm">{ELEMENT_ICONS[drug.element]}</span>
                                         <p className="text-[10px] font-black text-center px-1 text-slate-800 leading-tight truncate w-full">
-                                            {card.name}
+                                            {drug.name}
                                         </p>
                                     </motion.div>
                                 )
