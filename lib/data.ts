@@ -171,7 +171,7 @@ export const INITIAL_SPIRITS: Spirit[] = [
         element: 'Fire',
         stats: { genki: 30, chowa: 10, jukuren: 1, kizuna: 0 },
         dialogueCode: 'loud',
-        unlocked: true,
+        unlocked: false,
         mood: 'bad',
     },
     {
@@ -181,7 +181,7 @@ export const INITIAL_SPIRITS: Spirit[] = [
         element: 'Earth',
         stats: { genki: 10, chowa: 10, jukuren: 1, kizuna: 0 },
         dialogueCode: 'gentle',
-        unlocked: true,
+        unlocked: false,
         mood: 'bad',
     },
     {

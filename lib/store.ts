@@ -158,6 +158,7 @@ export const useStore = create<AppState>()(
                     const newTotalSessions = current.gameProgress.totalSessionsPlayed + 1;
                     let newUnlockedCount = current.gameProgress.gamesUnlockedCount;
                     let newNotify = null;
+                    let spiritToUnlockId: string | null = null;
 
                     if (newTotalSessions === 1 && newUnlockedCount < 2) {
                         newUnlockedCount = 2;
@@ -170,6 +171,33 @@ export const useStore = create<AppState>()(
                         newNotify = {
                             title: "修行の広がり",
                             message: "修行が板についてきたね！「連想仕分け」も解放されたよ。万物の繋がりを見極めてごらん。"
+                        };
+                    }
+
+                    // Spirit Unlocks (Every 2 sessions)
+                    if (newTotalSessions === 2) {
+                        spiritToUnlockId = 'ka';
+                        newNotify = {
+                            title: "新しい精霊！",
+                            message: "火の精霊「カ」が目を覚ましたよ！熱い情熱が修行を助けてくれるはずだ。"
+                        };
+                    } else if (newTotalSessions === 4) {
+                        spiritToUnlockId = 'do';
+                        newNotify = {
+                            title: "新しい精霊！",
+                            message: "土の精霊「ド」が仲間になったよ！母なる大地の安定が君の力になる。"
+                        };
+                    } else if (newTotalSessions === 6) {
+                        spiritToUnlockId = 'kon';
+                        newNotify = {
+                            title: "新しい精霊！",
+                            message: "金の精霊「コン」が修行に加わったよ！鋭い感覚で万物を切り開こう。"
+                        };
+                    } else if (newTotalSessions === 8) {
+                        spiritToUnlockId = 'sui';
+                        newNotify = {
+                            title: "精霊五行の集結！",
+                            message: "水の精霊「スイ」も覚醒した！これで五行の精霊がすべて揃ったね。真の薬師への道が今、開かれた！"
                         };
                     }
 
@@ -206,8 +234,7 @@ export const useStore = create<AppState>()(
                         crudeDrugs: newDrugs,
                         spirits: current.spirits.map(s => {
                             let updated = s.id === spiritToUpdate.id ? { ...s, mood: newMood, stats: { ...s.stats, jukuren: s.stats.jukuren + gainedExp } } : s;
-                            if (s.id === 'kon' && nextTotalJukuren >= 500 && !s.unlocked) return { ...updated, unlocked: true };
-                            if (s.id === 'sui' && nextTotalJukuren >= 1000 && !s.unlocked) return { ...updated, unlocked: true };
+                            if (s.id === spiritToUnlockId) return { ...updated, unlocked: true };
                             return updated;
                         }),
                         gameProgress: {
