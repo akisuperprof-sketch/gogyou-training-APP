@@ -30,6 +30,7 @@ export interface CrudeDrug {
     ownedCount: number;
     usedCount: number;
     discovered: boolean;
+    imageUrl?: string;
 }
 
 export interface Formula {
@@ -44,6 +45,7 @@ export interface Formula {
     ownedCount: number;
     usedCount: number; // Added
     discovered: boolean;
+    imageUrl?: string;
 }
 
 export interface SpiritRequest {

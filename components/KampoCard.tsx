@@ -72,10 +72,20 @@ export function KampoCard({ card, isDiscovered, onClick, className }: KampoCardP
                         <div className="absolute inset-0 opacity-10 pointer-events-none">
                             <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '12px 12px' }} />
                         </div>
-                        <div className="relative z-10 text-5xl transform group-hover:scale-110 transition-transform duration-500 drop-shadow-xl">
-                            {ELEMENT_ICONS[card.element]}
+                        <div className="relative z-10 w-full h-full flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                            {card.imageUrl ? (
+                                <img
+                                    src={card.imageUrl}
+                                    alt={card.name}
+                                    className="w-full h-full object-contain p-2 drop-shadow-xl"
+                                />
+                            ) : (
+                                <span className="text-5xl drop-shadow-xl">
+                                    {ELEMENT_ICONS[card.element]}
+                                </span>
+                            )}
                         </div>
-                        <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm border border-slate-100 px-2 py-0.5 rounded-lg flex items-center space-x-1 shadow-sm">
+                        <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm border border-slate-100 px-2 py-0.5 rounded-lg flex items-center space-x-1 shadow-sm z-20">
                             <Zap className="w-2.5 h-2.5 text-yellow-500 fill-current" />
                             <span className="text-[10px] font-black text-slate-700">{card.effectValue}</span>
                         </div>

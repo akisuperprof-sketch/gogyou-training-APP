@@ -34,11 +34,11 @@ export const useStore = create<AppState>()(
             spirits: INITIAL_SPIRITS,
             lastHealSpiritId: null,
             crudeDrugs: INITIAL_CRUDE_DRUGS.reduce((acc, drug) => {
-                acc[drug.id] = { ...drug, ownedCount: 0, usedCount: 0, discovered: false };
+                acc[drug.id] = { ...drug, ownedCount: 10, usedCount: 0, discovered: true };
                 return acc;
             }, {} as Record<number, CrudeDrug>),
             formulas: INITIAL_FORMULAS.reduce((acc, formula) => {
-                acc[formula.id] = { ...formula, ownedCount: 0, usedCount: 0, discovered: false };
+                acc[formula.id] = { ...formula, ownedCount: 5, usedCount: 0, discovered: true };
                 return acc;
             }, {} as Record<number, Formula>),
             gameProgress: {
@@ -46,22 +46,22 @@ export const useStore = create<AppState>()(
                 dailyStreak: 0,
                 lastPlayedDate: '',
                 currentRequest: null,
-                hasSeenStory: false,
+                hasSeenStory: true,
                 hasNewCards: false,
                 lastGenkiUpdate: Date.now(),
-                isMasterMode: false,
-                chainLevelsUnlocked: 1,
-                guardLevelsUnlocked: 1,
-                gamesUnlockedCount: 1,
-                totalSessionsPlayed: 0,
-                chainEasyClears: 0,
-                chainMediumClears: 0,
-                guardEasyClears: 0,
-                guardMediumClears: 0,
+                isMasterMode: true,
+                chainLevelsUnlocked: 3,
+                guardLevelsUnlocked: 3,
+                gamesUnlockedCount: 3,
+                totalSessionsPlayed: 10,
+                chainEasyClears: 5,
+                chainMediumClears: 5,
+                guardEasyClears: 5,
+                guardMediumClears: 5,
                 unlockNotification: null,
                 unlockedWisdomIds: [],
                 unlockedFormulaIds: [],
-                isPremiumUnlocked: false,
+                isPremiumUnlocked: true,
             },
 
             unlockSpirit: (id) => set((state) => ({

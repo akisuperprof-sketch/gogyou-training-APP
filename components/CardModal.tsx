@@ -87,11 +87,21 @@ export function CardModal({ card, onClose }: CardModalProps) {
                                 filter: ["brightness(1)", "brightness(1.5)", "brightness(1)"]
                             } : { scale: 1, opacity: 1 }}
                             transition={{ type: 'spring', damping: 15 }}
-                            className="z-10 text-7xl sm:text-9xl drop-shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative"
+                            className="z-10 w-full h-full flex items-center justify-center relative p-8"
                         >
-                            <span className="relative z-10">
-                                {card.element === 'Wood' ? '🌿' : card.element === 'Fire' ? '🔥' : card.element === 'Earth' ? '⛰️' : card.element === 'Metal' ? '💎' : '💧'}
-                            </span>
+                            <div className="relative w-full h-full flex items-center justify-center drop-shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
+                                {card.imageUrl ? (
+                                    <img
+                                        src={card.imageUrl}
+                                        alt={card.name}
+                                        className="w-full h-full object-contain"
+                                    />
+                                ) : (
+                                    <span className="text-7xl sm:text-9xl">
+                                        {card.element === 'Wood' ? '🌿' : card.element === 'Fire' ? '🔥' : card.element === 'Earth' ? '⛰️' : card.element === 'Metal' ? '💎' : '💧'}
+                                    </span>
+                                )}
+                            </div>
 
                             {/* Healing Particles */}
                             <AnimatePresence>
@@ -103,8 +113,8 @@ export function CardModal({ card, onClose }: CardModalProps) {
                                                 initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
                                                 animate={{
                                                     scale: [0, 1, 0],
-                                                    x: (Math.random() - 0.5) * 200,
-                                                    y: (Math.random() - 0.5) * 200,
+                                                    x: (Math.random() - 0.5) * 300,
+                                                    y: (Math.random() - 0.5) * 300,
                                                     opacity: 0
                                                 }}
                                                 transition={{ duration: 1, delay: i * 0.05 }}
@@ -117,7 +127,7 @@ export function CardModal({ card, onClose }: CardModalProps) {
                                             initial={{ y: 0, opacity: 0 }}
                                             animate={{ y: -100, opacity: 1 }}
                                             exit={{ opacity: 0 }}
-                                            className="absolute text-green-500 font-black text-4xl whitespace-nowrap drop-shadow-lg"
+                                            className="absolute text-green-500 font-black text-4xl whitespace-nowrap drop-shadow-lg z-[60]"
                                         >
                                             +{healAmount} GENKI!!
                                         </motion.div>
