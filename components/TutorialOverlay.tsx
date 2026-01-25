@@ -40,14 +40,14 @@ const TUTORIAL_DATA = {
         icon: <Shield className="w-14 h-14 text-white" />,
         rules: [
             <>
-                <ruby>相克<rt className="text-[8px] tracking-normal font-normal">そうこく</rt></ruby>で暴走を止めよう
+                暴走する属性の<span className="text-red-500">「弱点となる属性」</span>を選ぼう
             </>,
-            '相手の苦手な属性をタップ！',
-            '木は土、土は水、水は火、火は金、金は木',
+            '木は土に、土は水に、水は火に、火は金に、金は木に勝つ！',
+            '【対抗関係】木➜土 / 土➜水 / 水➜火 / 火➜金 / 金➜木',
         ],
-        bg: 'from-red-50 to-white',
-        accent: 'bg-red-500 shadow-red-200',
-        color: 'red'
+        bg: 'from-orange-50 to-white',
+        accent: 'bg-orange-500 shadow-orange-200',
+        color: 'orange'
     },
     sort: {
         title: '連想仕分け',

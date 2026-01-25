@@ -22,6 +22,8 @@ export default function GuardGame() {
     const [turnKey, setTurnKey] = useState(0);
     const [effect, setEffect] = useState<'CORRECT' | 'WRONG' | null>(null);
     const [missedOptions, setMissedOptions] = useState<Set<Element>>(new Set());
+    const [isNoneCorrect, setIsNoneCorrect] = useState(false);
+    const [isNoneMissed, setIsNoneMissed] = useState(false);
 
     const { gameCompleted } = useStore();
     const [resultData, setResultData] = useState<{ gainedCards: number[], gainedExp: number, reaction: string } | null>(null);
@@ -33,10 +35,24 @@ export default function GuardGame() {
         setTurnKey(prev => prev + 1);
 
         const correct = elements.find(e => SOUKOKU[e] === newEnemy) as Element;
+        const hasCorrect = Math.random() > 0.25; // 75% chance to have the answer
+        setIsNoneCorrect(!hasCorrect);
+        setIsNoneMissed(false);
+
         const wrongPool = elements.filter(e => e !== correct);
-        const wrong1 = wrongPool.splice(Math.floor(Math.random() * wrongPool.length), 1)[0];
-        const wrong2 = wrongPool.splice(Math.floor(Math.random() * wrongPool.length), 1)[0];
-        const newOptions = [correct, wrong1, wrong2].sort(() => Math.random() - 0.5);
+
+        let newOptions: Element[];
+        if (hasCorrect) {
+            const w1 = wrongPool.splice(Math.floor(Math.random() * wrongPool.length), 1)[0];
+            const w2 = wrongPool.splice(Math.floor(Math.random() * wrongPool.length), 1)[0];
+            newOptions = [correct, w1, w2].sort(() => Math.random() - 0.5);
+        } else {
+            const w1 = wrongPool.splice(Math.floor(Math.random() * wrongPool.length), 1)[0];
+            const w2 = wrongPool.splice(Math.floor(Math.random() * wrongPool.length), 1)[0];
+            const w3 = wrongPool.splice(Math.floor(Math.random() * wrongPool.length), 1)[0];
+            newOptions = [w1, w2, w3].sort(() => Math.random() - 0.5);
+        }
+
         setOptions(newOptions);
         setMissedOptions(new Set());
     };
@@ -79,10 +95,13 @@ export default function GuardGame() {
         setResultData(null);
     }
 
-    const handleAnswer = (choice: Element) => {
-        if (missedOptions.has(choice) || effect) return;
+    const handleAnswer = (choice: Element | 'NONE') => {
+        if (effect) return;
+        if (choice === 'NONE' && isNoneMissed) return;
+        if (choice !== 'NONE' && missedOptions.has(choice)) return;
 
-        const correct = SOUKOKU[choice] === enemy;
+        const correct = choice === 'NONE' ? isNoneCorrect : (SOUKOKU[choice] === enemy);
+
         if (correct) {
             setScore(s => s + 200);
             setEffect('CORRECT');
@@ -92,7 +111,11 @@ export default function GuardGame() {
             }, 500);
         } else {
             setScore(s => Math.max(0, s - 50));
-            setMissedOptions(prev => new Set(prev).add(choice));
+            if (choice === 'NONE') {
+                setIsNoneMissed(true);
+            } else {
+                setMissedOptions(prev => new Set(prev).add(choice));
+            }
             setEffect('WRONG');
             setTimeout(() => setEffect(null), 300);
         }
@@ -191,55 +214,84 @@ export default function GuardGame() {
                             </motion.div>
                         </AnimatePresence>
 
-                        {/* Soukoku Guide */}
-                        <div className="mt-4 sm:mt-8 flex flex-col items-center shrink-0">
-                            <div className="bg-slate-50/80 backdrop-blur-sm border border-slate-100 px-4 py-1.5 sm:px-6 sm:py-2 rounded-full shadow-sm mb-2 sm:mb-4">
-                                <div className="flex items-center space-x-1 sm:space-x-2 text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap overflow-x-auto no-scrollbar max-w-[80vw]">
-                                    {['Wood', 'Earth', 'Water', 'Fire', 'Metal', 'Wood'].map((el, i) => (
-                                        <div key={`guide-${i}`} className="flex items-center space-x-1 sm:space-x-2">
-                                            <span className={cn(
-                                                "w-4 h-4 sm:w-5 sm:h-5 rounded flex items-center justify-center text-[7px] sm:text-[8px] text-white",
-                                                ELEMENT_COLORS[el as Element]
-                                            )}>{ELEMENT_JP[el as Element]}</span>
-                                            {i < 5 && <span>勝つ</span>}
+                        {/* Soukoku Guide (Improved) */}
+                        <div className="mt-2 sm:mt-6 flex flex-col items-center shrink-0 w-full px-4">
+                            <div className="bg-white/90 backdrop-blur-md border border-slate-100 p-3 sm:p-4 rounded-3xl shadow-xl w-full max-w-[340px]">
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center mb-3">相克（勝ち）の法則</p>
+                                <div className="grid grid-cols-5 gap-1 sm:gap-2">
+                                    {[
+                                        { s: 'Wood', t: 'Earth' },
+                                        { s: 'Earth', t: 'Water' },
+                                        { s: 'Water', t: 'Fire' },
+                                        { s: 'Fire', t: 'Metal' },
+                                        { s: 'Metal', t: 'Wood' }
+                                    ].map((pair, i) => (
+                                        <div key={i} className="flex flex-col items-center space-y-1">
+                                            <div className={cn(
+                                                "w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[10px] sm:text-xs text-white font-black shadow-sm ring-2 ring-white",
+                                                ELEMENT_COLORS[pair.s as Element]
+                                            )}>
+                                                {ELEMENT_JP[pair.s as Element]}
+                                            </div>
+                                            <div className="text-slate-300 text-[8px] font-bold">⬇︎</div>
+                                            <div className={cn(
+                                                "w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[10px] sm:text-xs text-white font-black border border-white/50",
+                                                ELEMENT_COLORS[pair.t as Element]
+                                            )}>
+                                                {ELEMENT_JP[pair.t as Element]}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
+                                <div className="mt-2 flex justify-between px-1 text-[7px] font-bold text-slate-300 uppercase">
+                                    <span>あなたの属性</span>
+                                    <span>敵の属性</span>
+                                </div>
                             </div>
-                            <p className="text-slate-400 text-[10px] font-bold leading-none">迫る暴走を食い止めて！</p>
                         </div>
+                        <p className="text-slate-400 text-[10px] font-bold mt-4 leading-none">敵に勝つ属性をぶつけよう！</p>
                     </div>
 
                     {/* Options */}
-                    <div className="grid grid-cols-3 gap-2 sm:gap-5 px-4 sm:px-6 w-full max-w-md z-10 shrink-0">
-                        {options.map((opt, i) => {
-                            const isMissed = missedOptions.has(opt);
-                            return (
-                                <motion.button
-                                    key={`${opt}-${i}`}
-                                    initial={{ y: 20, opacity: 0 }}
-                                    animate={{ y: 0, opacity: isMissed ? 0.4 : 1 }}
-                                    transition={{ delay: i * 0.1 }}
-                                    onClick={() => handleAnswer(opt)}
-                                    whileTap={!isMissed ? { scale: 0.9, y: 5 } : {}}
-                                    className={cn(
-                                        "h-20 sm:h-32 rounded-[1.5rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center font-black text-lg sm:text-2xl shadow-xl border-b-[4px] sm:border-b-[8px] border-black/20 transition-all active:border-b-0 relative overflow-hidden",
-                                        ELEMENT_COLORS[opt],
-                                        isMissed && "grayscale cursor-not-allowed"
-                                    )}
-                                >
-                                    <Shield className="w-5 h-5 sm:w-8 sm:h-8 mb-1 sm:mb-2 opacity-40 shrink-0" />
-                                    <span className="drop-shadow-sm leading-none">
-                                        {isMissed ? 'miss' : ELEMENT_JP[opt]}
-                                    </span>
-                                    {isMissed && (
-                                        <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
-                                            <span className="text-white text-[10px] font-black uppercase tracking-tighter rotate-12">Fail</span>
-                                        </div>
-                                    )}
-                                </motion.button>
-                            );
-                        })}
+                    <div className="w-full max-w-md px-4 sm:px-6 z-10 shrink-0 space-y-3 sm:space-y-4">
+                        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+                            {options.map((opt, i) => {
+                                const isMissed = missedOptions.has(opt);
+                                return (
+                                    <motion.button
+                                        key={`${opt}-${i}`}
+                                        initial={{ y: 20, opacity: 0 }}
+                                        animate={{ y: 0, opacity: isMissed ? 0.4 : 1 }}
+                                        transition={{ delay: i * 0.1 }}
+                                        onClick={() => handleAnswer(opt)}
+                                        whileTap={!isMissed ? { scale: 0.9, y: 5 } : {}}
+                                        className={cn(
+                                            "h-16 sm:h-28 rounded-[1.5rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center font-black text-sm sm:text-xl shadow-lg border-b-[4px] sm:border-b-[6px] border-black/20 transition-all active:border-b-0 relative overflow-hidden",
+                                            ELEMENT_COLORS[opt],
+                                            isMissed && "grayscale cursor-not-allowed"
+                                        )}
+                                    >
+                                        <span className="drop-shadow-sm leading-none">
+                                            {isMissed ? 'miss' : ELEMENT_JP[opt]}
+                                        </span>
+                                    </motion.button>
+                                );
+                            })}
+                        </div>
+
+                        <motion.button
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: isNoneMissed ? 0.4 : 1 }}
+                            transition={{ delay: 0.3 }}
+                            onClick={() => handleAnswer('NONE')}
+                            whileTap={!isNoneMissed ? { scale: 0.98, y: 2 } : {}}
+                            className={cn(
+                                "w-full py-3 sm:py-5 rounded-2xl sm:rounded-[2rem] bg-slate-100 text-slate-500 font-black text-xs sm:text-lg border-2 border-slate-200 shadow-sm transition-all active:border-b-0 active:translate-y-1 relative",
+                                isNoneMissed && "opacity-50 grayscale cursor-not-allowed"
+                            )}
+                        >
+                            {isNoneMissed ? '答えは他にあった！' : 'ここにはない'}
+                        </motion.button>
                     </div>
                 </div>
             )}
