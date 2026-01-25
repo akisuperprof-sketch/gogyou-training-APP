@@ -108,7 +108,7 @@ export default function ChainGame() {
     };
 
     return (
-        <div className="min-h-[100dvh] bg-white relative overflow-hidden touch-none select-none font-sans text-slate-900">
+        <div className="h-[100dvh] bg-white relative overflow-hidden touch-none select-none font-sans text-slate-900">
             <TutorialOverlay
                 gameType="chain"
                 isOpen={gameState === 'TUTORIAL'}
@@ -151,34 +151,34 @@ export default function ChainGame() {
                     </AnimatePresence>
 
                     {/* Chain Progress */}
-                    <div className="absolute bottom-12 inset-x-8 flex justify-center items-center space-x-3 pointer-events-none">
+                    <div className="absolute bottom-6 sm:bottom-12 inset-x-8 flex justify-center items-center space-x-2 sm:space-x-3 pointer-events-none">
                         <AnimatePresence>
-                            {chain.slice(-6).map((node, i) => (
+                            {chain.slice(-5).map((node, i) => (
                                 <motion.div
                                     initial={{ scale: 0, x: 20 }}
                                     animate={{ scale: 1, x: 0 }}
                                     key={`${node.id}-${i}`}
                                     className={cn(
-                                        "w-12 h-12 rounded-[1rem] flex items-center justify-center border-2 border-white shadow-xl relative overflow-hidden",
+                                        "w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-[1rem] flex items-center justify-center border border-white shadow-xl relative overflow-hidden",
                                         ELEMENT_COLORS[node.element]
                                     )}
                                 >
-                                    <span className="text-xl font-black z-10 drop-shadow-sm">{ELEMENT_JP[node.element]}</span>
+                                    <span className="text-sm sm:text-xl font-black z-10 drop-shadow-sm">{ELEMENT_JP[node.element]}</span>
                                     <div className="absolute inset-0 bg-white/10 opacity-50" />
                                 </motion.div>
                             ))}
                         </AnimatePresence>
-                        {chain.length > 0 && <div className="text-slate-200 text-3xl animate-pulse">→</div>}
+                        {chain.length > 0 && <div className="text-slate-200 text-xl sm:text-3xl animate-pulse">→</div>}
                         {chain.length === 0 && (
-                            <div className="text-slate-300 text-xs font-bold tracking-widest bg-slate-50 px-6 py-2 rounded-full border border-slate-100">
-                                好きな属性から連鎖を開始
+                            <div className="text-slate-300 text-[10px] sm:text-xs font-bold tracking-widest bg-slate-50 px-4 py-1.5 sm:px-6 sm:py-2 rounded-full border border-slate-100">
+                                好きな属性から開始
                             </div>
                         )}
                     </div>
 
                     {/* Grid Nodes */}
-                    <div className="absolute inset-0 flex items-center justify-center p-6 pt-20">
-                        <div className="grid grid-cols-3 gap-3 w-full max-w-sm aspect-square">
+                    <div className="absolute inset-0 flex items-center justify-center p-6 pt-16 sm:pt-20">
+                        <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full max-w-[280px] sm:max-w-sm aspect-square">
                             {nodes.map((node) => (
                                 <motion.button
                                     key={node.id}
@@ -188,7 +188,7 @@ export default function ChainGame() {
                                     whileTap={{ scale: 0.9 }}
                                     onPointerDown={() => handleNodeClick(node)}
                                     className={cn(
-                                        "w-full h-full rounded-[1.5rem] sm:rounded-[2rem] shadow-lg flex items-center justify-center text-3xl sm:text-4xl font-black border-4 border-white transition-all ring-4 ring-slate-50/50 relative overflow-hidden",
+                                        "w-full h-full rounded-2xl sm:rounded-[2rem] shadow-lg flex items-center justify-center text-2xl sm:text-4xl font-black border-2 sm:border-4 border-white transition-all ring-2 sm:ring-4 ring-slate-50/50 relative overflow-hidden",
                                         ELEMENT_COLORS[node.element]
                                     )}
                                 >
@@ -200,17 +200,17 @@ export default function ChainGame() {
                     </div>
 
                     {/* Cycle Guide */}
-                    <div className="absolute top-24 sm:top-28 left-0 right-0 flex justify-center">
-                        <div className="bg-white/90 backdrop-blur-md border border-slate-100 px-6 py-3 rounded-full shadow-xl flex items-center space-x-3">
+                    <div className="absolute top-20 sm:top-28 left-0 right-0 flex justify-center">
+                        <div className="bg-white/90 backdrop-blur-md border border-slate-100 px-4 py-1.5 sm:px-6 sm:py-3 rounded-full shadow-xl flex items-center space-x-2 sm:space-x-3">
                             {['Wood', 'Fire', 'Earth', 'Metal', 'Water'].map((el, i) => (
-                                <div key={el} className="flex items-center space-x-3">
+                                <div key={el} className="flex items-center space-x-2 sm:space-x-3">
                                     <div className={cn(
-                                        "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black text-white shadow-sm",
+                                        "w-6 h-6 sm:w-8 sm:h-8 rounded sm:rounded-lg flex items-center justify-center text-[10px] sm:text-xs font-black text-white shadow-sm",
                                         ELEMENT_COLORS[el as Element]
                                     )}>
                                         {ELEMENT_JP[el as Element]}
                                     </div>
-                                    {i < 4 && <div className="text-slate-200 font-black">→</div>}
+                                    {i < 4 && <div className="text-slate-200 text-[10px] sm:text-sm font-black">→</div>}
                                 </div>
                             ))}
                         </div>

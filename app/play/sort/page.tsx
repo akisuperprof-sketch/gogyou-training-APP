@@ -111,7 +111,7 @@ export default function SortGame() {
     };
 
     return (
-        <div className="min-h-[100dvh] bg-white overflow-hidden flex flex-col relative text-slate-900 font-sans">
+        <div className="h-[100dvh] bg-white overflow-hidden flex flex-col relative text-slate-900 font-sans">
             <TutorialOverlay
                 gameType="sort"
                 isOpen={gameState === 'TUTORIAL'}
@@ -184,21 +184,21 @@ export default function SortGame() {
                                 onDragEnd={handleDragEnd}
                                 animate={controls}
                                 whileDrag={{ scale: 1.1, rotate: 5, zIndex: 50 }}
-                                className="w-48 h-64 sm:w-64 sm:h-80 bg-white rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl flex flex-col items-center justify-center p-6 sm:p-10 z-20 cursor-grab active:cursor-grabbing text-slate-900 border-[8px] sm:border-[12px] border-slate-50 relative"
+                                className="w-40 h-52 sm:w-64 sm:h-80 bg-white rounded-[2rem] sm:rounded-[3.5rem] shadow-2xl flex flex-col items-center justify-center p-4 sm:p-10 z-20 cursor-grab active:cursor-grabbing text-slate-900 border-[6px] sm:border-[12px] border-slate-50 relative shrink-0"
                             >
                                 <div className="absolute top-6 sm:top-8 left-1/2 -translate-x-1/2">
                                     <div className="p-1.5 sm:p-2 bg-slate-50 rounded-lg sm:rounded-xl">
                                         <LayoutGrid className="w-5 h-5 sm:w-6 sm:h-6 text-slate-300" />
                                     </div>
                                 </div>
-                                <p className="text-[9px] sm:text-[10px] text-slate-300 font-black uppercase tracking-[0.2em] mb-3 sm:mb-4">正しい属性へ</p>
-                                <h3 className="text-3xl sm:text-5xl font-black text-center break-keep leading-tight tracking-tighter">
+                                <p className="text-[8px] sm:text-[10px] text-slate-300 font-black uppercase tracking-[0.2em] mb-2 sm:mb-4">正しい属性へ</p>
+                                <h3 className="text-2xl sm:text-5xl font-black text-center break-keep leading-tight tracking-tighter">
                                     {currentCard.term}
                                 </h3>
-                                <div className="mt-8 sm:mt-12 flex items-center space-x-2">
-                                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-100 animate-bounce" />
-                                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-100 animate-bounce [animation-delay:0.2s]" />
-                                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-100 animate-bounce [animation-delay:0.4s]" />
+                                <div className="mt-6 sm:mt-12 flex items-center space-x-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-slate-100 animate-bounce" />
+                                    <div className="w-1.5 h-1.5 rounded-full bg-slate-100 animate-bounce [animation-delay:0.2s]" />
+                                    <div className="w-1.5 h-1.5 rounded-full bg-slate-100 animate-bounce [animation-delay:0.4s]" />
                                 </div>
                             </motion.div>
                         )}

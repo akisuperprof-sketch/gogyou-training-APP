@@ -50,15 +50,15 @@ const GAMES = [
 
 export default function PlayMenu() {
     return (
-        <div className="flex flex-col min-h-[100dvh] p-4 sm:p-6 pb-12 relative overflow-hidden bg-slate-50">
-            <header className="flex items-center justify-between mb-6 sm:mb-10 z-10 shrink-0">
+        <div className="flex flex-col h-[100dvh] p-4 sm:p-6 pb-8 relative overflow-hidden bg-slate-50">
+            <header className="flex items-center justify-between mb-4 sm:mb-8 z-10 shrink-0">
                 <div className="flex items-center space-x-3 sm:space-x-6">
                     <Link href="/" className="p-3 sm:p-4 bg-white border border-slate-100 rounded-[1.25rem] shadow-sm hover:bg-slate-50 transition-all active:scale-90">
                         <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-slate-700" />
                     </Link>
                     <div>
                         <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">修行の間</h1>
-                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">心の鍛錬</p>
+                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest leading-none">心の鍛錬</p>
                     </div>
                 </div>
                 <Link href="/" className="p-3 sm:p-4 bg-white border border-slate-100 rounded-[1.25rem] shadow-sm hover:bg-slate-50 transition-all">
@@ -66,7 +66,7 @@ export default function PlayMenu() {
                 </Link>
             </header>
 
-            <div className="flex-1 flex flex-col space-y-5 z-10">
+            <div className="flex-1 flex flex-col space-y-3 sm:space-y-5 z-10 overflow-y-auto no-scrollbar">
                 {GAMES.map((game, idx) => (
                     <Link href={game.href} key={game.id} className="block">
                         <motion.div
@@ -74,14 +74,14 @@ export default function PlayMenu() {
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: idx * 0.1 }}
                             whileTap={{ scale: 0.98 }}
-                            className="relative h-28 sm:h-36 w-full overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] group bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all"
+                            className="relative h-24 sm:h-36 w-full overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] group bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all shrink-0"
                         >
-                            <div className="relative h-full flex items-center p-5 sm:p-8 space-x-4 sm:space-x-8">
+                            <div className="relative h-full flex items-center p-4 sm:p-8 space-x-3 sm:space-x-8">
                                 <div className={cn(
-                                    "p-3 sm:p-5 rounded-[1.25rem] sm:rounded-[1.5rem] bg-gradient-to-br text-white shadow-xl shadow-indigo-100 shrink-0",
+                                    "p-2.5 sm:p-5 rounded-2xl sm:rounded-[1.5rem] bg-gradient-to-br text-white shadow-xl shadow-indigo-100 shrink-0",
                                     game.color
                                 )}>
-                                    <div className="w-7 h-7 sm:w-10 sm:h-10 flex items-center justify-center">
+                                    <div className="w-6 h-6 sm:w-10 sm:h-10 flex items-center justify-center">
                                         {game.icon}
                                     </div>
                                 </div>

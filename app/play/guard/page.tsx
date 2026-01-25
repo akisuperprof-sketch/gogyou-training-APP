@@ -52,10 +52,10 @@ export default function GuardGame() {
                 });
             }, 1000);
 
-            // Turn Timer: Switch enemy every 4 seconds if no answer
+            // Turn Timer: Switch enemy every 6 seconds if no answer
             const turnInterval = setInterval(() => {
                 nextTurn();
-            }, 4000);
+            }, 6000);
 
             return () => {
                 clearInterval(interval);
@@ -94,7 +94,7 @@ export default function GuardGame() {
     };
 
     return (
-        <div className="min-h-[100dvh] bg-white relative overflow-hidden flex flex-col text-slate-900 font-sans">
+        <div className="h-[100dvh] bg-white relative overflow-hidden flex flex-col text-slate-900 font-sans">
             <TutorialOverlay
                 gameType="guard"
                 isOpen={gameState === 'TUTORIAL'}
@@ -121,22 +121,22 @@ export default function GuardGame() {
             </div>
 
             {gameState === 'PLAYING' && (
-                <div className="flex-1 flex flex-col items-center justify-center pt-24 pb-12 sm:pb-20 space-y-8 sm:space-y-12">
+                <div className="flex-1 flex flex-col items-center justify-center pt-16 sm:pt-24 pb-8 sm:pb-20 space-y-6 sm:space-y-12 min-h-0">
                     {/* Enemy (Approaching from back) */}
-                    <div className="text-center relative perspective-1000 w-full flex flex-col items-center">
+                    <div className="text-center relative perspective-1000 w-full flex flex-col items-center flex-1 justify-center">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={`${enemy}-${turnKey}`}
-                                initial={{ scale: 0.1, z: -1000, opacity: 0 }}
+                                initial={{ scale: 0.1, z: -1000, opacity: 0.3 }}
                                 animate={{ scale: 1, z: 0, opacity: 1 }}
                                 exit={{ scale: 1.5, z: 500, opacity: 0 }}
-                                transition={{ duration: 3.5, ease: "linear" }}
-                                className={cn("inline-flex items-center justify-center w-36 h-36 sm:w-48 sm:h-48 rounded-[3rem] sm:rounded-[3.5rem] text-6xl sm:text-8xl shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-8 border-white relative z-10",
-                                    enemy === 'Fire' ? 'bg-red-500 text-white shadow-red-200' :
-                                        enemy === 'Water' ? 'bg-blue-500 text-white shadow-blue-200' :
-                                            enemy === 'Wood' ? 'bg-green-500 text-white shadow-green-200' :
-                                                enemy === 'Metal' ? 'bg-slate-300 text-slate-700 shadow-slate-200' :
-                                                    'bg-yellow-600 text-white shadow-yellow-200'
+                                transition={{ duration: 5.5, ease: "linear" }}
+                                className={cn("inline-flex items-center justify-center w-28 h-28 sm:w-48 sm:h-48 rounded-[2rem] sm:rounded-[3.5rem] text-4xl sm:text-8xl shadow-[0_30px_80px_rgba(0,0,0,0.3)] border-4 sm:border-8 border-white relative z-10",
+                                    enemy === 'Fire' ? 'bg-red-500 text-white shadow-red-500/50' :
+                                        enemy === 'Water' ? 'bg-blue-500 text-white shadow-blue-500/50' :
+                                            enemy === 'Wood' ? 'bg-green-500 text-white shadow-green-500/50' :
+                                                enemy === 'Metal' ? 'bg-slate-300 text-slate-700 shadow-slate-400/50' :
+                                                    'bg-yellow-600 text-white shadow-yellow-700/50'
                                 )}>
                                 <span className="drop-shadow-lg">{ELEMENT_JP[enemy]}</span>
 
@@ -145,19 +145,19 @@ export default function GuardGame() {
                                     {effect === 'CORRECT' && (
                                         <motion.div
                                             initial={{ scale: 0, opacity: 0 }}
-                                            animate={{ scale: 2, opacity: 1 }}
+                                            animate={{ scale: 1.5, opacity: 1 }}
                                             exit={{ opacity: 0 }}
                                             className="absolute inset-0 flex items-center justify-center z-20"
                                         >
-                                            <div className="w-full h-full rounded-full border-8 border-white animate-ping" />
-                                            <Shield className="w-24 h-24 text-white absolute fill-current opacity-80" />
+                                            <div className="w-full h-full rounded-full border-4 border-white animate-ping" />
+                                            <Shield className="w-16 h-16 text-white absolute fill-current opacity-80" />
                                         </motion.div>
                                     )}
                                     {effect === 'WRONG' && (
                                         <motion.div
                                             initial={{ x: -10 }}
                                             animate={{ x: [10, -10, 10, -10, 0] }}
-                                            className="absolute inset-0 bg-red-500/40 rounded-[3rem] sm:rounded-[3.5rem] z-20"
+                                            className="absolute inset-0 bg-red-500/40 rounded-[2rem] sm:rounded-[3.5rem] z-20"
                                         />
                                     )}
                                 </AnimatePresence>
@@ -165,13 +165,13 @@ export default function GuardGame() {
                         </AnimatePresence>
 
                         {/* Soukoku Guide */}
-                        <div className="mt-8 flex flex-col items-center">
-                            <div className="bg-slate-50/80 backdrop-blur-sm border border-slate-100 px-6 py-2 rounded-full shadow-sm mb-4">
-                                <div className="flex items-center space-x-2 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap overflow-x-auto no-scrollbar max-w-[80vw]">
+                        <div className="mt-4 sm:mt-8 flex flex-col items-center shrink-0">
+                            <div className="bg-slate-50/80 backdrop-blur-sm border border-slate-100 px-4 py-1.5 sm:px-6 sm:py-2 rounded-full shadow-sm mb-2 sm:mb-4">
+                                <div className="flex items-center space-x-1 sm:space-x-2 text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap overflow-x-auto no-scrollbar max-w-[80vw]">
                                     {['Wood', 'Earth', 'Water', 'Fire', 'Metal', 'Wood'].map((el, i) => (
-                                        <div key={`guide-${i}`} className="flex items-center space-x-2">
+                                        <div key={`guide-${i}`} className="flex items-center space-x-1 sm:space-x-2">
                                             <span className={cn(
-                                                "w-5 h-5 rounded flex items-center justify-center text-[8px] text-white",
+                                                "w-4 h-4 sm:w-5 sm:h-5 rounded flex items-center justify-center text-[7px] sm:text-[8px] text-white",
                                                 ELEMENT_COLORS[el as Element]
                                             )}>{ELEMENT_JP[el as Element]}</span>
                                             {i < 5 && <span>勝つ</span>}
@@ -179,12 +179,12 @@ export default function GuardGame() {
                                     ))}
                                 </div>
                             </div>
-                            <p className="text-slate-400 text-xs font-bold leading-none translate-y-2">迫ってくる暴走を食い止めて！</p>
+                            <p className="text-slate-400 text-[10px] font-bold leading-none">迫る暴走を食い止めて！</p>
                         </div>
                     </div>
 
                     {/* Options */}
-                    <div className="grid grid-cols-3 gap-3 sm:gap-5 px-4 sm:px-6 w-full max-w-md z-10">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-5 px-4 sm:px-6 w-full max-w-md z-10 shrink-0">
                         {options.map((opt, i) => (
                             <motion.button
                                 key={`${opt}-${i}`}
@@ -194,12 +194,12 @@ export default function GuardGame() {
                                 onClick={() => handleAnswer(opt)}
                                 whileTap={{ scale: 0.9, y: 5 }}
                                 className={cn(
-                                    "h-24 sm:h-32 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center font-black text-xl sm:text-2xl shadow-xl border-b-[8px] border-black/20 transition-all active:border-b-0",
+                                    "h-20 sm:h-32 rounded-[1.5rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center font-black text-lg sm:text-2xl shadow-xl border-b-[4px] sm:border-b-[8px] border-black/20 transition-all active:border-b-0",
                                     ELEMENT_COLORS[opt]
                                 )}
                             >
-                                <Shield className="w-6 h-6 sm:w-8 sm:h-8 mb-1 sm:mb-2 opacity-40 shrink-0" />
-                                <span className="drop-shadow-sm">{ELEMENT_JP[opt]}</span>
+                                <Shield className="w-5 h-5 sm:w-8 sm:h-8 mb-1 sm:mb-2 opacity-40 shrink-0" />
+                                <span className="drop-shadow-sm leading-none">{ELEMENT_JP[opt]}</span>
                             </motion.button>
                         ))}
                     </div>
