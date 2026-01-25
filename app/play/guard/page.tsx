@@ -36,7 +36,7 @@ export default function GuardGame() {
         setTurnKey(prev => prev + 1);
 
         const correct = elements.find(e => SOUKOKU[e] === newEnemy) as Element;
-        const hasCorrect = Math.random() > 0.25; // 75% chance to have the answer
+        const hasCorrect = Math.random() > 0.15; // 85% chance to have the answer
         setIsNoneCorrect(!hasCorrect);
         setIsNoneMissed(false);
 
@@ -71,17 +71,24 @@ export default function GuardGame() {
                 });
             }, 1000);
 
-            // Turn Timer: Switch enemy every 6 seconds if no answer
-            const turnInterval = setInterval(() => {
-                nextTurn();
-            }, 6000);
-
-            return () => {
-                clearInterval(interval);
-                clearInterval(turnInterval);
-            };
+            return () => clearInterval(interval);
         }
     }, [gameState]);
+
+    // Use a separate effect to handle enemy auto-switching to allow manual resets
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (gameState === 'PLAYING') {
+            const startTimer = () => {
+                timer = setTimeout(() => {
+                    nextTurn();
+                    startTimer();
+                }, 6000);
+            };
+            startTimer();
+        }
+        return () => clearTimeout(timer);
+    }, [gameState, turnKey]); // Resets whenever a new turn starts
 
     useEffect(() => {
         if (gameState === 'FINISHED') {
@@ -238,7 +245,10 @@ export default function GuardGame() {
                         {/* Soukoku Guide (Improved) */}
                         <div className="mt-4 flex flex-col items-center shrink-0 w-full px-4">
                             <div className="bg-white/90 backdrop-blur-md border border-slate-100 p-2 sm:p-4 rounded-3xl shadow-xl w-full max-w-[320px]">
-                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest text-center mb-2 leading-none">相克の理</p>
+                                <div className="flex justify-between items-center mb-2 px-2">
+                                    <span className="text-[7px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full uppercase tracking-widest">あなたの属性(勝)</span>
+                                    <span className="text-[7px] font-black text-red-400 bg-red-50 px-2 py-0.5 rounded-full uppercase tracking-widest">敵の属性(負)</span>
+                                </div>
                                 <div className="flex justify-between items-center px-1">
                                     {[
                                         { s: 'Wood', t: 'Earth' },
@@ -254,9 +264,9 @@ export default function GuardGame() {
                                             )}>
                                                 {ELEMENT_JP[pair.s as Element]}
                                             </div>
-                                            <div className="text-slate-200 text-[10px] font-black my-0.5">↓</div>
+                                            <div className="text-slate-200 text-[10px] font-black my-0.5">⬇︎</div>
                                             <div className={cn(
-                                                "w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[9px] text-white font-black opacity-60",
+                                                "w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[9px] text-white font-black opacity-40 grayscale-[0.3]",
                                                 ELEMENT_COLORS[pair.t as Element]
                                             )}>
                                                 {ELEMENT_JP[pair.t as Element]}
@@ -266,7 +276,9 @@ export default function GuardGame() {
                                 </div>
                             </div>
                         </div>
-                        <p className="text-slate-400 text-[9px] font-bold mt-4 leading-none">敵に勝つ属性を選択せよ！</p>
+                        <p className="text-slate-500 text-[10px] font-black mt-4 leading-none bg-slate-50 px-4 py-1.5 rounded-full border border-slate-100 italic">
+                            中央の敵に「勝つ」属性を下から選べ！
+                        </p>
                     </div>
 
                     {/* Options */}
@@ -303,11 +315,11 @@ export default function GuardGame() {
                             onClick={() => handleAnswer('NONE')}
                             whileTap={!isNoneMissed ? { scale: 0.98, y: 2 } : {}}
                             className={cn(
-                                "w-full py-3 sm:py-5 rounded-2xl sm:rounded-[2rem] bg-slate-100 text-slate-500 font-black text-xs sm:text-lg border-2 border-slate-200 shadow-sm transition-all active:border-b-0 active:translate-y-1 relative",
+                                "w-full py-4 sm:py-5 rounded-2xl sm:rounded-[2rem] bg-slate-50 text-slate-400 font-black text-xs sm:text-lg border-2 border-dashed border-slate-200 shadow-sm transition-all active:border-b-0 active:translate-y-1 relative",
                                 isNoneMissed && "opacity-50 grayscale cursor-not-allowed"
                             )}
                         >
-                            {isNoneMissed ? '答えは他にあった！' : 'ここにはない'}
+                            {isNoneMissed ? '正解は他にあった！' : 'ここに正解の属性がない'}
                         </motion.button>
                     </div>
                 </div>
