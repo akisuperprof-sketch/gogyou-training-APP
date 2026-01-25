@@ -19,12 +19,15 @@ interface AppState {
     checkGenkiDecay: () => void;
     toggleMasterMode: () => void;
     unlockChainLevel: (level: number) => void;
+    lastHealSpiritId: string | null;
+    clearHealNotification: () => void;
 }
 
 export const useStore = create<AppState>()(
     persist(
         (set, get) => ({
             spirits: INITIAL_SPIRITS,
+            lastHealSpiritId: null,
             cards: INITIAL_CARDS.reduce((acc, card) => {
                 acc[card.id] = { ...card, ownedCount: 0, usedCount: 0, discovered: false };
                 return acc;
@@ -63,7 +66,6 @@ export const useStore = create<AppState>()(
                 const card = state.cards[cardId];
                 if (!card || card.ownedCount <= 0) return state;
 
-                // MVP: Use card on the first spirit of matching element or first unlocked
                 const spirits = [...state.spirits];
                 let spiritIdx = spirits.findIndex(s => s.unlocked && s.element === card.element);
                 if (spiritIdx === -1) spiritIdx = spirits.findIndex(s => s.unlocked);
@@ -72,7 +74,7 @@ export const useStore = create<AppState>()(
 
                 const spirit = spirits[spiritIdx];
                 const isMatch = card.element === spirit.element;
-                const recoveryAmount = Math.floor(card.effectValue * (isMatch ? 1.5 : 1.0) / 2); // Use effect value for genki
+                const recoveryAmount = Math.floor(card.effectValue * (isMatch ? 1.5 : 1.0) / 2);
 
                 const newGenki = Math.min(100, spirit.stats.genki + recoveryAmount);
                 let newMood = spirit.mood;
@@ -95,9 +97,12 @@ export const useStore = create<AppState>()(
                         ...state.cards,
                         [cardId]: { ...card, ownedCount: card.ownedCount - 1, usedCount: card.usedCount + 1 }
                     },
-                    spirits
+                    spirits,
+                    lastHealSpiritId: spirit.id
                 };
             }),
+
+            clearHealNotification: () => set({ lastHealSpiritId: null }),
 
             gameCompleted: (score, mode) => {
                 const state = get();
@@ -135,15 +140,11 @@ export const useStore = create<AppState>()(
                     const relatedElement: Record<string, Element> = { chain: 'Wood', guard: 'Fire', sort: 'Earth' };
                     const spiritToUpdate = current.spirits.find(s => s.element === relatedElement[mode]) || current.spirits[0];
 
-                    // Game unlock logic
                     const newTotalSessions = current.gameProgress.totalSessionsPlayed + 1;
                     let newUnlockedCount = current.gameProgress.gamesUnlockedCount;
-
-                    // Unlock 2nd game after 1 session, 3rd game after 2 sessions
                     if (newTotalSessions >= 1 && newUnlockedCount < 2) newUnlockedCount = 2;
                     if (newTotalSessions >= 2 && newUnlockedCount < 3) newUnlockedCount = 3;
 
-                    // Auto-unlock logic for spirits
                     const nextTotalJukuren = current.spirits.reduce((acc, s) => acc + s.stats.jukuren, 0) + gainedExp;
 
                     return {
@@ -210,9 +211,6 @@ export const useStore = create<AppState>()(
                 const now = Date.now();
                 const lastUpdate = state.gameProgress.lastGenkiUpdate || now;
                 const elapsedMs = now - lastUpdate;
-
-                // 1 day = 86400000 ms. Decay 5 points per day.
-                // 1 point per 17,280,000 ms (4.8 hours)
                 const decayAmount = Math.floor(elapsedMs / (1000 * 60 * 60 * 4.8));
 
                 if (decayAmount <= 0) return state;
@@ -220,8 +218,6 @@ export const useStore = create<AppState>()(
                 const newSpirits = state.spirits.map(s => {
                     if (!s.unlocked) return s;
                     const newGenki = Math.max(0, s.stats.genki - decayAmount);
-
-                    // Also update mood if genki falls too low
                     let newMood = s.mood;
                     if (newGenki < 15) newMood = 'bad';
                     else if (newGenki >= 70) newMood = 'good';
@@ -238,14 +234,14 @@ export const useStore = create<AppState>()(
                     spirits: newSpirits,
                     gameProgress: {
                         ...state.gameProgress,
-                        lastGenkiUpdate: now - (elapsedMs % (1000 * 60 * 60 * 4.8)) // Keep the remainder for next time
+                        lastGenkiUpdate: now - (elapsedMs % (1000 * 60 * 60 * 4.8))
                     }
                 };
             }),
+
             toggleMasterMode: () => set((state) => {
                 const isMaster = !state.gameProgress.isMasterMode;
                 if (isMaster) {
-                    // Unlock everything
                     return {
                         spirits: state.spirits.map(s => ({ ...s, unlocked: true })),
                         cards: Object.keys(state.cards).reduce((acc, id) => {
@@ -261,6 +257,7 @@ export const useStore = create<AppState>()(
                     };
                 }
             }),
+
             unlockChainLevel: (level) => set((state) => ({
                 gameProgress: {
                     ...state.gameProgress,
@@ -269,7 +266,7 @@ export const useStore = create<AppState>()(
             }))
         }),
         {
-            name: 'gogyou-storage-v7', // Incremented version to reset/update schema
+            name: 'gogyou-storage-v8',
             storage: createJSONStorage(() => localStorage),
         }
     )

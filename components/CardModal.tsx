@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles, Zap } from 'lucide-react';
 import { useStore } from '@/lib/store';
+import { useRouter } from 'next/navigation';
 
 interface CardModalProps {
     card: CardType | null;
@@ -15,6 +16,7 @@ interface CardModalProps {
 
 export function CardModal({ card, onClose }: CardModalProps) {
     const { useCard, spirits } = useStore();
+    const router = useRouter();
     const [isHealing, setIsHealing] = useState(false);
     const [healAmount, setHealAmount] = useState(0);
 
@@ -34,7 +36,9 @@ export function CardModal({ card, onClose }: CardModalProps) {
 
         setTimeout(() => {
             setIsHealing(false);
-        }, 1500);
+            onClose();
+            router.push('/');
+        }, 1200);
     };
 
     return (

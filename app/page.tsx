@@ -6,14 +6,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { SPIRIT_DATA } from '@/lib/data';
-import { HelpCircle, Sparkles, Crown } from 'lucide-react';
+import { HelpCircle, Sparkles, Crown, Book, History, Info } from 'lucide-react';
 import { StoryModal } from '@/components/StoryModal';
 
 export default function Home() {
-  const { spirits, gameProgress, setHasSeenStory, checkGenkiDecay, toggleMasterMode } = useStore();
+  const { spirits, gameProgress, setHasSeenStory, checkGenkiDecay, toggleMasterMode, lastHealSpiritId, clearHealNotification } = useStore();
   const [mounted, setMounted] = useState(false);
   const [focusedIdx, setFocusedIdx] = useState(0);
   const [storyOpen, setStoryOpen] = useState(false);
+  const [isGlowActive, setIsGlowActive] = useState(false);
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -34,6 +35,18 @@ export default function Home() {
       }
     }
   }, [mounted, gameProgress.hasSeenStory, gameProgress.currentRequest, setHasSeenStory]);
+
+  // Handle glow animation for healed spirit
+  useEffect(() => {
+    if (lastHealSpiritId && spirits[focusedIdx] && spirits[focusedIdx].id === lastHealSpiritId) {
+      setIsGlowActive(true);
+      const timer = setTimeout(() => {
+        setIsGlowActive(false);
+        clearHealNotification();
+      }, 3000); // Animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [lastHealSpiritId, focusedIdx, spirits, clearHealNotification]);
 
   if (!mounted) return <div className="min-h-screen bg-white" />;
 
@@ -96,6 +109,7 @@ export default function Home() {
             const isFocused = idx === focusedIdx;
             const spiritInfo = SPIRIT_DATA[spirit.id];
             const moodLine = spiritInfo.moodLines[spirit.mood][0];
+            const isCurrentHealedSpirit = isFocused && isGlowActive;
 
             return (
               <motion.div
@@ -107,15 +121,40 @@ export default function Home() {
                   scale: isFocused ? 1.15 : 0.75,
                   opacity: isFocused ? 1 : 0.4,
                   rotate: (idx - focusedIdx) * 5,
-                  zIndex: isFocused ? 20 : 10
+                  zIndex: isFocused ? 20 : 10,
+                  boxShadow: isCurrentHealedSpirit ? "0 0 50px rgba(250, 204, 21, 0.8)" : (isFocused ? "0 25px 50px -12px rgba(0, 0, 0, 0.1)" : "0 1px 2px 0 rgba(0, 0, 0, 0.05)")
                 }}
                 className={cn(
                   "absolute w-36 sm:w-44 h-56 sm:h-72 rounded-[2.5rem] sm:rounded-[3.5rem] p-4 sm:p-6 flex flex-col items-center justify-between border-2 transition-all cursor-pointer bg-white",
-                  isFocused ? "shadow-2xl shadow-slate-200 border-white" : "border-slate-50 shadow-sm grayscale-[0.6]",
+                  isCurrentHealedSpirit ? "border-yellow-400 scale-[1.02]" : (isFocused ? "shadow-2xl shadow-slate-200 border-white" : "border-slate-50 shadow-sm grayscale-[0.6]"),
                   spirit.mood === 'good' && isFocused && "border-yellow-200 ring-4 ring-yellow-50",
                   spirit.mood === 'bad' && isFocused && "border-slate-200 opacity-80"
                 )}
               >
+                {isCurrentHealedSpirit && (
+                  <div className="absolute inset-0 z-0 pointer-events-none">
+                    {[...Array(20)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{
+                          opacity: [0, 1, 0],
+                          scale: [0.5, 1.2, 0.5],
+                          y: [0, -200],
+                          x: (Math.random() - 0.5) * 300
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: Math.random() * 2
+                        }}
+                        className="absolute bottom-0 left-1/2 text-yellow-400"
+                      >
+                        <Sparkles className="w-4 h-4 fill-current" />
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
                 <div className="flex flex-col items-center">
                   <motion.div
                     animate={isFocused ? { y: [0, -5, 0] } : {}}
