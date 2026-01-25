@@ -5,9 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useStore } from '@/lib/store';
-import { SPIRIT_DATA } from '@/lib/data';
-import { HelpCircle, Sparkles, Crown, Book, History, Info, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
+import { SPIRIT_DATA, MOOD_COLORS, ELEMENT_COLORS } from '@/lib/data';
+import { HelpCircle, Sparkles, Crown, Book, History, Info, Zap, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { StoryModal } from '@/components/StoryModal';
+import { DAILY_WISDOM } from '@/lib/wisdomData';
+import { DailyWisdom } from '@/lib/types';
 
 export default function Home() {
   const { spirits, cards, gameProgress, setHasSeenStory, checkGenkiDecay, toggleMasterMode, lastHealSpiritId, clearHealNotification, clearUnlockNotification } = useStore();
@@ -15,6 +17,20 @@ export default function Home() {
   const [focusedIdx, setFocusedIdx] = useState(0);
   const [storyOpen, setStoryOpen] = useState(false);
   const [isGlowActive, setIsGlowActive] = useState(false);
+  const [todayWisdom, setTodayWisdom] = useState<DailyWisdom | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  useEffect(() => {
+    if (mounted) {
+      const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+      const wisdom = DAILY_WISDOM[dayOfYear % DAILY_WISDOM.length];
+      setTodayWisdom(wisdom);
+      // Auto-unlock today's wisdom
+      if (!gameProgress.unlockedWisdomIds.includes(wisdom.id)) {
+        useStore.getState().unlockWisdom(wisdom.id);
+      }
+    }
+  }, [mounted, gameProgress.unlockedWisdomIds]);
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -276,6 +292,110 @@ export default function Home() {
             "{SPIRIT_DATA[spirit.id].moodLines[spirit.mood][0]}"
           </p>
         </motion.div>
+
+        {/* Daily Wisdom Section (Developer Only) */}
+        {gameProgress.isMasterMode && todayWisdom && (
+          <section className="w-full max-w-sm mt-12">
+            <div className="flex justify-between items-center mb-4 px-2">
+              <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center">
+                <Sparkles className="w-4 h-4 mr-2 text-yellow-500" />
+                今日の五行
+              </h3>
+              <button
+                onClick={() => setHistoryOpen(true)}
+                className="text-[10px] font-black text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-tighter active:scale-95"
+              >
+                過去の知恵を見る
+              </button>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-[2.5rem] p-6 shadow-2xl border-2 border-indigo-50 relative overflow-hidden group"
+            >
+              <div className={cn(
+                "absolute top-0 right-0 px-4 py-1 rounded-bl-2xl text-[10px] font-black text-white uppercase tracking-widest",
+                MOOD_COLORS[todayWisdom.element === 'Balance' ? 'good' : 'normal']
+              )}>
+                {todayWisdom.tag}
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className={cn(
+                  "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-inner",
+                  ELEMENT_COLORS[todayWisdom.element === 'Balance' ? 'Earth' : todayWisdom.element]
+                )}>
+                  {todayWisdom.element === 'Balance' ? '☯️' : (
+                    todayWisdom.element === 'Wood' ? '🌿' :
+                      todayWisdom.element === 'Fire' ? '🔥' :
+                        todayWisdom.element === 'Earth' ? '⛰️' :
+                          todayWisdom.element === 'Metal' ? '💎' : '💧'
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <h4 className="text-lg font-black text-slate-900 leading-none">{todayWisdom.title}</h4>
+                  <p className="text-sm font-bold text-slate-500 leading-relaxed italic">
+                    "{todayWisdom.content}"
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </section>
+        )}
+
+        {/* History Modal (Developer Only) */}
+        <AnimatePresence>
+          {historyOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[110] bg-slate-900/60 backdrop-blur-xl flex items-center justify-center p-6"
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 50 }}
+                animate={{ scale: 1, y: 0 }}
+                className="bg-white rounded-[3rem] w-full max-w-md h-[80vh] flex flex-col overflow-hidden relative"
+              >
+                <div className="p-8 border-b border-slate-50 flex justify-between items-center">
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-900">習得した知恵</h3>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Wisdom Collection</p>
+                  </div>
+                  <button onClick={() => setHistoryOpen(false)} className="p-3 bg-slate-50 rounded-2xl text-slate-400">
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
+                  {DAILY_WISDOM.filter(w => gameProgress.unlockedWisdomIds.includes(w.id)).map(w => (
+                    <div key={w.id} className="bg-slate-50 rounded-3xl p-5 border border-slate-100 flex items-start space-x-4">
+                      <div className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                        ELEMENT_COLORS[w.element === 'Balance' ? 'Earth' : w.element]
+                      )}>
+                        <span className="text-sm">{w.element === 'Balance' ? '☯️' : '✨'}</span>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-black text-slate-900">{w.title}</span>
+                          <span className="text-[8px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">{w.tag}</span>
+                        </div>
+                        <p className="text-[11px] font-bold text-slate-500 leading-relaxed">{w.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {gameProgress.unlockedWisdomIds.length === 0 && (
+                    <div className="h-full flex flex-col items-center justify-center text-center p-12 space-y-4">
+                      <Book className="w-16 h-16 text-slate-100" />
+                      <p className="text-sm font-bold text-slate-300">まだ知恵を習得していません。<br />毎日の学習を続けましょう。</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Navigation Buttons */}
         <div className="grid grid-cols-2 gap-4 w-full max-w-sm mt-12">

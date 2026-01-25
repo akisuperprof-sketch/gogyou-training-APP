@@ -58,4 +58,13 @@ export interface GameProgress {
     chainEasyClears: number;
     chainMediumClears: number;
     unlockNotification: { title: string; message: string } | null;
+    unlockedWisdomIds: string[];
+}
+
+export interface DailyWisdom {
+    id: string;
+    element: Element | 'Balance';
+    title: string;
+    content: string;
+    tag?: string; // e.g. 抑平, 相生, etc.
 }

@@ -22,6 +22,7 @@ interface AppState {
     lastHealSpiritId: string | null;
     clearHealNotification: () => void;
     clearUnlockNotification: () => void;
+    unlockWisdom: (id: string) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -48,6 +49,7 @@ export const useStore = create<AppState>()(
                 chainEasyClears: 0,
                 chainMediumClears: 0,
                 unlockNotification: null,
+                unlockedWisdomIds: [],
             },
 
             unlockSpirit: (id) => set((state) => ({
@@ -306,7 +308,8 @@ export const useStore = create<AppState>()(
                             gamesUnlockedCount: 3,
                             totalSessionsPlayed: 10,
                             chainEasyClears: 1,
-                            chainMediumClears: 5
+                            chainMediumClears: 5,
+                            unlockedWisdomIds: ['w1', 'w2', 'w3', 'w4', 'w5', 'w6', 'w7', 'w8', 'w9', 'w10']
                         }
                     };
                 } else {
@@ -325,11 +328,32 @@ export const useStore = create<AppState>()(
 
             clearUnlockNotification: () => set((state) => ({
                 gameProgress: { ...state.gameProgress, unlockNotification: null }
+            })),
+            unlockWisdom: (id) => set((state) => {
+                if (state.gameProgress.unlockedWisdomIds.includes(id)) return state;
+                return {
+                    gameProgress: {
+                        ...state.gameProgress,
+                        unlockedWisdomIds: [...state.gameProgress.unlockedWisdomIds, id]
+                    }
+                };
+            }),
+            clearUnlockedWisdomIds: () => set((state) => ({
+                gameProgress: { ...state.gameProgress, unlockedWisdomIds: [] }
             }))
         }),
         {
-            name: 'gogyou-storage-v10',
+            name: 'gogyou-storage-v12',
             storage: createJSONStorage(() => localStorage),
+            partialize: (state) => ({
+                cards: state.cards,
+                spirits: state.spirits,
+                gameProgress: {
+                    ...state.gameProgress,
+                    // Ensure unlockedWisdomIds is initialized as an empty array if not present
+                    unlockedWisdomIds: state.gameProgress.unlockedWisdomIds || [],
+                },
+            }),
         }
     )
 );
