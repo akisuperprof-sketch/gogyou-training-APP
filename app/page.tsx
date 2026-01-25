@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useStore } from '@/lib/store';
 import { SPIRIT_DATA, MOOD_COLORS, ELEMENT_COLORS } from '@/lib/data';
-import { HelpCircle, Sparkles, Crown, Book, History, Info, Zap, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { HelpCircle, Sparkles, Crown, Book, History, Info, Zap, ChevronLeft, ChevronRight, X, BookOpen } from 'lucide-react';
 import { StoryModal } from '@/components/StoryModal';
+import { GuideModal } from '@/components/GuideModal';
 import { DAILY_WISDOM } from '@/lib/wisdomData';
 import { DailyWisdom } from '@/lib/types';
 
@@ -19,6 +20,7 @@ export default function Home() {
   const [isGlowActive, setIsGlowActive] = useState(false);
   const [todayWisdom, setTodayWisdom] = useState<DailyWisdom | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   useEffect(() => {
     if (mounted) {
@@ -129,6 +131,7 @@ export default function Home() {
       </AnimatePresence>
 
       <StoryModal isOpen={storyOpen} onClose={() => setStoryOpen(false)} />
+      <GuideModal isOpen={guideOpen} onClose={() => setGuideOpen(false)} />
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-slate-50/90 backdrop-blur-md border-b border-slate-100/50">
@@ -153,6 +156,15 @@ export default function Home() {
                 <Crown className="w-4 h-4" />
                 <span className="text-[6px] font-black uppercase leading-none">Master</span>
               </button>
+              {gameProgress.isMasterMode && (
+                <button
+                  onClick={() => setGuideOpen(true)}
+                  className="p-2.5 bg-indigo-500 border border-indigo-400 rounded-2xl shadow-lg text-white hover:bg-indigo-600 active:scale-90 transition-all flex flex-col items-center"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span className="text-[6px] font-black uppercase leading-none mt-0.5">使い方</span>
+                </button>
+              )}
               <button
                 onClick={() => setStoryOpen(true)}
                 className="p-2.5 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-slate-600 active:scale-90"

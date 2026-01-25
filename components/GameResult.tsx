@@ -39,9 +39,9 @@ export function GameResult({ score, gainedExp, gainedCardIds, reaction, onRetry 
                         />
                     </div>
 
-                    <div className="bg-white/90 backdrop-blur-md rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-white">
-                        <h2 className="text-sm font-black text-slate-400 tracking-[0.4em] mb-4 uppercase">修行結果</h2>
-                        <p className="text-7xl sm:text-9xl font-black text-slate-900 tabular-nums tracking-tighter leading-none">
+                    <div className="bg-white/90 backdrop-blur-md rounded-[2.5rem] sm:rounded-[3rem] p-5 sm:p-8 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.1)] border border-white">
+                        <h2 className="text-[10px] font-black text-slate-400 tracking-[0.4em] mb-3 uppercase">修行結果</h2>
+                        <p className="text-5xl sm:text-7xl font-black text-slate-900 tabular-nums tracking-tighter leading-none">
                             {score}
                         </p>
                     </div>
@@ -62,14 +62,14 @@ export function GameResult({ score, gainedExp, gainedCardIds, reaction, onRetry 
                     </p>
                 </motion.div>
 
-                <div className="grid grid-cols-2 gap-3 sm:gap-5">
-                    <div className="bg-white p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-slate-50 shadow-sm text-center">
-                        <p className="text-[10px] text-slate-400 font-bold tracking-widest mb-1.5 uppercase">習得度</p>
-                        <p className="text-3xl sm:text-4xl font-black text-indigo-600">+{gainedExp}</p>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <div className="bg-white p-4 sm:p-5 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-slate-50 shadow-sm text-center">
+                        <p className="text-[9px] text-slate-400 font-bold tracking-widest mb-1 uppercase">習得度</p>
+                        <p className="text-xl sm:text-2xl font-black text-indigo-600">+{gainedExp}</p>
                     </div>
-                    <div className="bg-white p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-slate-50 shadow-sm text-center">
-                        <p className="text-[10px] text-slate-400 font-bold tracking-widest mb-1.5 uppercase">獲得カード</p>
-                        <p className="text-3xl sm:text-4xl font-black text-blue-500">+{gainedCardIds.length}</p>
+                    <div className="bg-white p-4 sm:p-5 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-slate-50 shadow-sm text-center">
+                        <p className="text-[9px] text-slate-400 font-bold tracking-widest mb-1 uppercase">獲得カード</p>
+                        <p className="text-xl sm:text-2xl font-black text-blue-500">+{gainedCardIds.length}</p>
                     </div>
                 </div>
 
