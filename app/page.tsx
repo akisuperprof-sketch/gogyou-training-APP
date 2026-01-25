@@ -115,44 +115,58 @@ export default function Home() {
       <StoryModal isOpen={storyOpen} onClose={() => setStoryOpen(false)} />
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-50 bg-slate-50/80 backdrop-blur-md border-b border-slate-100/50">
-        <div className="flex items-center space-x-4">
-          <div className="px-4 py-2 bg-white rounded-2xl shadow-sm border border-slate-100">
-            <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest leading-none mb-1">習得経験値</p>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-50/90 backdrop-blur-md border-b border-slate-100/50">
+        <div className="max-w-lg mx-auto w-full p-4 sm:p-6 space-y-3">
+          {/* Main Title */}
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter">
+                陰陽五行学習APP
+              </h1>
+              <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest">Yin Yang & Five Elements Learning</p>
+            </div>
+
             <div className="flex items-center space-x-2">
-              <Zap className="w-3 h-3 text-indigo-500 fill-current" />
-              <span className="text-lg font-black tabular-nums">{totalExp}</span>
+              <button
+                onClick={toggleMasterMode}
+                className={cn(
+                  "p-2.5 rounded-2xl transition-all active:scale-90 border flex flex-col items-center justify-center space-y-0.5",
+                  gameProgress.isMasterMode ? "bg-amber-100 border-amber-200 text-amber-600" : "bg-white border-slate-100 text-slate-300"
+                )}
+              >
+                <Crown className="w-4 h-4" />
+                <span className="text-[6px] font-black uppercase leading-none">Master</span>
+              </button>
+              <button
+                onClick={() => setStoryOpen(true)}
+                className="p-2.5 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-slate-600 active:scale-90"
+              >
+                <HelpCircle className="w-4 h-4" />
+              </button>
             </div>
           </div>
-          <div className="px-4 py-2 bg-white rounded-2xl shadow-sm border border-slate-100">
-            <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest leading-none mb-1">所持カード</p>
-            <div className="flex items-center space-x-2">
-              <Book className="w-3 h-3 text-emerald-500 fill-current" />
-              <span className="text-lg font-black tabular-nums">{totalCards}</span>
+
+          {/* Stats Bar */}
+          <div className="flex items-center space-x-3">
+            <div className="flex-1 px-3 py-2 bg-white/50 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
+              <p className="text-[7px] text-slate-400 font-black uppercase tracking-widest">習得経験値</p>
+              <div className="flex items-center space-x-1.5">
+                <Zap className="w-3 h-3 text-indigo-500 fill-current" />
+                <span className="text-sm font-black tabular-nums">{totalExp}</span>
+              </div>
+            </div>
+            <div className="flex-1 px-3 py-2 bg-white/50 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
+              <p className="text-[7px] text-slate-400 font-black uppercase tracking-widest">所持カード</p>
+              <div className="flex items-center space-x-1.5">
+                <Book className="w-3 h-3 text-emerald-500 fill-current" />
+                <span className="text-sm font-black tabular-nums">{totalCards}</span>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={toggleMasterMode}
-            className={cn(
-              "p-3 rounded-2xl transition-all active:scale-90 border flex flex-col items-center justify-center space-y-0.5",
-              gameProgress.isMasterMode ? "bg-amber-100 border-amber-200 text-amber-600" : "bg-white border-slate-100 text-slate-300"
-            )}
-          >
-            <Crown className="w-5 h-5" />
-            <span className="text-[7px] font-black uppercase leading-none">Master</span>
-          </button>
-          <button
-            onClick={() => setStoryOpen(true)}
-            className="p-3 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-slate-600 active:scale-90"
-          >
-            <HelpCircle className="w-5 h-5" />
-          </button>
         </div>
       </header>
 
-      <main className="pt-24 sm:pt-32 px-4 flex flex-col items-center">
+      <main className="pt-40 sm:pt-48 px-4 flex flex-col items-center">
         {/* Spirit Selector / Display */}
         <div className="w-full max-w-lg relative flex items-center justify-center h-[400px]">
           <button onClick={prevSpirit} className="absolute left-0 z-30 p-2 bg-white/50 backdrop-blur-md rounded-full shadow-sm hover:bg-white transition">
