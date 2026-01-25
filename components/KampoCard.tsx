@@ -38,13 +38,21 @@ export function KampoCard({ card, isDiscovered, onClick, className }: KampoCardP
             whileTap={{ scale: 0.95 }}
             onClick={onClick}
             className={cn(
-                "aspect-[3/4] relative flex flex-col w-full bg-white rounded-[1.5rem] border-2 shadow-xl overflow-hidden group transition-all",
+                "aspect-[3/4] relative flex flex-col w-full bg-white rounded-[1.5rem] border-2 shadow-xl group transition-all",
                 isDiscovered ? theme.border : "border-slate-100 bg-slate-50 shadow-none",
                 className
             )}
         >
+            {/* Border-radius Clip Wrapper (to keep glossy effect and bg within corners while allowing badge overflow) */}
+            <div className="absolute inset-0 rounded-[1.4rem] overflow-hidden pointer-events-none z-0">
+                {/* Glossy Overlay */}
+                {isDiscovered && (
+                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                )}
+            </div>
+
             {/* Header / Element Banner */}
-            <div className={cn("h-7 w-full flex items-center justify-between px-3", isDiscovered ? theme.bg : "bg-slate-100")}>
+            <div className={cn("h-7 w-full flex items-center justify-between px-3 rounded-t-[1.4rem] overflow-hidden", isDiscovered ? theme.bg : "bg-slate-100")}>
                 <div className="flex items-center space-x-1">
                     <span className={cn("text-[10px]", !isDiscovered && "grayscale")}>{ELEMENT_ICONS[card.element]}</span>
                     <span className={cn("text-[9px] font-black uppercase tracking-widest", isDiscovered ? theme.text : "text-slate-400")}>
@@ -53,7 +61,8 @@ export function KampoCard({ card, isDiscovered, onClick, className }: KampoCardP
                         ) : "???"}
                     </span>
                 </div>
-                <span className="text-[9px] font-black text-slate-300 whitespace-nowrap">ID: {String(card.id).padStart(3, '0')}</span>
+                {/* ID - Moved slightly left to avoid overlap with badge */}
+                <span className="text-[8px] font-black text-slate-400/30 whitespace-nowrap pr-6">#{String(card.id).padStart(3, '0')}</span>
             </div>
 
             {/* Illustration Area */}
@@ -77,7 +86,7 @@ export function KampoCard({ card, isDiscovered, onClick, className }: KampoCardP
             </div>
 
             {/* Content area */}
-            <div className="px-3 pb-3 pt-1">
+            <div className="px-3 pb-3 pt-1 relative z-10">
                 {isDiscovered ? (
                     <>
                         <h3 className="text-[12px] font-black text-slate-800 leading-tight mb-0.5 truncate">
@@ -95,19 +104,15 @@ export function KampoCard({ card, isDiscovered, onClick, className }: KampoCardP
                 )}
             </div>
 
-            {/* Owned Badge */}
+            {/* Owned Badge - Outside the inner overflow container to prevent clipping */}
             {isDiscovered && card.ownedCount > 0 && (
-                <div className="absolute -top-1 -right-1 z-10">
-                    <div className="bg-slate-900 text-white min-w-[24px] h-6 px-1.5 rounded-full text-[10px] font-black flex items-center justify-center shadow-lg border-2 border-white">
+                <div className="absolute -top-2 -right-2 z-20 scale-110">
+                    <div className="bg-slate-900 text-white min-w-[28px] h-7 px-2 rounded-full text-[11px] font-black flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.3)] border-2 border-white">
                         {card.ownedCount}
                     </div>
                 </div>
             )}
-
-            {/* Glossy Overlay */}
-            {isDiscovered && (
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
-            )}
         </motion.button>
+
     );
 }
