@@ -323,5 +323,170 @@ export const INITIAL_FORMULAS: Omit<Formula, 'ownedCount' | 'usedCount' | 'disco
             { crudeDrugId: 4, count: 1 },  // 川キュウ
             { crudeDrugId: 3, count: 1 },  // 当帰
         ]
+    },
+    {
+        id: 106,
+        name: '加味逍遙散',
+        reading: 'かみしょうようさん',
+        element: 'Wood',
+        description: 'イライラや不安、更年期の不調に。',
+        flavor: 'たなびく雲のような解放感',
+        effectValue: 50,
+        recipe: [
+            { crudeDrugId: 1, count: 1 },  // 柴胡
+            { crudeDrugId: 2, count: 1 },  // 芍薬
+            { crudeDrugId: 3, count: 1 },  // 当帰
+            { crudeDrugId: 14, count: 1 }, // 白朮
+            { crudeDrugId: 22, count: 1 }, // 茯苓
+            { crudeDrugId: 12, count: 1 }, // 甘草
+            { crudeDrugId: 9, count: 1 },  // 山梔子
+            { crudeDrugId: 5, count: 1 },  // 薄荷
+        ]
+    },
+    {
+        id: 107,
+        name: '桂枝湯',
+        reading: 'けいしとう',
+        element: 'Fire',
+        description: '風邪のひきはじめ、寒気がする時に。',
+        flavor: 'ぽかぽかと灯る火の粉',
+        effectValue: 30,
+        recipe: [
+            { crudeDrugId: 6, count: 2 },  // 桂枝
+            { crudeDrugId: 2, count: 2 },  // 芍薬
+            { crudeDrugId: 10, count: 1 }, // 生姜
+            { crudeDrugId: 13, count: 1 }, // 大棗
+            { crudeDrugId: 12, count: 1 }, // 甘草
+        ]
+    },
+    {
+        id: 108,
+        name: '四君子湯',
+        reading: 'しくんしとう',
+        element: 'Earth',
+        description: '胃腸が弱く、疲れやすい基本。',
+        flavor: '大地を支える四柱',
+        effectValue: 35,
+        recipe: [
+            { crudeDrugId: 11, count: 1 }, // 人参
+            { crudeDrugId: 14, count: 1 }, // 白朮
+            { crudeDrugId: 22, count: 1 }, // 茯苓
+            { crudeDrugId: 12, count: 1 }, // 甘草
+            { crudeDrugId: 10, count: 1 }, // 生姜
+            { crudeDrugId: 13, count: 1 }, // 大棗
+        ]
+    },
+    {
+        id: 109,
+        name: '麻杏甘石湯',
+        reading: 'まきょうかんせきとう',
+        element: 'Metal',
+        description: '咳が激しく、喉が渇く時に。',
+        flavor: '熱を吸い込む白銀の風',
+        effectValue: 45,
+        recipe: [
+            { crudeDrugId: 16, count: 2 }, // 麻黄
+            { crudeDrugId: 17, count: 2 }, // 杏仁
+            { crudeDrugId: 12, count: 1 }, // 甘草
+            { crudeDrugId: 20, count: 2 }, // 石膏
+        ]
+    },
+    {
+        id: 110,
+        name: '五苓散',
+        reading: 'ごれいさん',
+        element: 'Water',
+        description: 'むくみ、頭痛、二日酔いに。',
+        flavor: '清らかに澄み渡る水系',
+        effectValue: 35,
+        recipe: [
+            { crudeDrugId: 23, count: 2 }, // 沢瀉
+            { crudeDrugId: 22, count: 1 }, // 茯苓
+            { crudeDrugId: 14, count: 1 }, // 白朮
+            { crudeDrugId: 6, count: 1 },  // 桂枝
+        ]
+    },
+    {
+        id: 111,
+        name: '十全大補湯',
+        reading: 'じゅうぜんだいほとう',
+        element: 'Earth',
+        description: '気血ともに衰え、衰弱した時に。',
+        flavor: '万物を満たす黄金の輝き',
+        effectValue: 60,
+        recipe: [
+            { crudeDrugId: 11, count: 2 }, // 人参
+            { crudeDrugId: 14, count: 1 }, // 白朮
+            { crudeDrugId: 22, count: 1 }, // 茯苓
+            { crudeDrugId: 12, count: 1 }, // 甘草
+            { crudeDrugId: 3, count: 2 },  // 当帰
+            { crudeDrugId: 4, count: 1 },  // 川キュウ
+            { crudeDrugId: 2, count: 1 },  // 芍薬
+            { crudeDrugId: 21, count: 1 }, // 地黄
+            { crudeDrugId: 6, count: 1 },  // 桂枝
+        ]
+    },
+    {
+        id: 112,
+        name: '六君子湯',
+        reading: 'りっくんしとう',
+        element: 'Earth',
+        description: '胃腸が弱く、食欲不振、痰が多い時に。',
+        flavor: '穏やかに整う土の気',
+        effectValue: 45,
+        recipe: [
+            { crudeDrugId: 11, count: 1 }, // 人参
+            { crudeDrugId: 14, count: 1 }, // 白朮
+            { crudeDrugId: 22, count: 1 }, // 茯苓
+            { crudeDrugId: 12, count: 1 }, // 甘草
+            { crudeDrugId: 15, count: 1 }, // 陳皮
+            { crudeDrugId: 10, count: 1 }, // 生姜
+            { crudeDrugId: 13, count: 1 }, // 大棗
+        ]
+    },
+    {
+        id: 113,
+        name: '桔梗湯',
+        reading: 'ききょうとう',
+        element: 'Metal',
+        description: '喉の痛みや腫れ、声がれに。',
+        flavor: '喉を通る涼やかな癒やし',
+        effectValue: 25,
+        recipe: [
+            { crudeDrugId: 18, count: 3 }, // 桔梗
+            { crudeDrugId: 12, count: 2 }, // 甘草
+        ]
+    },
+    {
+        id: 114,
+        name: '芍薬甘草湯',
+        reading: 'しゃくやくかんぞうとう',
+        element: 'Wood',
+        description: '急な筋肉の痙攣や足のつりに。',
+        flavor: '緊張を解く春の雨',
+        effectValue: 30,
+        recipe: [
+            { crudeDrugId: 2, count: 3 },  // 芍薬
+            { crudeDrugId: 12, count: 3 }, // 甘草
+        ]
+    },
+    {
+        id: 115,
+        name: '葛根湯加川キュウ辛夷',
+        reading: 'かっこんとうかせんきゅうしんい',
+        element: 'Metal',
+        description: '鼻づまりや蓄膿、鼻炎に。',
+        flavor: '通り抜ける冬の銀雪',
+        effectValue: 45,
+        recipe: [
+            { crudeDrugId: 19, count: 2 }, // 葛根
+            { crudeDrugId: 16, count: 1 }, // 麻黄
+            { crudeDrugId: 6, count: 1 },  // 桂枝
+            { crudeDrugId: 2, count: 1 },  // 芍薬
+            { crudeDrugId: 12, count: 1 }, // 甘草
+            { crudeDrugId: 10, count: 1 }, // 生姜
+            { crudeDrugId: 13, count: 1 }, // 大棗
+            { crudeDrugId: 4, count: 2 },  // 川キュウ
+        ]
     }
 ];
