@@ -12,11 +12,17 @@ interface TutorialOverlayProps {
 
 const TUTORIAL_DATA = {
     chain: {
-        title: '相生チェイン',
+        title: (
+            <>
+                <ruby>相生<rt className="text-[10px] tracking-normal font-normal">そうせい</rt></ruby>チェイン
+            </>
+        ),
         desc: '属性を繋いで連鎖を作る',
         icon: <Zap className="w-14 h-14 text-white" />,
         rules: [
-            '相生（そうせい）の順に繋げよう',
+            <>
+                <ruby>相生<rt className="text-[8px] tracking-normal font-normal">そうせい</rt></ruby>の順に繋げよう
+            </>,
             '木 → 火 → 土 → 金 → 水 → 木',
             '繋げるほどスコアボーナス！',
         ],
@@ -25,11 +31,17 @@ const TUTORIAL_DATA = {
         color: 'blue'
     },
     guard: {
-        title: '相克ガード',
+        title: (
+            <>
+                <ruby>相克<rt className="text-[10px] tracking-normal font-normal">そうこく</rt></ruby>ガード
+            </>
+        ),
         desc: '暴走する力を抑え込む',
         icon: <Shield className="w-14 h-14 text-white" />,
         rules: [
-            '相克（そうこく）で暴走を止めよう',
+            <>
+                <ruby>相克<rt className="text-[8px] tracking-normal font-normal">そうこく</rt></ruby>で暴走を止めよう
+            </>,
             '相手の苦手な属性をタップ！',
             '木は土、土は水、水は火、火は金、金は木',
         ],
