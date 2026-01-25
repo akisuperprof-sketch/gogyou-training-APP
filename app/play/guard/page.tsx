@@ -100,11 +100,15 @@ export default function GuardGame() {
 
     return (
         <div className="h-[100dvh] bg-white relative overflow-hidden flex flex-col text-slate-900 font-sans">
-            <TutorialOverlay
-                gameType="guard"
-                isOpen={gameState === 'TUTORIAL'}
-                onStart={handleStart}
-            />
+            <AnimatePresence>
+                {gameState === 'TUTORIAL' && (
+                    <TutorialOverlay
+                        gameType="guard"
+                        isOpen={true}
+                        onStart={handleStart}
+                    />
+                )}
+            </AnimatePresence>
 
             {/* HUD */}
             <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-20">

@@ -112,11 +112,15 @@ export default function SortGame() {
 
     return (
         <div className="h-[100dvh] bg-white overflow-hidden flex flex-col relative text-slate-900 font-sans">
-            <TutorialOverlay
-                gameType="sort"
-                isOpen={gameState === 'TUTORIAL'}
-                onStart={handleStart}
-            />
+            <AnimatePresence>
+                {gameState === 'TUTORIAL' && (
+                    <TutorialOverlay
+                        gameType="sort"
+                        isOpen={true}
+                        onStart={handleStart}
+                    />
+                )}
+            </AnimatePresence>
 
             {/* HUD */}
             <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-20">

@@ -53,4 +53,6 @@ export interface GameProgress {
     lastGenkiUpdate?: number;
     isMasterMode: boolean;
     chainLevelsUnlocked: number;
+    gamesUnlockedCount: number;
+    totalSessionsPlayed: number;
 }

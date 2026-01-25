@@ -121,14 +121,18 @@ export function TutorialOverlay({ isOpen, gameType, onStart }: TutorialOverlayPr
                             </div>
 
                             <button
-                                onClick={onStart}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    onStart();
+                                }}
                                 className={cn(
-                                    "w-full py-5 sm:py-6 text-white font-black rounded-2xl sm:rounded-3xl shadow-2xl flex items-center justify-center space-x-3 active:scale-95 transition-all shrink-0",
+                                    "w-full py-5 sm:py-6 text-white font-black rounded-2xl sm:rounded-3xl shadow-2xl flex items-center justify-center space-x-3 active:scale-95 transition-all shrink-0 cursor-pointer pointer-events-auto relative z-[110] touch-manipulation",
                                     data.accent
                                 )}
                             >
-                                <Play className="fill-current w-5 h-5 sm:w-6 sm:h-6 border-none" />
-                                <span className="text-base sm:text-lg tracking-widest">開始する</span>
+                                <Play className="fill-current w-5 h-5 sm:w-6 sm:h-6" />
+                                <span className="text-base sm:text-lg tracking-widest">修行を開始する</span>
                             </button>
                         </div>
                     </div>

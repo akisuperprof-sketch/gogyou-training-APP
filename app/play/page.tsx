@@ -3,7 +3,8 @@
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Zap, Shield, LayoutGrid, Sparkles, Home } from 'lucide-react';
+import { ArrowLeft, Zap, Shield, LayoutGrid, Sparkles, Home, Lock } from 'lucide-react';
+import { useStore } from '@/lib/store';
 
 const GAMES = [
     {
@@ -49,6 +50,9 @@ const GAMES = [
 ];
 
 export default function PlayMenu() {
+    const { gameProgress } = useStore();
+    const unlockedCount = gameProgress.gamesUnlockedCount || 1;
+
     return (
         <div className="flex flex-col h-[100dvh] p-4 sm:p-6 pb-8 relative overflow-hidden bg-slate-50">
             <header className="flex items-center justify-between mb-4 sm:mb-8 z-10 shrink-0">
@@ -67,39 +71,54 @@ export default function PlayMenu() {
             </header>
 
             <div className="flex-1 flex flex-col space-y-3 sm:space-y-5 z-10 overflow-y-auto no-scrollbar">
-                {GAMES.map((game, idx) => (
-                    <Link href={game.href} key={game.id} className="block">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: idx * 0.1 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="relative h-24 sm:h-36 w-full overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] group bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all shrink-0"
-                        >
-                            <div className="relative h-full flex items-center p-4 sm:p-8 space-x-3 sm:space-x-8">
-                                <div className={cn(
-                                    "p-2.5 sm:p-5 rounded-2xl sm:rounded-[1.5rem] bg-gradient-to-br text-white shadow-xl shadow-indigo-100 shrink-0",
-                                    game.color
-                                )}>
-                                    <div className="w-6 h-6 sm:w-10 sm:h-10 flex items-center justify-center">
-                                        {game.icon}
-                                    </div>
-                                </div>
+                {GAMES.map((game, idx) => {
+                    const isLocked = idx >= unlockedCount;
+                    return (
+                        <div key={game.id} className="relative">
+                            <Link
+                                href={isLocked ? '#' : game.href}
+                                className={cn("block transition-all", isLocked && "opacity-50 grayscale cursor-not-allowed")}
+                                onClick={(e) => isLocked && e.preventDefault()}
+                            >
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: idx * 0.1 }}
+                                    whileTap={!isLocked ? { scale: 0.98 } : {}}
+                                    className="relative h-24 sm:h-36 w-full overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] group bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all shrink-0"
+                                >
+                                    <div className="relative h-full flex items-center p-4 sm:p-8 space-x-3 sm:space-x-8">
+                                        <div className={cn(
+                                            "p-2.5 sm:p-5 rounded-2xl sm:rounded-[1.5rem] bg-gradient-to-br text-white shadow-xl shadow-indigo-100 shrink-0",
+                                            isLocked ? "from-slate-300 to-slate-400" : game.color
+                                        )}>
+                                            <div className="w-6 h-6 sm:w-10 sm:h-10 flex items-center justify-center">
+                                                {isLocked ? <Lock className="w-6 h-6 sm:w-8 sm:h-8" /> : game.icon}
+                                            </div>
+                                        </div>
 
-                                <div className="flex-1 min-w-0">
-                                    <h2 className="text-lg sm:text-xl font-black text-slate-900 mb-0.5 sm:mb-1 truncate">{game.title}</h2>
-                                    <p className="text-slate-500 text-[10px] sm:text-xs font-bold leading-tight line-clamp-2">{game.desc}</p>
-                                </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h2 className="text-lg sm:text-xl font-black text-slate-900 mb-0.5 sm:mb-1 truncate">
+                                                {isLocked ? '????? 修行' : game.title}
+                                            </h2>
+                                            <p className="text-slate-500 text-[10px] sm:text-xs font-bold leading-tight line-clamp-2">
+                                                {isLocked ? '修行を重ねて解放しよう' : game.desc}
+                                            </p>
+                                        </div>
 
-                                <div className="p-2 transition-transform group-hover:translate-x-1">
-                                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
-                                        <Sparkles className="w-5 h-5" />
+                                        {!isLocked && (
+                                            <div className="p-2 transition-transform group-hover:translate-x-1">
+                                                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
+                                                    <Sparkles className="w-5 h-5" />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </Link>
-                ))}
+                                </motion.div>
+                            </Link>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

@@ -39,6 +39,8 @@ export const useStore = create<AppState>()(
                 lastGenkiUpdate: Date.now(),
                 isMasterMode: false,
                 chainLevelsUnlocked: 1,
+                gamesUnlockedCount: 1,
+                totalSessionsPlayed: 0,
             },
 
             unlockSpirit: (id) => set((state) => ({
@@ -127,7 +129,15 @@ export const useStore = create<AppState>()(
                     const relatedElement: Record<string, Element> = { chain: 'Wood', guard: 'Fire', sort: 'Earth' };
                     const spiritToUpdate = current.spirits.find(s => s.element === relatedElement[mode]) || current.spirits[0];
 
-                    // Auto-unlock logic
+                    // Game unlock logic
+                    const newTotalSessions = current.gameProgress.totalSessionsPlayed + 1;
+                    let newUnlockedCount = current.gameProgress.gamesUnlockedCount;
+
+                    // Unlock 2nd game after 1 session, 3rd game after 2 sessions
+                    if (newTotalSessions >= 1 && newUnlockedCount < 2) newUnlockedCount = 2;
+                    if (newTotalSessions >= 2 && newUnlockedCount < 3) newUnlockedCount = 3;
+
+                    // Auto-unlock logic for spirits
                     const nextTotalJukuren = current.spirits.reduce((acc, s) => acc + s.stats.jukuren, 0) + gainedExp;
 
                     return {
@@ -145,7 +155,9 @@ export const useStore = create<AppState>()(
                                 [mode]: Math.max(current.gameProgress.bestScores[mode] || 0, score)
                             },
                             currentRequest: isRequestFulfilled ? null : current.gameProgress.currentRequest,
-                            hasNewCards: gainedCards.length > 0
+                            hasNewCards: gainedCards.length > 0,
+                            gamesUnlockedCount: newUnlockedCount,
+                            totalSessionsPlayed: newTotalSessions
                         }
                     };
                 });
@@ -235,7 +247,7 @@ export const useStore = create<AppState>()(
                             acc[cid] = { ...state.cards[cid], ownedCount: Math.max(state.cards[cid].ownedCount, 99), discovered: true };
                             return acc;
                         }, {} as Record<number, Card>),
-                        gameProgress: { ...state.gameProgress, isMasterMode: true, chainLevelsUnlocked: 3 }
+                        gameProgress: { ...state.gameProgress, isMasterMode: true, chainLevelsUnlocked: 3, gamesUnlockedCount: 3, totalSessionsPlayed: 10 }
                     };
                 } else {
                     return {
@@ -251,7 +263,7 @@ export const useStore = create<AppState>()(
             }))
         }),
         {
-            name: 'gogyou-storage-v6', // Incremented version to reset/update schema
+            name: 'gogyou-storage-v7', // Incremented version to reset/update schema
             storage: createJSONStorage(() => localStorage),
         }
     )

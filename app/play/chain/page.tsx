@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Element } from '@/lib/types';
-import { SOUSEI, ELEMENT_COLORS, ELEMENT_JP, SOUKOKU } from '@/lib/data';
+import { SOUSEI, ELEMENT_COLORS, ELEMENT_JP } from '@/lib/data';
 import { useStore } from '@/lib/store';
 import { GameResult } from '@/components/GameResult';
 import { TutorialOverlay } from '@/components/TutorialOverlay';
@@ -12,7 +12,6 @@ import { X } from 'lucide-react';
 import Link from 'next/link';
 
 const TIME_LIMIT = 30;
-const NODE_COUNT = 10;
 
 interface Node {
     id: number;
@@ -21,7 +20,7 @@ interface Node {
 }
 
 export default function ChainGame() {
-    const [gameState, setGameState] = useState<'TUTORIAL' | 'PLAYING' | 'FINISHED'>('TUTORIAL');
+    const [gameState, setGameState] = useState<'TUTORIAL' | 'LEVEL_SELECT' | 'PLAYING' | 'FINISHED'>('TUTORIAL');
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
     const [nodes, setNodes] = useState<Node[]>([]);
@@ -47,7 +46,7 @@ export default function ChainGame() {
 
     useEffect(() => {
         if (gameState === 'PLAYING') {
-            spawnNodes(selectedLevel || 9); // Pass a default level (9) if selectedLevel is null
+            spawnNodes(selectedLevel || 9);
             const interval = setInterval(() => {
                 setTimeLeft((t) => {
                     if (t <= 1) {
@@ -59,14 +58,7 @@ export default function ChainGame() {
             }, 1000);
             return () => clearInterval(interval);
         }
-    }, [gameState]);
-
-    useEffect(() => {
-        if (gameState === 'FINISHED') {
-            const rewards = gameCompleted(score, 'chain');
-            setResultData(rewards);
-        }
-    }, [gameState, score, gameCompleted]);
+    }, [gameState, selectedLevel]);
 
     const handleStart = (level: 9 | 18 | 36 = 9) => {
         setScore(0);
@@ -117,7 +109,6 @@ export default function ChainGame() {
         const rewards = gameCompleted(score, 'chain');
         setResultData(rewards);
 
-        // Unlock next level if score is decent
         if (score > 1000) {
             if (selectedLevel === 9) unlockChainLevel(2);
             if (selectedLevel === 18) unlockChainLevel(3);
@@ -132,13 +123,17 @@ export default function ChainGame() {
 
     return (
         <div className="h-[100dvh] bg-white relative overflow-hidden touch-none select-none font-sans text-slate-900">
-            <TutorialOverlay
-                gameType="chain"
-                isOpen={gameState === 'TUTORIAL'}
-                onStart={() => setSelectedLevel(null)} // Handled by level selection UI
-            />
+            <AnimatePresence>
+                {gameState === 'TUTORIAL' && (
+                    <TutorialOverlay
+                        gameType="chain"
+                        isOpen={true}
+                        onStart={() => setGameState('LEVEL_SELECT')}
+                    />
+                )}
+            </AnimatePresence>
 
-            {gameState === 'TUTORIAL' && !selectedLevel && (
+            {gameState === 'LEVEL_SELECT' && (
                 <div className="absolute inset-0 z-50 bg-white/60 backdrop-blur-md flex flex-col items-center justify-center p-6 pb-20">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -172,7 +167,7 @@ export default function ChainGame() {
                                         <div className="text-left">
                                             <div className="flex items-center space-x-2">
                                                 <span className="text-lg font-black">{lv.label}</span>
-                                                <span className="text-[10px] font-black px-2 py-0.5 bg-slate-100 rounded-full text-slate-400 uppercase">{lv.count}点</span>
+                                                <span className="text-[10px] font-black px-2 py-0.5 bg-slate-100 rounded-full text-slate-400 uppercase">{lv.id > 1 ? (lv.id === 2 ? '2x' : '3x') : '1x'} pt</span>
                                             </div>
                                             <p className="text-[10px] font-bold text-slate-400">{lv.sub}</p>
                                         </div>
