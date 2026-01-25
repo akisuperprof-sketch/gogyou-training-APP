@@ -67,7 +67,7 @@ export const SPIRIT_DATA: Record<string, {
     illustration: string;
 }> = {
     moku: {
-        illustration: '/Users/akihironishi/.gemini/antigravity/brain/e66a4e1a-ff28-42e9-8247-e87d23d21f39/wood_spirit_illustration_1769307082312.png',
+        illustration: '/spirit_moku.png',
         moodLines: {
             good: ['絶好調だよ、どんどん行こう！', '風が気持ちいいね！'],
             normal: ['今日は何をしようか？', '準備はできてるよ。'],
@@ -84,7 +84,7 @@ export const SPIRIT_DATA: Record<string, {
         }
     },
     ka: {
-        illustration: '/Users/akihironishi/.gemini/antigravity/brain/e66a4e1a-ff28-42e9-8247-e87d23d21f39/fire_spirit_illustration_1769307104935.png',
+        illustration: '/spirit_ka.png',
         moodLines: {
             good: ['最高の気分！燃えてきた！', '遊びまくろうぜ！'],
             normal: ['次はどのゲームにする？', '準備万端だ！'],
@@ -101,7 +101,7 @@ export const SPIRIT_DATA: Record<string, {
         }
     },
     do: {
-        illustration: '/Users/akihironishi/.gemini/antigravity/brain/e66a4e1a-ff28-42e9-8247-e87d23d21f39/earth_spirit_illustration_1769307119667.png',
+        illustration: '/spirit_do.png',
         moodLines: {
             good: ['今日はとってもいい日だね', '心がぽかぽかするよ'],
             normal: ['ゆっくり、マイペースにいこう', 'お茶でも飲む？'],
@@ -118,7 +118,7 @@ export const SPIRIT_DATA: Record<string, {
         }
     },
     kon: {
-        illustration: '/Users/akihironishi/.gemini/antigravity/brain/e66a4e1a-ff28-42e9-8247-e87d23d21f39/metal_spirit_illustration_1769307137461.png',
+        illustration: '/spirit_kon.png',
         moodLines: {
             good: ['鋭い感覚だ、何でも切れそうだよ', '輝きが増してきたかな'],
             normal: ['冷静に、確実にこなそう', '準備はできている'],
@@ -135,7 +135,7 @@ export const SPIRIT_DATA: Record<string, {
         }
     },
     sui: {
-        illustration: '/Users/akihironishi/.gemini/antigravity/brain/e66a4e1a-ff28-42e9-8247-e87d23d21f39/water_spirit_illustration_1769307152833.png',
+        illustration: '/spirit_moku.png', // Placeholder or add Water if provided
         moodLines: {
             good: ['澄み渡るような心地よさです', 'どこまでも流れていけそう'],
             normal: ['静かな波に身を任せて', '穏やかな一日ですね'],
