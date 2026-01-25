@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card as CardType } from '@/lib/types';
 import { ELEMENT_COLORS, ELEMENT_JP } from '@/lib/data';
 import { cn } from '@/lib/utils';
@@ -13,11 +14,27 @@ interface CardModalProps {
 }
 
 export function CardModal({ card, onClose }: CardModalProps) {
-    const { useCard } = useStore();
+    const { useCard, spirits } = useStore();
+    const [isHealing, setIsHealing] = useState(false);
+    const [healAmount, setHealAmount] = useState(0);
+
     if (!card) return null;
 
     const handleUse = () => {
+        // Calculate potential heal for UI
+        const spirit = spirits.find(s => s.unlocked && s.element === card.element) || spirits.find(s => s.unlocked);
+        if (!spirit) return;
+
+        const isMatch = card.element === spirit.element;
+        const amount = Math.floor(card.effectValue * (isMatch ? 1.5 : 1.0) / 2);
+
+        setHealAmount(amount);
+        setIsHealing(true);
         useCard(card.id);
+
+        setTimeout(() => {
+            setIsHealing(false);
+        }, 1500);
     };
 
     return (
@@ -59,13 +76,49 @@ export function CardModal({ card, onClose }: CardModalProps) {
                         {/* Card Emblem */}
                         <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
+                            animate={isHealing ? {
+                                scale: [1, 1.4, 1],
+                                rotate: [0, 15, -15, 0],
+                                filter: ["brightness(1)", "brightness(1.5)", "brightness(1)"]
+                            } : { scale: 1, opacity: 1 }}
                             transition={{ type: 'spring', damping: 15 }}
                             className="z-10 text-7xl sm:text-9xl drop-shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative"
                         >
                             <span className="relative z-10">
                                 {card.element === 'Wood' ? '🌿' : card.element === 'Fire' ? '🔥' : card.element === 'Earth' ? '⛰️' : card.element === 'Metal' ? '💎' : '💧'}
                             </span>
+
+                            {/* Healing Particles */}
+                            <AnimatePresence>
+                                {isHealing && (
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                        {[...Array(12)].map((_, i) => (
+                                            <motion.div
+                                                key={i}
+                                                initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+                                                animate={{
+                                                    scale: [0, 1, 0],
+                                                    x: (Math.random() - 0.5) * 200,
+                                                    y: (Math.random() - 0.5) * 200,
+                                                    opacity: 0
+                                                }}
+                                                transition={{ duration: 1, delay: i * 0.05 }}
+                                                className="absolute w-4 h-4 text-yellow-400 fill-current"
+                                            >
+                                                <Sparkles />
+                                            </motion.div>
+                                        ))}
+                                        <motion.div
+                                            initial={{ y: 0, opacity: 0 }}
+                                            animate={{ y: -100, opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            className="absolute text-green-500 font-black text-4xl whitespace-nowrap drop-shadow-lg"
+                                        >
+                                            +{healAmount} GENKI!!
+                                        </motion.div>
+                                    </div>
+                                )}
+                            </AnimatePresence>
                         </motion.div>
                     </div>
 
@@ -119,18 +172,18 @@ export function CardModal({ card, onClose }: CardModalProps) {
                         </div>
 
                         <button
-                            disabled={card.ownedCount <= 0}
+                            disabled={card.ownedCount <= 0 || isHealing}
                             onClick={handleUse}
                             className={cn(
                                 "w-full py-6 rounded-[2rem] font-black text-lg transition-all shadow-2xl active:scale-95 flex items-center justify-center space-x-3",
-                                card.ownedCount > 0
+                                card.ownedCount > 0 && !isHealing
                                     ? "bg-slate-900 text-white shadow-indigo-100"
                                     : "bg-slate-100 text-slate-300 shadow-none cursor-not-allowed"
                             )}
                         >
                             <div className="flex flex-col items-center">
-                                <Zap className={cn("w-6 h-6 mb-1", card.ownedCount > 0 ? "text-yellow-400 fill-current" : "")} />
-                                <span className="leading-none">このカードを飲む</span>
+                                <Zap className={cn("w-6 h-6 mb-1", card.ownedCount > 0 && !isHealing ? "text-yellow-400 fill-current" : "")} />
+                                <span className="leading-none">{isHealing ? '回復中...' : 'このアイテムを飲む'}</span>
                                 <span className="text-[10px] font-bold opacity-50 mt-1">精霊のごきげんを回復します</span>
                             </div>
                         </button>

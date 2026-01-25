@@ -72,14 +72,20 @@ export const useStore = create<AppState>()(
 
                 const spirit = spirits[spiritIdx];
                 const isMatch = card.element === spirit.element;
-                const growth = Math.floor(card.effectValue * (isMatch ? 1.5 : 1.0));
+                const recoveryAmount = Math.floor(card.effectValue * (isMatch ? 1.5 : 1.0) / 2); // Use effect value for genki
+
+                const newGenki = Math.min(100, spirit.stats.genki + recoveryAmount);
+                let newMood = spirit.mood;
+                if (newGenki >= 70) newMood = 'good';
+                else if (newGenki >= 15) newMood = 'normal';
 
                 spirits[spiritIdx] = {
                     ...spirit,
+                    mood: newMood,
                     stats: {
                         ...spirit.stats,
-                        jukuren: spirit.stats.jukuren + growth,
-                        genki: Math.min(100, spirit.stats.genki + 10),
+                        jukuren: spirit.stats.jukuren + Math.floor(recoveryAmount / 2),
+                        genki: newGenki,
                         kizuna: Math.min(100, spirit.stats.kizuna + 5),
                     }
                 };
