@@ -6,11 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { SPIRIT_DATA } from '@/lib/data';
-import { HelpCircle, Sparkles } from 'lucide-react';
+import { HelpCircle, Sparkles, Crown } from 'lucide-react';
 import { StoryModal } from '@/components/StoryModal';
 
 export default function Home() {
-  const { spirits, gameProgress, setHasSeenStory, checkGenkiDecay } = useStore();
+  const { spirits, gameProgress, setHasSeenStory, checkGenkiDecay, toggleMasterMode } = useStore();
   const [mounted, setMounted] = useState(false);
   const [focusedIdx, setFocusedIdx] = useState(0);
   const [storyOpen, setStoryOpen] = useState(false);
@@ -59,6 +59,18 @@ export default function Home() {
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Wu Xing Spirits & Kampo</p>
         </div>
         <div className="flex space-x-2">
+          <button
+            onClick={toggleMasterMode}
+            className={cn(
+              "p-3 rounded-2xl border transition shadow-sm",
+              gameProgress.isMasterMode
+                ? "bg-yellow-400 border-yellow-500 text-white shadow-yellow-200"
+                : "bg-slate-50 border-slate-100 text-slate-300 hover:text-slate-400"
+            )}
+            title="マスターモード"
+          >
+            <Crown className="w-5 h-5 fill-current" />
+          </button>
           <button
             onClick={() => setStoryOpen(true)}
             className="p-3 bg-slate-50 border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-slate-600 transition"

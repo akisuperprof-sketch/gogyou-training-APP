@@ -55,7 +55,8 @@ const TUTORIAL_DATA = {
         icon: <LayoutGrid className="w-14 h-14 text-white" />,
         rules: [
             '正しい五行にドラッグしよう',
-            '左：木　中央：火　右：土',
+            '上：火　左：木　右：土',
+            'さらに上達すると「金（左下）」「水（右下）」も！',
             '色や感情、季節がヒントだよ！',
         ],
         bg: 'from-green-50 to-white',

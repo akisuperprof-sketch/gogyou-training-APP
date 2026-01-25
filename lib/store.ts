@@ -17,6 +17,7 @@ interface AppState {
     setHasSeenStory: (val: boolean) => void;
     clearNewCardsFlag: () => void;
     checkGenkiDecay: () => void;
+    toggleMasterMode: () => void;
 }
 
 export const useStore = create<AppState>()(
@@ -35,6 +36,7 @@ export const useStore = create<AppState>()(
                 hasSeenStory: false,
                 hasNewCards: false,
                 lastGenkiUpdate: Date.now(),
+                isMasterMode: false,
             },
 
             unlockSpirit: (id) => set((state) => ({
@@ -219,6 +221,25 @@ export const useStore = create<AppState>()(
                         lastGenkiUpdate: now - (elapsedMs % (1000 * 60 * 60 * 4.8)) // Keep the remainder for next time
                     }
                 };
+            }),
+            toggleMasterMode: () => set((state) => {
+                const isMaster = !state.gameProgress.isMasterMode;
+                if (isMaster) {
+                    // Unlock everything
+                    return {
+                        spirits: state.spirits.map(s => ({ ...s, unlocked: true })),
+                        cards: Object.keys(state.cards).reduce((acc, id) => {
+                            const cid = Number(id);
+                            acc[cid] = { ...state.cards[cid], ownedCount: Math.max(state.cards[cid].ownedCount, 99), discovered: true };
+                            return acc;
+                        }, {} as Record<number, Card>),
+                        gameProgress: { ...state.gameProgress, isMasterMode: true }
+                    };
+                } else {
+                    return {
+                        gameProgress: { ...state.gameProgress, isMasterMode: false }
+                    };
+                }
             })
         }),
         {

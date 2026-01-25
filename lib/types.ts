@@ -51,4 +51,5 @@ export interface GameProgress {
     hasSeenStory: boolean;
     hasNewCards: boolean;
     lastGenkiUpdate?: number;
+    isMasterMode: boolean;
 }
