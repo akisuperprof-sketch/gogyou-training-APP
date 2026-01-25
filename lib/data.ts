@@ -209,28 +209,28 @@ export const INITIAL_SPIRITS: Spirit[] = [
 export const INITIAL_CRUDE_DRUGS: Omit<CrudeDrug, 'ownedCount' | 'usedCount' | 'discovered'>[] = [
     // Wood
     { id: 1, name: '柴胡', reading: 'さいこ', element: 'Wood', flavor: 'イライラを流す', description: '肝の気の滞りを解消し、ストレスや炎症を和らげる。', effectValue: 5, imageUrl: '/images/saiko_herb_illustration.png' },
-    { id: 2, name: '芍薬', reading: 'しゃくやく', element: 'Wood', flavor: '筋肉の緊張をほぐす', description: '血を養い、痛みや筋肉のこわばりを和らげる。', effectValue: 5 },
-    { id: 3, name: '当帰', reading: 'とうき', element: 'Wood', flavor: '血を巡らせる', description: '血を補い、巡りを良くする女性の強い味方。', effectValue: 5 },
-    { id: 4, name: '川キュウ', reading: 'せんきゅう', element: 'Wood', flavor: '頭の巡りを良くする', description: '血行を促進し、頭痛や月経トラブルに用いられる。', effectValue: 5 },
-    { id: 5, name: '薄荷', reading: 'はっか', element: 'Wood', flavor: 'スッと通りを良くする', description: '体表の熱を飛ばし、気の巡りを改善する。', effectValue: 3 },
+    { id: 2, name: '芍薬', reading: 'しゃくやく', element: 'Wood', flavor: '筋肉の緊張をほぐす', description: '血を養い、痛みや筋肉のこわばりを和らげる。', effectValue: 5, imageUrl: '/images/shakuyaku_herb_illustration.png' },
+    { id: 3, name: '当帰', reading: 'とうき', element: 'Wood', flavor: '血を巡らせる', description: '血を補い、巡りを良くする女性の強い味方。', effectValue: 5, imageUrl: '/images/toki_herb_illustration.png' },
+    { id: 4, name: '川キュウ', reading: 'せんきゅう', element: 'Wood', flavor: '頭の巡りを良くする', description: '血行を促進し、頭痛や月経トラブルに用いられる。', effectValue: 5, imageUrl: '/images/senkyu_herb_illustration.png' },
+    { id: 5, name: '薄荷', reading: 'はっか', element: 'Wood', flavor: 'スッと通りを良くする', description: '体表の熱を飛ばし、気の巡りを改善する。', effectValue: 3, imageUrl: '/images/hakka_herb_illustration.png' },
 
     // Fire
     { id: 6, name: '桂枝', reading: 'けいし', element: 'Fire', flavor: '体を芯から温める', description: '発汗を促し、血行を良くして冷えを除く。', effectValue: 5, imageUrl: '/images/keishi_herb_illustration.png' },
-    { id: 7, name: '黄連', reading: 'おうれん', element: 'Fire', flavor: '強い熱を冷ます', description: '心火を鎮め、イライラや不眠、炎症を抑える。', effectValue: 8 },
-    { id: 8, name: '黄ゴン', reading: 'おうごん', element: 'Fire', flavor: '熱と湿りを除く', description: '上半身の熱を冷まし、解毒を助ける。', effectValue: 5 },
-    { id: 9, name: '山梔子', reading: 'さんしし', element: 'Fire', flavor: 'イライラの熱を消す', description: '精神的な興奮や充血、炎症を鎮める。', effectValue: 5 },
-    { id: 10, name: '生姜', reading: 'しょうきょう', element: 'Fire', flavor: 'お腹を温める', description: '胃腸を温め、吐き気を止める。', effectValue: 3 },
+    { id: 7, name: '黄連', reading: 'おうれん', element: 'Fire', flavor: '強い熱を冷ます', description: '心火を鎮め、イライラや不眠、炎症を抑える。', effectValue: 8, imageUrl: '/images/oren_herb_illustration.png' },
+    { id: 8, name: '黄ゴン', reading: 'おうごん', element: 'Fire', flavor: '熱と湿りを除く', description: '上半身の熱を冷まし、解毒を助ける。', effectValue: 5, imageUrl: '/images/ogon_herb_illustration.png' },
+    { id: 9, name: '山梔子', reading: 'さんしし', element: 'Fire', flavor: 'イライラの熱を消す', description: '精神的な興奮や充血、炎症を鎮める。', effectValue: 5, imageUrl: '/images/sanshishi_herb_illustration.png' },
+    { id: 10, name: '生姜', reading: 'しょうきょう', element: 'Fire', flavor: 'お腹を温める', description: '胃腸を温め、吐き気を止める。', effectValue: 3, imageUrl: '/images/shokyo_herb_illustration.png' },
 
     // Earth
     { id: 11, name: '人参', reading: 'にんじん', element: 'Earth', flavor: '元気を強力に補う', description: '消化器を丈夫にし、エネルギーを全身に満たす。', effectValue: 10, imageUrl: '/images/ninjin_herb_illustration.png' },
-    { id: 12, name: '甘草', reading: 'かんぞう', element: 'Earth', flavor: '調和の要', description: '諸薬の毒を和らげ、全体のバランスを整える。', effectValue: 2 },
-    { id: 13, name: '大棗', reading: 'たいそう', element: 'Earth', flavor: '胃腸に優しい甘み', description: '胃を保護し、精神を安定させるナツメの実。', effectValue: 3 },
-    { id: 14, name: '白朮', reading: 'びゃくじゅつ', element: 'Earth', flavor: '湿気を取り除く', description: '胃腸を丈夫にし、体内の余分な水分を排出する。', effectValue: 5 },
-    { id: 15, name: '陳皮', reading: 'ちんぴ', element: 'Earth', flavor: '気の巡りを助ける', description: '胃腸の働きを助け、吐き気や痰を除く。', effectValue: 4 },
+    { id: 12, name: '甘草', reading: 'かんぞう', element: 'Earth', flavor: '調和の要', description: '諸薬の毒を和らげ、全体のバランスを整える。', effectValue: 2, imageUrl: '/images/kanzo_herb_illustration.png' },
+    { id: 13, name: '大棗', reading: 'たいそう', element: 'Earth', flavor: '胃腸に優しい甘み', description: '胃を保護し、精神を安定させるナツメの実。', effectValue: 3, imageUrl: '/images/taiso_herb_illustration.png' },
+    { id: 14, name: '白朮', reading: 'びゃくじゅつ', element: 'Earth', flavor: '湿気を取り除く', description: '胃腸を丈夫にし、体内の余分な水分を排出する。', effectValue: 5, imageUrl: '/images/byakujutsu_herb_illustration.png' },
+    { id: 15, name: '陳皮', reading: 'ちんぴ', element: 'Earth', flavor: '気の巡りを助ける', description: '胃腸の働きを助け、吐き気や痰を除く。', effectValue: 4, imageUrl: '/images/chinpi_herb_illustration.png' },
 
     // Metal
     { id: 16, name: '麻黄', reading: 'まおう', element: 'Metal', flavor: 'ガツンと汗を出す', description: '寒気を飛ばし、喘息や関節の痛みを和らげる。', effectValue: 8, imageUrl: '/images/maou_herb_illustration.png' },
-    { id: 17, name: '杏仁', reading: 'きょうにん', element: 'Metal', flavor: '咳を鎮める', description: '肺を潤し、咳や痰を止める。', effectValue: 5 },
+    { id: 17, name: '杏仁', reading: 'きょうにん', element: 'Metal', flavor: '咳を鎮める', description: '肺を潤し、咳や痰を止める。', effectValue: 5, imageUrl: '/images/kyonin_herb_illustration.png' },
     { id: 18, name: '桔梗', reading: 'ききょう', element: 'Metal', flavor: '喉の通りを良くする', description: '喉の痛みを和らげ、排膿を促す。', effectValue: 5 },
     { id: 19, name: '葛根', reading: 'かっこん', element: 'Metal', flavor: '筋肉のこわばりに', description: '首筋や背中のこわばりをほぐし、熱を下げる。', effectValue: 5 },
     { id: 20, name: '石膏', reading: 'せっこう', element: 'Metal', flavor: '強烈な熱を鎮める', description: '肺や胃の激しい熱を冷まし、喉の渇きを止める。', effectValue: 7 },
