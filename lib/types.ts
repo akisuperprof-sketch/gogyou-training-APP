@@ -84,3 +84,4 @@ export interface DailyWisdom {
     content: string;
     tag?: string; // e.g. 抑平, 相生, etc.
 }
+export type DebugPreset = 'VISUAL' | 'GAMES' | 'SPIRITS' | 'HALF_DRUGS' | 'CRAFTING' | 'FULL' | 'RESET';

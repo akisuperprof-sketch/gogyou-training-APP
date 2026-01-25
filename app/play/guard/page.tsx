@@ -24,6 +24,7 @@ export default function GuardGame() {
     const [missedOptions, setMissedOptions] = useState<Set<Element>>(new Set());
     const [isNoneCorrect, setIsNoneCorrect] = useState(false);
     const [isNoneMissed, setIsNoneMissed] = useState(false);
+    const [showLevelIntro, setShowLevelIntro] = useState(false);
 
     const { gameCompleted } = useStore();
     const [resultData, setResultData] = useState<{ gainedCards: number[], gainedExp: number, reaction: string } | null>(null);
@@ -93,6 +94,8 @@ export default function GuardGame() {
         setTimeLeft(TIME_LIMIT);
         setGameState('PLAYING');
         setResultData(null);
+        setShowLevelIntro(true);
+        setTimeout(() => setShowLevelIntro(false), 2000);
     }
 
     const handleAnswer = (choice: Element | 'NONE') => {
@@ -134,23 +137,41 @@ export default function GuardGame() {
             </AnimatePresence>
 
             {/* HUD */}
-            <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-20">
+            <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-40 bg-white/40 backdrop-blur-sm">
                 <div className="flex items-center space-x-3">
-                    <Link href="/play" className="p-3 bg-white/90 backdrop-blur-sm border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-slate-900 transition active:scale-90">
+                    <Link href="/play" className="p-3 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-slate-900 transition active:scale-90">
                         <X className="w-5 h-5" />
                     </Link>
-                    <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 py-2 rounded-2xl shadow-sm">
+                    <div className="bg-white border border-slate-100 px-4 py-2 rounded-2xl shadow-sm">
                         <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest mb-0.5 leading-none">スコア</p>
                         <p className="text-xl sm:text-2xl font-black tabular-nums text-slate-900 leading-none">{score}</p>
                     </div>
                 </div>
-                <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 py-2 rounded-2xl text-right shadow-sm">
+                <div className="bg-white border border-slate-100 px-4 py-2 rounded-2xl text-right shadow-sm">
                     <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest mb-0.5 leading-none">残り時間</p>
                     <p className={cn("text-xl sm:text-2xl font-black tabular-nums leading-none", timeLeft < 10 ? "text-red-500 animate-pulse" : "text-amber-500")}>
                         {timeLeft}秒
                     </p>
                 </div>
             </div>
+
+            {/* Level Intro Overlay */}
+            <AnimatePresence>
+                {showLevelIntro && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.5 }}
+                        className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-slate-900/40 backdrop-blur-sm pointer-events-none"
+                    >
+                        <div className="bg-white px-10 py-6 rounded-[3rem] shadow-2xl border-4 border-amber-500 flex flex-col items-center">
+                            <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] mb-1">Spirit Guide</span>
+                            <h2 className="text-5xl font-black text-slate-900 tracking-tighter">修行開始</h2>
+                            <p className="mt-2 text-xs font-bold text-slate-400">相克の理で護れ！</p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {gameState === 'PLAYING' && (
                 <div className="flex-1 flex flex-col items-center justify-center pt-16 sm:pt-24 pb-8 sm:pb-20 space-y-6 sm:space-y-12 min-h-0">
@@ -215,10 +236,10 @@ export default function GuardGame() {
                         </AnimatePresence>
 
                         {/* Soukoku Guide (Improved) */}
-                        <div className="mt-2 sm:mt-6 flex flex-col items-center shrink-0 w-full px-4">
-                            <div className="bg-white/90 backdrop-blur-md border border-slate-100 p-3 sm:p-4 rounded-3xl shadow-xl w-full max-w-[340px]">
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center mb-3">相克（勝ち）の法則</p>
-                                <div className="grid grid-cols-5 gap-1 sm:gap-2">
+                        <div className="mt-4 flex flex-col items-center shrink-0 w-full px-4">
+                            <div className="bg-white/90 backdrop-blur-md border border-slate-100 p-2 sm:p-4 rounded-3xl shadow-xl w-full max-w-[320px]">
+                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest text-center mb-2 leading-none">相克の理</p>
+                                <div className="flex justify-between items-center px-1">
                                     {[
                                         { s: 'Wood', t: 'Earth' },
                                         { s: 'Earth', t: 'Water' },
@@ -226,16 +247,16 @@ export default function GuardGame() {
                                         { s: 'Fire', t: 'Metal' },
                                         { s: 'Metal', t: 'Wood' }
                                     ].map((pair, i) => (
-                                        <div key={i} className="flex flex-col items-center space-y-1">
+                                        <div key={i} className="flex flex-col items-center">
                                             <div className={cn(
-                                                "w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[10px] sm:text-xs text-white font-black shadow-sm ring-2 ring-white",
+                                                "w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[9px] text-white font-black shadow-sm ring-1 ring-white",
                                                 ELEMENT_COLORS[pair.s as Element]
                                             )}>
                                                 {ELEMENT_JP[pair.s as Element]}
                                             </div>
-                                            <div className="text-slate-300 text-[8px] font-bold">⬇︎</div>
+                                            <div className="text-slate-200 text-[10px] font-black my-0.5">↓</div>
                                             <div className={cn(
-                                                "w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[10px] sm:text-xs text-white font-black border border-white/50",
+                                                "w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[9px] text-white font-black opacity-60",
                                                 ELEMENT_COLORS[pair.t as Element]
                                             )}>
                                                 {ELEMENT_JP[pair.t as Element]}
@@ -243,13 +264,9 @@ export default function GuardGame() {
                                         </div>
                                     ))}
                                 </div>
-                                <div className="mt-2 flex justify-between px-1 text-[7px] font-bold text-slate-300 uppercase">
-                                    <span>あなたの属性</span>
-                                    <span>敵の属性</span>
-                                </div>
                             </div>
                         </div>
-                        <p className="text-slate-400 text-[10px] font-bold mt-4 leading-none">敵に勝つ属性をぶつけよう！</p>
+                        <p className="text-slate-400 text-[9px] font-bold mt-4 leading-none">敵に勝つ属性を選択せよ！</p>
                     </div>
 
                     {/* Options */}

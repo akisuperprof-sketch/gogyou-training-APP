@@ -13,7 +13,7 @@ import { DAILY_WISDOM } from '@/lib/wisdomData';
 import { DailyWisdom } from '@/lib/types';
 
 export default function Home() {
-  const { spirits, crudeDrugs, formulas, gameProgress, setHasSeenStory, checkGenkiDecay, toggleMasterMode, lastHealSpiritId, clearHealNotification, clearUnlockNotification } = useStore();
+  const { spirits, crudeDrugs, formulas, gameProgress, setHasSeenStory, checkGenkiDecay, toggleMasterMode, applyDebugPreset, lastHealSpiritId, clearHealNotification, clearUnlockNotification } = useStore();
   const [mounted, setMounted] = useState(false);
   const [focusedIdx, setFocusedIdx] = useState(0);
   const [storyOpen, setStoryOpen] = useState(false);
@@ -21,6 +21,7 @@ export default function Home() {
   const [todayWisdom, setTodayWisdom] = useState<DailyWisdom | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [debugMenuOpen, setDebugMenuOpen] = useState(false);
 
   useEffect(() => {
     if (mounted) {
@@ -147,16 +148,51 @@ export default function Home() {
             </div>
 
             <div className="flex items-center space-x-2">
-              <button
-                onClick={toggleMasterMode}
-                className={cn(
-                  "p-2.5 rounded-2xl transition-all active:scale-90 border flex flex-col items-center justify-center space-y-0.5",
-                  gameProgress.isMasterMode ? "bg-amber-100 border-amber-200 text-amber-600" : "bg-white border-slate-100 text-slate-300"
-                )}
-              >
-                <Crown className="w-4 h-4" />
-                <span className="text-[6px] font-black uppercase leading-none">Master</span>
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setDebugMenuOpen(!debugMenuOpen)}
+                  className={cn(
+                    "p-2.5 rounded-2xl transition-all active:scale-90 border flex flex-col items-center justify-center space-y-0.5",
+                    gameProgress.isMasterMode ? "bg-amber-100 border-amber-200 text-amber-600" : "bg-white border-slate-100 text-slate-300"
+                  )}
+                >
+                  <Crown className="w-4 h-4" />
+                  <span className="text-[6px] font-black uppercase leading-none">Debug</span>
+                </button>
+
+                <AnimatePresence>
+                  {debugMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-2 w-48 bg-white rounded-3xl shadow-2xl border border-slate-100 p-2 z-[60]"
+                    >
+                      {[
+                        { id: 'VISUAL', label: 'ビジュアルだけ', sub: 'UI要素の解放のみ' },
+                        { id: 'GAMES', label: 'ゲーム全部', sub: '全修行を解放' },
+                        { id: 'SPIRITS', label: '精霊全部', sub: '全精霊を解放' },
+                        { id: 'HALF_DRUGS', label: '生薬半分', sub: '収集状況50%' },
+                        { id: 'CRAFTING', label: '調合可能', sub: '素材+プレミアム' },
+                        { id: 'FULL', label: 'フル解放', sub: '全要素MAX' },
+                        { id: 'RESET', label: 'リセット', sub: '初期状態に戻す' },
+                      ].map((preset) => (
+                        <button
+                          key={preset.id}
+                          onClick={() => {
+                            applyDebugPreset(preset.id as any);
+                            setDebugMenuOpen(false);
+                          }}
+                          className="w-full text-left p-3 hover:bg-slate-50 rounded-2xl transition-colors group"
+                        >
+                          <p className="text-[10px] font-black text-slate-900 group-hover:text-indigo-600">{preset.label}</p>
+                          <p className="text-[8px] font-bold text-slate-400">{preset.sub}</p>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               {gameProgress.isMasterMode && (
                 <button
                   onClick={() => setGuideOpen(true)}

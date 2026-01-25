@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { CrudeDrug, Formula, GameProgress, Spirit, Element, Mood, SpiritRequest } from './types';
+import { CrudeDrug, Formula, GameProgress, Spirit, Element, Mood, SpiritRequest, DebugPreset } from './types';
 import { INITIAL_CRUDE_DRUGS, INITIAL_FORMULAS, INITIAL_SPIRITS, SPIRIT_DATA } from './data';
 
 interface AppState {
@@ -25,6 +25,7 @@ interface AppState {
     clearUnlockNotification: () => void;
     unlockWisdom: (id: string) => void;
     purchasePremium: () => void;
+    applyDebugPreset: (preset: DebugPreset) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -293,38 +294,102 @@ export const useStore = create<AppState>()(
                 };
             }),
 
-            toggleMasterMode: () => set((state) => {
-                const isMaster = !state.gameProgress.isMasterMode;
-                if (isMaster) {
-                    return {
-                        spirits: state.spirits.map(s => ({ ...s, unlocked: true })),
-                        crudeDrugs: Object.keys(state.crudeDrugs).reduce((acc, id) => {
-                            const cid = Number(id);
-                            acc[cid] = { ...state.crudeDrugs[cid], ownedCount: Math.max(state.crudeDrugs[cid].ownedCount, 99), discovered: true };
-                            return acc;
-                        }, {} as Record<number, CrudeDrug>),
-                        formulas: Object.keys(state.formulas).reduce((acc, id) => {
-                            const fid = Number(id);
-                            acc[fid] = { ...state.formulas[fid], ownedCount: Math.max(state.formulas[fid].ownedCount, 99), discovered: true };
-                            return acc;
-                        }, {} as Record<number, Formula>),
-                        gameProgress: {
-                            ...state.gameProgress,
-                            isMasterMode: true,
-                            chainLevelsUnlocked: 3,
-                            gamesUnlockedCount: 3,
-                            totalSessionsPlayed: 10,
-                            chainEasyClears: 1,
-                            chainMediumClears: 5,
-                            unlockedWisdomIds: ['w1', 'w2', 'w3', 'w4', 'w5', 'w6', 'w7', 'w8', 'w9', 'w10'],
-                            unlockedFormulaIds: Object.keys(state.formulas).map(Number),
-                            isPremiumUnlocked: true
-                        }
-                    };
-                } else {
-                    return {
-                        gameProgress: { ...state.gameProgress, isMasterMode: false, isPremiumUnlocked: false }
-                    };
+            toggleMasterMode: () => {
+                const state = get();
+                get().applyDebugPreset(state.gameProgress.isMasterMode ? 'RESET' : 'FULL');
+            },
+
+            applyDebugPreset: (preset) => set((state) => {
+                // Base state for resets
+                const initialCrudeDrugs = INITIAL_CRUDE_DRUGS.reduce((acc, drug) => {
+                    acc[drug.id] = { ...drug, ownedCount: 0, usedCount: 0, discovered: false };
+                    return acc;
+                }, {} as Record<number, CrudeDrug>);
+                const initialFormulas = INITIAL_FORMULAS.reduce((acc, formula) => {
+                    acc[formula.id] = { ...formula, ownedCount: 0, usedCount: 0, discovered: false };
+                    return acc;
+                }, {} as Record<number, Formula>);
+
+                switch (preset) {
+                    case 'VISUAL':
+                        return { gameProgress: { ...state.gameProgress, isMasterMode: true } };
+
+                    case 'GAMES':
+                        return {
+                            gameProgress: {
+                                ...state.gameProgress,
+                                chainLevelsUnlocked: 3,
+                                gamesUnlockedCount: 3,
+                                isMasterMode: true
+                            }
+                        };
+
+                    case 'SPIRITS':
+                        return {
+                            spirits: state.spirits.map(s => ({ ...s, unlocked: true })),
+                            gameProgress: { ...state.gameProgress, isMasterMode: true }
+                        };
+
+                    case 'HALF_DRUGS': {
+                        const drugIds = Object.keys(state.crudeDrugs).map(Number);
+                        const halfIds = drugIds.slice(0, Math.ceil(drugIds.length / 2));
+                        const newDrugs = { ...state.crudeDrugs };
+                        halfIds.forEach(id => {
+                            newDrugs[id] = { ...newDrugs[id], discovered: true, ownedCount: 5 };
+                        });
+                        return { crudeDrugs: newDrugs, gameProgress: { ...state.gameProgress, isMasterMode: true } };
+                    }
+
+                    case 'CRAFTING':
+                        return {
+                            crudeDrugs: Object.keys(state.crudeDrugs).reduce((acc, id) => {
+                                const cid = Number(id);
+                                acc[cid] = { ...state.crudeDrugs[cid], ownedCount: 10, discovered: true };
+                                return acc;
+                            }, {} as Record<number, CrudeDrug>),
+                            gameProgress: { ...state.gameProgress, isPremiumUnlocked: true, isMasterMode: true }
+                        };
+
+                    case 'FULL':
+                        return {
+                            spirits: state.spirits.map(s => ({ ...s, unlocked: true })),
+                            crudeDrugs: Object.keys(state.crudeDrugs).reduce((acc, id) => {
+                                const cid = Number(id);
+                                acc[cid] = { ...state.crudeDrugs[cid], ownedCount: 99, discovered: true };
+                                return acc;
+                            }, {} as Record<number, CrudeDrug>),
+                            formulas: Object.keys(state.formulas).reduce((acc, id) => {
+                                const fid = Number(id);
+                                acc[fid] = { ...state.formulas[fid], ownedCount: 99, discovered: true };
+                                return acc;
+                            }, {} as Record<number, Formula>),
+                            gameProgress: {
+                                ...state.gameProgress,
+                                isMasterMode: true,
+                                isPremiumUnlocked: true,
+                                chainLevelsUnlocked: 3,
+                                gamesUnlockedCount: 3,
+                                unlockedFormulaIds: Object.keys(state.formulas).map(Number),
+                            }
+                        };
+
+                    case 'RESET':
+                        return {
+                            spirits: INITIAL_SPIRITS,
+                            crudeDrugs: initialCrudeDrugs,
+                            formulas: initialFormulas,
+                            gameProgress: {
+                                ...state.gameProgress,
+                                isMasterMode: false,
+                                isPremiumUnlocked: false,
+                                chainLevelsUnlocked: 1,
+                                gamesUnlockedCount: 1,
+                                unlockedFormulaIds: [],
+                            }
+                        };
+
+                    default:
+                        return state;
                 }
             }),
 

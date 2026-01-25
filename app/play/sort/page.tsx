@@ -27,6 +27,7 @@ export default function SortGame() {
     const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
     const [currentCard, setCurrentCard] = useState<{ term: string; element: Element } | null>(null);
     const [level, setLevel] = useState(1); // 1: 3 elements, 2: 5 elements
+    const [showLevelIntro, setShowLevelIntro] = useState(false);
 
     const { gameCompleted, gameProgress } = useStore();
     const [resultData, setResultData] = useState<{ gainedCards: number[], gainedExp: number, reaction: string } | null>(null);
@@ -71,6 +72,8 @@ export default function SortGame() {
         setTimeLeft(TIME_LIMIT);
         setGameState('PLAYING');
         setResultData(null);
+        setShowLevelIntro(true);
+        setTimeout(() => setShowLevelIntro(false), 2000);
     }
 
     const handleDragEnd = (event: any, info: PanInfo) => {
@@ -123,17 +126,17 @@ export default function SortGame() {
             </AnimatePresence>
 
             {/* HUD */}
-            <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-20">
+            <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-40 bg-white/40 backdrop-blur-sm">
                 <div className="flex items-center space-x-3">
-                    <Link href="/play" className="p-3 bg-white/90 backdrop-blur-sm border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-slate-900 transition active:scale-90">
+                    <Link href="/play" className="p-3 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-slate-900 transition active:scale-90">
                         <X className="w-5 h-5" />
                     </Link>
-                    <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 py-2 rounded-2xl shadow-sm">
+                    <div className="bg-white border border-slate-100 px-4 py-2 rounded-2xl shadow-sm">
                         <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest mb-0.5 leading-none">スコア</p>
                         <p className="text-xl sm:text-2xl font-black tabular-nums text-slate-900 leading-none">{score}</p>
                     </div>
                 </div>
-                <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 py-2 rounded-2xl text-right shadow-sm">
+                <div className="bg-white border border-slate-100 px-4 py-2 rounded-2xl text-right shadow-sm">
                     <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest mb-0.5 leading-none">残り時間</p>
                     <p className={cn("text-xl sm:text-2xl font-black tabular-nums leading-none", timeLeft < 10 ? "text-red-500 animate-pulse" : "text-green-600")}>
                         {timeLeft}秒
@@ -141,37 +144,55 @@ export default function SortGame() {
                 </div>
             </div>
 
+            {/* Level Intro Overlay */}
+            <AnimatePresence>
+                {showLevelIntro && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.5 }}
+                        className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-slate-900/40 backdrop-blur-sm pointer-events-none"
+                    >
+                        <div className="bg-white px-10 py-6 rounded-[3rem] shadow-2xl border-4 border-emerald-500 flex flex-col items-center">
+                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-1">Elemental Sort</span>
+                            <h2 className="text-5xl font-black text-slate-900 tracking-tighter">修行開始</h2>
+                            <p className="mt-2 text-xs font-bold text-slate-400">属性ごとに仕分けよ！</p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {gameState === 'PLAYING' && (
                 <div className="flex-1 flex flex-col items-center justify-center relative px-6">
-                    {/* Zones Visualization */}
-                    <div className="absolute inset-x-2 sm:inset-x-6 inset-y-12 pointer-events-none opacity-40">
+                    {/* Zones Visualization (Responsive) */}
+                    <div className="absolute inset-x-4 inset-y-16 pointer-events-none opacity-40">
                         {/* Top: Fire */}
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 sm:w-32 sm:h-32 border-4 border-dashed border-red-200 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center bg-red-50/50">
-                            <span className="text-3xl sm:text-4xl mb-1">🔥</span>
-                            <span className="text-[10px] font-black uppercase text-red-400">火（上）</span>
+                        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-20 sm:w-32 sm:h-32 border-2 border-dashed border-red-200 rounded-2xl sm:rounded-[2.5rem] flex flex-col items-center justify-center bg-red-50/50">
+                            <span className="text-2xl sm:text-4xl">🔥</span>
+                            <span className="text-[8px] sm:text-[10px] font-black uppercase text-red-400">火</span>
                         </div>
                         {/* Left: Wood */}
-                        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-24 h-24 sm:w-32 sm:h-32 border-4 border-dashed border-green-200 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center bg-green-50/50">
-                            <span className="text-3xl sm:text-4xl mb-1">🌿</span>
-                            <span className="text-[10px] font-black uppercase text-green-400">木（左）</span>
+                        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-20 h-20 sm:w-32 sm:h-32 border-2 border-dashed border-green-200 rounded-2xl sm:rounded-[2.5rem] flex flex-col items-center justify-center bg-green-50/50">
+                            <span className="text-2xl sm:text-4xl">🌿</span>
+                            <span className="text-[8px] sm:text-[10px] font-black uppercase text-green-400">木</span>
                         </div>
                         {/* Right: Earth */}
-                        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-24 h-24 sm:w-32 sm:h-32 border-4 border-dashed border-yellow-200 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center bg-yellow-50/50">
-                            <span className="text-3xl sm:text-4xl mb-1">⛰️</span>
-                            <span className="text-[10px] font-black uppercase text-yellow-600">土（右）</span>
+                        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-20 h-20 sm:w-32 sm:h-32 border-2 border-dashed border-yellow-200 rounded-2xl sm:rounded-[2.5rem] flex flex-col items-center justify-center bg-yellow-50/50">
+                            <span className="text-2xl sm:text-4xl">⛰️</span>
+                            <span className="text-[8px] sm:text-[10px] font-black uppercase text-yellow-600">土</span>
                         </div>
 
                         {level === 2 && (
                             <>
                                 {/* Bottom Left: Metal */}
-                                <div className="absolute bottom-0 left-0 w-24 h-24 sm:w-32 sm:h-32 border-4 border-dashed border-slate-200 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center bg-slate-50/50">
-                                    <span className="text-3xl sm:text-4xl mb-1">💎</span>
-                                    <span className="text-[10px] font-black uppercase text-slate-400">金（左下）</span>
+                                <div className="absolute bottom-2 left-0 w-20 h-20 sm:w-32 sm:h-32 border-2 border-dashed border-slate-200 rounded-2xl sm:rounded-[2.5rem] flex flex-col items-center justify-center bg-slate-50/50">
+                                    <span className="text-2xl sm:text-4xl">💎</span>
+                                    <span className="text-[8px] sm:text-[10px] font-black uppercase text-slate-400">金</span>
                                 </div>
                                 {/* Bottom Right: Water */}
-                                <div className="absolute bottom-0 right-0 w-24 h-24 sm:w-32 sm:h-32 border-4 border-dashed border-blue-200 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center bg-blue-50/50">
-                                    <span className="text-3xl sm:text-4xl mb-1">💧</span>
-                                    <span className="text-[10px] font-black uppercase text-blue-400">水（右下）</span>
+                                <div className="absolute bottom-2 right-0 w-20 h-20 sm:w-32 sm:h-32 border-2 border-dashed border-blue-200 rounded-2xl sm:rounded-[2.5rem] flex flex-col items-center justify-center bg-blue-50/50">
+                                    <span className="text-2xl sm:text-4xl">💧</span>
+                                    <span className="text-[8px] sm:text-[10px] font-black uppercase text-blue-400">水</span>
                                 </div>
                             </>
                         )}

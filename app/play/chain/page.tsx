@@ -27,6 +27,7 @@ export default function ChainGame() {
     const [chain, setChain] = useState<Node[]>([]);
     const [lastLinkResult, setLastLinkResult] = useState<'GOOD' | 'BAD' | null>(null);
     const [selectedLevel, setSelectedLevel] = useState<9 | 18 | 36 | null>(null);
+    const [showLevelIntro, setShowLevelIntro] = useState(false);
 
     const { gameCompleted, gameProgress, unlockChainLevel } = useStore();
     const [resultData, setResultData] = useState<{ gainedCards: number[], gainedExp: number, reaction: string } | null>(null);
@@ -68,6 +69,8 @@ export default function ChainGame() {
         setChain([]);
         setSelectedLevel(level);
         spawnNodes(level);
+        setShowLevelIntro(true);
+        setTimeout(() => setShowLevelIntro(false), 2000);
     };
 
     const handleNodeClick = (node: Node) => {
@@ -205,17 +208,17 @@ export default function ChainGame() {
             )}
 
             {/* HUD */}
-            <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-10">
+            <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-40 bg-white/40 backdrop-blur-sm">
                 <div className="flex items-center space-x-3">
-                    <Link href="/play" className="p-3 bg-white/90 backdrop-blur-sm border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-slate-900 transition active:scale-90">
+                    <Link href="/play" className="p-3 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-slate-900 transition active:scale-90">
                         <X className="w-5 h-5" />
                     </Link>
-                    <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 py-2 rounded-2xl shadow-sm">
+                    <div className="bg-white border border-slate-100 px-4 py-2 rounded-2xl shadow-sm">
                         <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest mb-0.5 leading-none">スコア</p>
                         <p className="text-xl sm:text-2xl font-black tabular-nums text-slate-900 leading-none">{score}</p>
                     </div>
                 </div>
-                <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 py-2 rounded-2xl text-right shadow-sm">
+                <div className="bg-white border border-slate-100 px-4 py-2 rounded-2xl text-right shadow-sm">
                     <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest mb-0.5 leading-none">残り時間</p>
                     <p className={cn("text-xl sm:text-2xl font-black tabular-nums leading-none", timeLeft < 10 ? "text-red-500 animate-pulse" : "text-blue-500")}>
                         {timeLeft}秒
@@ -223,55 +226,57 @@ export default function ChainGame() {
                 </div>
             </div>
 
-            {gameState === 'PLAYING' && (
-                <div className="absolute inset-0 z-0">
-                    {/* Visual Feedback */}
-                    <AnimatePresence>
-                        {lastLinkResult === 'GOOD' && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.5 }}
-                                animate={{ opacity: 1, scale: 2 }}
-                                exit={{ opacity: 0 }}
-                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-100 font-black text-8xl z-0 pointer-events-none tracking-tighter"
-                            >
-                                連鎖成功！
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Chain Progress */}
-                    <div className="absolute bottom-6 sm:bottom-12 inset-x-8 flex justify-center items-center space-x-2 sm:space-x-3 pointer-events-none">
-                        <AnimatePresence>
-                            {chain.slice(-5).map((node, i) => (
-                                <motion.div
-                                    initial={{ scale: 0, x: 20 }}
-                                    animate={{ scale: 1, x: 0 }}
-                                    key={`${node.id}-${i}`}
-                                    className={cn(
-                                        "w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-[1rem] flex items-center justify-center border border-white shadow-xl relative overflow-hidden",
-                                        ELEMENT_COLORS[node.element]
-                                    )}
-                                >
-                                    <span className="text-sm sm:text-xl font-black z-10 drop-shadow-sm">{ELEMENT_JP[node.element]}</span>
-                                    <div className="absolute inset-0 bg-white/10 opacity-50" />
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                        {chain.length > 0 && <div className="text-slate-200 text-xl sm:text-3xl animate-pulse">→</div>}
-                        {chain.length === 0 && (
-                            <div className="text-slate-300 text-[10px] sm:text-xs font-bold tracking-widest bg-slate-50 px-4 py-1.5 sm:px-6 sm:py-2 rounded-full border border-slate-100">
-                                {selectedLevel === 9 ? '3x3 グリッド' : selectedLevel === 18 ? '3x6 グリッド' : '6x6 グリッド'}
+            {/* Level Intro Overlay */}
+            <AnimatePresence>
+                {showLevelIntro && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.5 }}
+                        className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-slate-900/40 backdrop-blur-sm pointer-events-none"
+                    >
+                        <div className="bg-white px-10 py-6 rounded-[3rem] shadow-2xl border-4 border-indigo-500 flex flex-col items-center">
+                            <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em] mb-1">Challenge Level</span>
+                            <h2 className="text-5xl font-black text-slate-900 tracking-tighter">
+                                {selectedLevel === 9 ? '初級' : selectedLevel === 18 ? '中級' : '上級'}
+                            </h2>
+                            <div className="mt-4 flex items-center space-x-2">
+                                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" />
+                                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce [animation-delay:0.2s]" />
+                                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce [animation-delay:0.4s]" />
                             </div>
-                        )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {gameState === 'PLAYING' && (
+                <div className="absolute inset-0 flex flex-col z-0 pt-20 pb-20">
+                    {/* Top Guide Section */}
+                    <div className="shrink-0 flex flex-col items-center justify-center p-2 pt-4">
+                        <div className="bg-white/90 backdrop-blur-md border border-slate-100 px-4 py-1.5 rounded-full shadow-lg flex items-center space-x-2">
+                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mr-2 leading-none">五行循環:</span>
+                            {['Wood', 'Fire', 'Earth', 'Metal', 'Water'].map((el, i) => (
+                                <div key={el} className="flex items-center">
+                                    <div className={cn(
+                                        "w-5 h-5 rounded flex items-center justify-center text-[9px] font-black text-white shadow-sm ring-1 ring-white",
+                                        ELEMENT_COLORS[el as Element]
+                                    )}>
+                                        {ELEMENT_JP[el as Element]}
+                                    </div>
+                                    {i < 4 && <div className="text-slate-200 text-[10px] font-black mx-1">→</div>}
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Grid Nodes */}
-                    <div className="absolute inset-0 flex items-center justify-center p-4 pt-16 sm:pt-20">
+                    {/* Main Game Grid Area */}
+                    <div className="flex-1 flex items-center justify-center px-4 overflow-hidden min-h-0 py-4">
                         <div className={cn(
-                            "grid gap-2 sm:gap-3 w-full max-w-[340px] sm:max-w-xl aspect-square",
-                            selectedLevel === 9 ? "grid-cols-3 max-w-[280px]" :
-                                selectedLevel === 18 ? "grid-cols-3 aspect-[3/6] max-w-[240px]" :
-                                    "grid-cols-6"
+                            "grid gap-1 sm:gap-3 w-full max-w-[340px] max-h-full",
+                            selectedLevel === 9 ? "grid-cols-3 aspect-square max-w-[280px]" :
+                                selectedLevel === 18 ? "grid-cols-3 aspect-[3/6] h-full" :
+                                    "grid-cols-6 aspect-square"
                         )}>
                             {nodes.map((node) => (
                                 <motion.button
@@ -282,34 +287,56 @@ export default function ChainGame() {
                                     whileTap={{ scale: 0.9 }}
                                     onPointerDown={() => handleNodeClick(node)}
                                     className={cn(
-                                        "w-full h-full rounded-xl sm:rounded-2xl shadow-lg flex items-center justify-center font-black border-2 border-white transition-all ring-2 ring-slate-50/50 relative overflow-hidden",
+                                        "w-full h-full rounded-xl sm:rounded-2xl shadow-lg border-2 border-white flex flex-col items-center justify-center font-black relative overflow-hidden",
                                         ELEMENT_COLORS[node.element],
-                                        selectedLevel === 36 ? "text-xs sm:text-xl" : "text-2xl sm:text-4xl"
+                                        selectedLevel === 36 ? "text-base sm:text-xl" : "text-2xl sm:text-4xl"
                                     )}
                                 >
                                     <span className="drop-shadow-md z-10">{ELEMENT_JP[node.element]}</span>
-                                    <div className="absolute inset-0 bg-white/10 opacity-30" />
+                                    <div className="absolute inset-x-0 bottom-0 top-1/2 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
                                 </motion.button>
                             ))}
                         </div>
                     </div>
 
-                    {/* Cycle Guide */}
-                    <div className="absolute top-20 sm:top-28 left-0 right-0 flex justify-center">
-                        <div className="bg-white/90 backdrop-blur-md border border-slate-100 px-4 py-1.5 sm:px-6 sm:py-3 rounded-full shadow-xl flex items-center space-x-2 sm:space-x-3">
-                            {['Wood', 'Fire', 'Earth', 'Metal', 'Water'].map((el, i) => (
-                                <div key={el} className="flex items-center space-x-2 sm:space-x-3">
-                                    <div className={cn(
-                                        "w-6 h-6 sm:w-8 sm:h-8 rounded sm:rounded-lg flex items-center justify-center text-[10px] sm:text-xs font-black text-white shadow-sm",
-                                        ELEMENT_COLORS[el as Element]
-                                    )}>
-                                        {ELEMENT_JP[el as Element]}
-                                    </div>
-                                    {i < 4 && <div className="text-slate-200 text-[10px] sm:text-sm font-black">→</div>}
-                                </div>
-                            ))}
+                    {/* Bottom Progress Section */}
+                    <div className="shrink-0 h-16 flex flex-col items-center justify-center p-2">
+                        <div className="flex justify-center items-center space-x-2 pointer-events-none">
+                            <AnimatePresence>
+                                {chain.slice(-5).map((node, i) => (
+                                    <motion.div
+                                        initial={{ scale: 0, x: 20 }}
+                                        animate={{ scale: 1, x: 0 }}
+                                        key={`${node.id}-${i}`}
+                                        className={cn(
+                                            "w-8 h-8 rounded-lg flex items-center justify-center border-2 border-white shadow-lg relative overflow-hidden",
+                                            ELEMENT_COLORS[node.element]
+                                        )}
+                                    >
+                                        <span className="text-[9px] font-black z-10 drop-shadow-sm">{ELEMENT_JP[node.element]}</span>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                            {chain.length > 0 && <div className="text-slate-300 text-xl animate-pulse">→</div>}
+                            <div className="text-slate-400 text-[9px] font-black tracking-widest bg-slate-50 px-4 py-1 rounded-full border border-slate-100 shadow-inner">
+                                {selectedLevel === 9 ? '初級 3x3' : selectedLevel === 18 ? '中級 3x6' : '上級 6x6'}
+                            </div>
                         </div>
                     </div>
+
+                    {/* Visual Feedback Overlays */}
+                    <AnimatePresence>
+                        {lastLinkResult === 'GOOD' && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.5 }}
+                                animate={{ opacity: 0.15, scale: 2 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-800 font-black text-8xl z-[5] pointer-events-none"
+                            >
+                                連鎖！
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             )}
 
