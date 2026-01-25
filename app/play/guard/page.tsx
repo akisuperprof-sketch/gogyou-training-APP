@@ -17,12 +17,10 @@ export default function GuardGame() {
     const [gameState, setGameState] = useState<'TUTORIAL' | 'PLAYING' | 'FINISHED'>('TUTORIAL');
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
-    const [enemy, setEnemy] = useState<Element>('Fire');
-    const [options, setOptions] = useState<Element[]>([]);
+    const [turnData, setTurnData] = useState<{ enemy: Element; options: Element[]; isNoneCorrect: boolean } | null>(null);
     const [turnKey, setTurnKey] = useState(0);
     const [effect, setEffect] = useState<'CORRECT' | 'WRONG' | null>(null);
     const [missedOptions, setMissedOptions] = useState<Set<Element>>(new Set());
-    const [isNoneCorrect, setIsNoneCorrect] = useState(false);
     const [isNoneMissed, setIsNoneMissed] = useState(false);
     const [showLevelIntro, setShowLevelIntro] = useState(false);
 
@@ -32,16 +30,12 @@ export default function GuardGame() {
     const nextTurn = () => {
         const elements: Element[] = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'];
         const newEnemy = elements[Math.floor(Math.random() * elements.length)];
-        setEnemy(newEnemy);
-        setTurnKey(prev => prev + 1);
 
         const correct = elements.find(e => SOUKOKU[e] === newEnemy) as Element;
         const hasCorrect = Math.random() > 0.15; // 85% chance to have the answer
-        setIsNoneCorrect(!hasCorrect);
-        setIsNoneMissed(false);
+        const isNoneCorrect = !hasCorrect;
 
         const wrongPool = elements.filter(e => e !== correct);
-
         let newOptions: Element[];
         if (hasCorrect) {
             const w1 = wrongPool.splice(Math.floor(Math.random() * wrongPool.length), 1)[0];
@@ -54,8 +48,14 @@ export default function GuardGame() {
             newOptions = [w1, w2, w3].sort(() => Math.random() - 0.5);
         }
 
-        setOptions(newOptions);
+        setTurnData({
+            enemy: newEnemy,
+            options: newOptions,
+            isNoneCorrect
+        });
+        setTurnKey(prev => prev + 1);
         setMissedOptions(new Set());
+        setIsNoneMissed(false);
     };
 
     useEffect(() => {
@@ -106,11 +106,11 @@ export default function GuardGame() {
     }
 
     const handleAnswer = (choice: Element | 'NONE') => {
-        if (effect) return;
+        if (effect || !turnData) return;
         if (choice === 'NONE' && isNoneMissed) return;
         if (choice !== 'NONE' && missedOptions.has(choice)) return;
 
-        const correct = choice === 'NONE' ? isNoneCorrect : (SOUKOKU[choice] === enemy);
+        const correct = choice === 'NONE' ? turnData.isNoneCorrect : (SOUKOKU[choice] === turnData.enemy);
 
         if (correct) {
             setScore(s => s + 200);
@@ -180,13 +180,13 @@ export default function GuardGame() {
                 )}
             </AnimatePresence>
 
-            {gameState === 'PLAYING' && (
+            {gameState === 'PLAYING' && turnData && (
                 <div className="flex-1 flex flex-col items-center justify-center pt-16 sm:pt-24 pb-8 sm:pb-20 space-y-6 sm:space-y-12 min-h-0">
                     {/* Enemy (Approaching from back) */}
                     <div className="text-center relative perspective-1000 w-full flex flex-col items-center flex-1 justify-center">
-                        <AnimatePresence mode="wait">
+                        <AnimatePresence>
                             <motion.div
-                                key={`${enemy}-${turnKey}`}
+                                key={`${turnData.enemy}-${turnKey}`}
                                 initial={{ scale: 0.1, z: -1000, opacity: 0.3 }}
                                 animate={effect === 'CORRECT' ? {
                                     scale: [1, 1.2, 0.8, 1],
@@ -196,13 +196,13 @@ export default function GuardGame() {
                                 exit={{ scale: 1.5, z: 500, opacity: 0 }}
                                 transition={effect === 'CORRECT' ? { duration: 0.4 } : { duration: 5.5, ease: "linear" }}
                                 className={cn("inline-flex items-center justify-center w-28 h-28 sm:w-48 sm:h-48 rounded-[2rem] sm:rounded-[3.5rem] text-4xl sm:text-8xl shadow-[0_30px_80px_rgba(0,0,0,0.3)] border-4 sm:border-8 border-white relative z-10",
-                                    enemy === 'Fire' ? 'bg-red-500 text-white shadow-red-500/50' :
-                                        enemy === 'Water' ? 'bg-blue-500 text-white shadow-blue-500/50' :
-                                            enemy === 'Wood' ? 'bg-green-500 text-white shadow-green-500/50' :
-                                                enemy === 'Metal' ? 'bg-slate-300 text-slate-700 shadow-slate-400/50' :
+                                    turnData.enemy === 'Fire' ? 'bg-red-500 text-white shadow-red-500/50' :
+                                        turnData.enemy === 'Water' ? 'bg-blue-500 text-white shadow-blue-500/50' :
+                                            turnData.enemy === 'Wood' ? 'bg-green-500 text-white shadow-green-500/50' :
+                                                turnData.enemy === 'Metal' ? 'bg-slate-300 text-slate-700 shadow-slate-400/50' :
                                                     'bg-yellow-600 text-white shadow-yellow-700/50'
                                 )}>
-                                <span className="drop-shadow-lg">{ELEMENT_JP[enemy]}</span>
+                                <span className="drop-shadow-lg">{ELEMENT_JP[turnData.enemy]}</span>
 
                                 {/* Impact Burst Effect */}
                                 {effect === 'CORRECT' && (
@@ -246,27 +246,27 @@ export default function GuardGame() {
                         <div className="mt-4 flex flex-col items-center shrink-0 w-full px-4">
                             <div className="bg-white/90 backdrop-blur-md border border-slate-100 p-2 sm:p-4 rounded-3xl shadow-xl w-full max-w-[320px]">
                                 <div className="flex justify-between items-center mb-2 px-2">
-                                    <span className="text-[7px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full uppercase tracking-widest">あなたの属性(勝)</span>
-                                    <span className="text-[7px] font-black text-red-400 bg-red-50 px-2 py-0.5 rounded-full uppercase tracking-widest">敵の属性(負)</span>
+                                    <span className="text-[7px] font-black text-red-400 bg-red-50 px-2 py-0.5 rounded-full uppercase tracking-widest">敵の属性 (出題)</span>
+                                    <span className="text-[7px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full uppercase tracking-widest">あなたの属性 (対策)</span>
                                 </div>
                                 <div className="flex justify-between items-center px-1">
                                     {[
-                                        { s: 'Wood', t: 'Earth' },
-                                        { s: 'Earth', t: 'Water' },
-                                        { s: 'Water', t: 'Fire' },
-                                        { s: 'Fire', t: 'Metal' },
-                                        { s: 'Metal', t: 'Wood' }
+                                        { s: 'Wood', t: 'Metal' },
+                                        { s: 'Fire', t: 'Water' },
+                                        { s: 'Earth', t: 'Wood' },
+                                        { s: 'Metal', t: 'Fire' },
+                                        { s: 'Water', t: 'Earth' }
                                     ].map((pair, i) => (
                                         <div key={i} className="flex flex-col items-center">
                                             <div className={cn(
-                                                "w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[9px] text-white font-black shadow-sm ring-1 ring-white",
+                                                "w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[9px] text-white font-black opacity-40 grayscale-[0.3]",
                                                 ELEMENT_COLORS[pair.s as Element]
                                             )}>
                                                 {ELEMENT_JP[pair.s as Element]}
                                             </div>
                                             <div className="text-slate-200 text-[10px] font-black my-0.5">⬇︎</div>
                                             <div className={cn(
-                                                "w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[9px] text-white font-black opacity-40 grayscale-[0.3]",
+                                                "w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[9px] text-white font-black shadow-sm ring-1 ring-white",
                                                 ELEMENT_COLORS[pair.t as Element]
                                             )}>
                                                 {ELEMENT_JP[pair.t as Element]}
@@ -284,7 +284,7 @@ export default function GuardGame() {
                     {/* Options */}
                     <div className="w-full max-w-md px-4 sm:px-6 z-10 shrink-0 space-y-3 sm:space-y-4">
                         <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                            {options.map((opt, i) => {
+                            {turnData.options.map((opt, i) => {
                                 const isMissed = missedOptions.has(opt);
                                 return (
                                     <motion.button
