@@ -67,10 +67,13 @@ export interface GameProgress {
     lastGenkiUpdate?: number;
     isMasterMode: boolean;
     chainLevelsUnlocked: number;
+    guardLevelsUnlocked: number;
     gamesUnlockedCount: number;
     totalSessionsPlayed: number;
     chainEasyClears: number;
     chainMediumClears: number;
+    guardEasyClears: number;
+    guardMediumClears: number;
     unlockNotification: { title: string; message: string } | null;
     unlockedWisdomIds: string[];
     unlockedFormulaIds: number[];

@@ -51,10 +51,13 @@ export const useStore = create<AppState>()(
                 lastGenkiUpdate: Date.now(),
                 isMasterMode: false,
                 chainLevelsUnlocked: 1,
+                guardLevelsUnlocked: 1,
                 gamesUnlockedCount: 1,
                 totalSessionsPlayed: 0,
                 chainEasyClears: 0,
                 chainMediumClears: 0,
+                guardEasyClears: 0,
+                guardMediumClears: 0,
                 unlockNotification: null,
                 unlockedWisdomIds: [],
                 unlockedFormulaIds: [],
@@ -203,10 +206,14 @@ export const useStore = create<AppState>()(
 
                     const nextTotalJukuren = current.spirits.reduce((acc, s) => acc + s.stats.jukuren, 0) + gainedExp;
 
-                    // Level Clear logic for Chain Game
+                    // Level Clear logic for Games
                     let newEasyClears = current.gameProgress.chainEasyClears;
                     let newMediumClears = current.gameProgress.chainMediumClears;
                     let newChainLevelsUnlocked = current.gameProgress.chainLevelsUnlocked;
+
+                    let newGuardEasyClears = current.gameProgress.guardEasyClears;
+                    let newGuardMediumClears = current.gameProgress.guardMediumClears;
+                    let newGuardLevelsUnlocked = current.gameProgress.guardLevelsUnlocked;
 
                     if (mode === 'chain') {
                         if (level === 9) {
@@ -225,6 +232,26 @@ export const useStore = create<AppState>()(
                                 newNotify = {
                                     title: "上級解放！",
                                     message: "素晴らしい集中力だ！「相生チェイン」の上級が解放されたよ。これぞ究極の修行だ！"
+                                };
+                            }
+                        }
+                    } else if (mode === 'guard') {
+                        if (level === 1) { // Easy
+                            newGuardEasyClears += 1;
+                            if (newGuardEasyClears === 1 && newGuardLevelsUnlocked < 2) {
+                                newGuardLevelsUnlocked = 2;
+                                newNotify = {
+                                    title: "相克ガード・中級解放！",
+                                    message: "お見事！相克の理が身についてきたね。中級では時折、五行の導きが消えることもあるよ。"
+                                };
+                            }
+                        } else if (level === 2) { // Intermediate
+                            newGuardMediumClears += 1;
+                            if (newGuardMediumClears === 3 && newGuardLevelsUnlocked < 3) {
+                                newGuardLevelsUnlocked = 3;
+                                newNotify = {
+                                    title: "相克ガード・上級解放！",
+                                    message: "これぞ真の理！上級では五行の導きが完全に消え、君の知識のみが武器となる！"
                                 };
                             }
                         }
@@ -249,7 +276,10 @@ export const useStore = create<AppState>()(
                             totalSessionsPlayed: newTotalSessions,
                             chainEasyClears: newEasyClears,
                             chainMediumClears: newMediumClears,
+                            guardEasyClears: newGuardEasyClears,
+                            guardMediumClears: newGuardMediumClears,
                             chainLevelsUnlocked: newChainLevelsUnlocked,
+                            guardLevelsUnlocked: newGuardLevelsUnlocked,
                             unlockNotification: newNotify || current.gameProgress.unlockNotification
                         }
                     };

@@ -14,7 +14,7 @@ import Link from 'next/link';
 const TIME_LIMIT = 45;
 
 export default function GuardGame() {
-    const [gameState, setGameState] = useState<'TUTORIAL' | 'PLAYING' | 'FINISHED'>('TUTORIAL');
+    const [gameState, setGameState] = useState<'TUTORIAL' | 'LEVEL_SELECT' | 'PLAYING' | 'FINISHED'>('TUTORIAL');
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
     const [turnData, setTurnData] = useState<{ enemy: Element; options: Element[]; isNoneCorrect: boolean } | null>(null);
@@ -22,9 +22,11 @@ export default function GuardGame() {
     const [effect, setEffect] = useState<'CORRECT' | 'WRONG' | null>(null);
     const [missedOptions, setMissedOptions] = useState<Set<Element>>(new Set());
     const [isNoneMissed, setIsNoneMissed] = useState(false);
+    const [selectedLevel, setSelectedLevel] = useState<1 | 2 | 3 | null>(null);
     const [showLevelIntro, setShowLevelIntro] = useState(false);
+    const [showGuideForTurn, setShowGuideForTurn] = useState(true);
 
-    const { gameCompleted } = useStore();
+    const { gameProgress, gameCompleted } = useStore();
     const [resultData, setResultData] = useState<{ gainedCards: number[], gainedExp: number, reaction: string } | null>(null);
 
     const nextTurn = () => {
@@ -48,6 +50,14 @@ export default function GuardGame() {
             newOptions = [w1, w2, w3].sort(() => Math.random() - 0.5);
         }
 
+        // Level-based guide logic
+        let showGuide = true;
+        if (selectedLevel === 2) {
+            showGuide = Math.random() > 0.3; // 30% chance no guide
+        } else if (selectedLevel === 3) {
+            showGuide = false; // Always no guide
+        }
+
         setTurnData({
             enemy: newEnemy,
             options: newOptions,
@@ -56,6 +66,7 @@ export default function GuardGame() {
         setTurnKey(prev => prev + 1);
         setMissedOptions(new Set());
         setIsNoneMissed(false);
+        setShowGuideForTurn(showGuide);
     };
 
     useEffect(() => {
@@ -92,13 +103,14 @@ export default function GuardGame() {
 
     useEffect(() => {
         if (gameState === 'FINISHED') {
-            setResultData(gameCompleted(score, 'guard'));
+            setResultData(gameCompleted(score, 'guard', selectedLevel || 1));
         }
-    }, [gameState, score, gameCompleted]);
+    }, [gameState, score, gameCompleted, selectedLevel]);
 
-    const handleStart = () => {
+    const handleLevelSelect = (level: 1 | 2 | 3) => {
         setScore(0);
         setTimeLeft(TIME_LIMIT);
+        setSelectedLevel(level);
         setGameState('PLAYING');
         setResultData(null);
         setShowLevelIntro(true);
@@ -138,10 +150,63 @@ export default function GuardGame() {
                     <TutorialOverlay
                         gameType="guard"
                         isOpen={true}
-                        onStart={handleStart}
+                        onStart={() => setGameState('LEVEL_SELECT')}
                     />
                 )}
             </AnimatePresence>
+
+            {gameState === 'LEVEL_SELECT' && (
+                <div className="absolute inset-0 z-50 bg-white/60 backdrop-blur-md flex flex-col items-center justify-center p-6 pb-20">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100 w-full max-w-sm flex flex-col items-center space-y-6"
+                    >
+                        <div className="text-center">
+                            <h3 className="text-2xl font-black text-slate-900 mb-2">修行レベルを選択</h3>
+                            <p className="text-xs text-slate-400 font-bold">難易度が高いほど獲得ポイントアップ！</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-3 w-full">
+                            {[
+                                { id: 1, label: '初級', sub: '五行の導きあり', multiplier: '1x' },
+                                { id: 2, label: '中級', sub: '導きが消えることも…', multiplier: '2x' },
+                                { id: 3, label: '上級', sub: '自らの知識で立ち向かえ', multiplier: '3x' },
+                            ].map((lv) => {
+                                const isLocked = gameProgress.guardLevelsUnlocked < lv.id;
+                                return (
+                                    <button
+                                        key={lv.id}
+                                        disabled={isLocked}
+                                        onClick={() => handleLevelSelect(lv.id as 1 | 2 | 3)}
+                                        className={cn(
+                                            "w-full p-5 rounded-2xl flex items-center justify-between transition-all active:scale-95 border-2",
+                                            isLocked
+                                                ? "bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed"
+                                                : "bg-white border-amber-50 hover:border-amber-500 text-slate-900 shadow-sm hover:shadow-md"
+                                        )}
+                                    >
+                                        <div className="text-left">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-lg font-black">{lv.label}</span>
+                                                <span className="text-[10px] font-black px-2 py-0.5 bg-slate-100 rounded-full text-slate-400 uppercase">{lv.multiplier} pt</span>
+                                            </div>
+                                            <p className="text-[10px] font-bold text-slate-400">{lv.sub}</p>
+                                        </div>
+                                        {isLocked ? (
+                                            <div className="text-[10px] font-black text-red-400">Locked</div>
+                                        ) : (
+                                            <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center text-white">
+                                                <div className="text-lg">→</div>
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </motion.div>
+                </div>
+            )}
 
             {/* HUD */}
             <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-40 bg-white/40 backdrop-blur-sm">
@@ -173,8 +238,12 @@ export default function GuardGame() {
                     >
                         <div className="bg-white px-10 py-6 rounded-[3rem] shadow-2xl border-4 border-amber-500 flex flex-col items-center">
                             <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] mb-1">Spirit Guide</span>
-                            <h2 className="text-5xl font-black text-slate-900 tracking-tighter">修行開始</h2>
-                            <p className="mt-2 text-xs font-bold text-slate-400">相克の理で護れ！</p>
+                            <h2 className="text-5xl font-black text-slate-900 tracking-tighter">
+                                {selectedLevel === 1 ? '初級' : selectedLevel === 2 ? '中級' : '上級'}
+                            </h2>
+                            <p className="mt-2 text-xs font-bold text-slate-400">
+                                {selectedLevel === 3 ? '五行の導きなし！' : '相克の理で護れ！'}
+                            </p>
                         </div>
                     </motion.div>
                 )}
@@ -244,40 +313,53 @@ export default function GuardGame() {
 
                         {/* Soukoku Guide (Improved) */}
                         <div className="mt-4 flex flex-col items-center shrink-0 w-full px-4">
-                            <div className="bg-white/90 backdrop-blur-md border border-slate-100 p-2 sm:p-4 rounded-3xl shadow-xl w-full max-w-[320px]">
-                                <div className="flex justify-between items-center mb-2 px-2">
-                                    <span className="text-[7px] font-black text-red-400 bg-red-50 px-2 py-0.5 rounded-full uppercase tracking-widest">敵の属性 (出題)</span>
-                                    <span className="text-[7px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full uppercase tracking-widest">あなたの属性 (対策)</span>
-                                </div>
-                                <div className="flex justify-between items-center px-1">
-                                    {[
-                                        { s: 'Wood', t: 'Metal' },
-                                        { s: 'Fire', t: 'Water' },
-                                        { s: 'Earth', t: 'Wood' },
-                                        { s: 'Metal', t: 'Fire' },
-                                        { s: 'Water', t: 'Earth' }
-                                    ].map((pair, i) => (
-                                        <div key={i} className="flex flex-col items-center">
-                                            <div className={cn(
-                                                "w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[9px] text-white font-black opacity-40 grayscale-[0.3]",
-                                                ELEMENT_COLORS[pair.s as Element]
-                                            )}>
-                                                {ELEMENT_JP[pair.s as Element]}
-                                            </div>
-                                            <div className="text-slate-200 text-[10px] font-black my-0.5">⬇︎</div>
-                                            <div className={cn(
-                                                "w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[9px] text-white font-black shadow-sm ring-1 ring-white",
-                                                ELEMENT_COLORS[pair.t as Element]
-                                            )}>
-                                                {ELEMENT_JP[pair.t as Element]}
-                                            </div>
+                            <AnimatePresence>
+                                {showGuideForTurn ? (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="bg-white/90 backdrop-blur-md border border-slate-100 p-2 sm:p-4 rounded-3xl shadow-xl w-full max-w-[320px]"
+                                    >
+                                        <div className="flex justify-between items-center mb-2 px-2">
+                                            <span className="text-[7px] font-black text-red-400 bg-red-50 px-2 py-0.5 rounded-full uppercase tracking-widest">敵の属性 (出題)</span>
+                                            <span className="text-[7px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full uppercase tracking-widest">あなたの属性 (対策)</span>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
+                                        <div className="flex justify-between items-center px-1">
+                                            {[
+                                                { s: 'Wood', t: 'Metal' },
+                                                { s: 'Fire', t: 'Water' },
+                                                { s: 'Earth', t: 'Wood' },
+                                                { s: 'Metal', t: 'Fire' },
+                                                { s: 'Water', t: 'Earth' }
+                                            ].map((pair, i) => (
+                                                <div key={i} className="flex flex-col items-center">
+                                                    <div className={cn(
+                                                        "w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[9px] text-white font-black opacity-40 grayscale-[0.3]",
+                                                        ELEMENT_COLORS[pair.s as Element]
+                                                    )}>
+                                                        {ELEMENT_JP[pair.s as Element]}
+                                                    </div>
+                                                    <div className="text-slate-200 text-[10px] font-black my-0.5">⬇︎</div>
+                                                    <div className={cn(
+                                                        "w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[9px] text-white font-black shadow-sm ring-1 ring-white",
+                                                        ELEMENT_COLORS[pair.t as Element]
+                                                    )}>
+                                                        {ELEMENT_JP[pair.t as Element]}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                ) : (
+                                    <div className="h-[92px] sm:h-[128px] flex items-center justify-center">
+                                        <div className="text-slate-200 font-black text-2xl tracking-[0.5em] opacity-20 uppercase">No Guide</div>
+                                    </div>
+                                )}
+                            </AnimatePresence>
                         </div>
                         <p className="text-slate-500 text-[10px] font-black mt-4 leading-none bg-slate-50 px-4 py-1.5 rounded-full border border-slate-100 italic">
-                            中央の敵に「勝つ」属性を下から選べ！
+                            {showGuideForTurn ? '中央の敵に「勝つ」属性を下から選べ！' : '自らの知識で「勝つ」属性を導き出せ！'}
                         </p>
                     </div>
 
@@ -331,7 +413,7 @@ export default function GuardGame() {
                     gainedExp={resultData.gainedExp}
                     gainedCardIds={resultData.gainedCards}
                     reaction={resultData.reaction}
-                    onRetry={handleStart}
+                    onRetry={() => setGameState('LEVEL_SELECT')}
                 />
             )}
         </div>
