@@ -3,19 +3,20 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Element } from '@/lib/types';
-import { SOUSEI, ELEMENT_COLORS, ELEMENT_JP } from '@/lib/data';
+import { SOUSEI, ELEMENT_COLORS, ELEMENT_JP, SOUKOKU } from '@/lib/data';
 import { useStore } from '@/lib/store';
 import { GameResult } from '@/components/GameResult';
 import { TutorialOverlay } from '@/components/TutorialOverlay';
 import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
+import Link from 'next/link';
 
 const TIME_LIMIT = 30;
 const NODE_COUNT = 10;
 
 interface Node {
     id: number;
-    x: number;
-    y: number;
+    gridIndex: number; // 0-8 for 3x3
     element: Element;
 }
 
@@ -31,17 +32,16 @@ export default function ChainGame() {
     const [resultData, setResultData] = useState<{ gainedCards: number[], gainedExp: number, reaction: string } | null>(null);
 
     const spawnNodes = () => {
-        const newNodes: Node[] = [];
         const elements: Element[] = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'];
-        for (let i = 0; i < NODE_COUNT; i++) {
+        const newNodes: Node[] = [];
+        for (let i = 0; i < 9; i++) {
             newNodes.push({
                 id: Math.random(),
-                x: Math.random() * 75 + 10,
-                y: Math.random() * 55 + 20,
-                element: elements[i % elements.length]
+                gridIndex: i,
+                element: elements[Math.floor(Math.random() * elements.length)]
             });
         }
-        setNodes(newNodes.sort(() => Math.random() - 0.5));
+        setNodes(newNodes);
     };
 
     useEffect(() => {
@@ -88,23 +88,12 @@ export default function ChainGame() {
             if (node.element === nextNeeded) {
                 setChain([...chain, node]);
                 setNodes(prev => {
-                    const remaining = prev.filter(n => n.id !== node.id);
                     const elements: Element[] = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'];
-
-                    const nextOfNext = SOUSEI[node.element];
-                    const hasNext = remaining.some(n => n.element === nextOfNext);
-
-                    const newElement = hasNext
-                        ? elements[Math.floor(Math.random() * elements.length)]
-                        : nextOfNext;
-
-                    remaining.push({
+                    return prev.map(n => n.gridIndex === node.gridIndex ? {
+                        ...n,
                         id: Math.random(),
-                        x: Math.random() * 75 + 10,
-                        y: Math.random() * 55 + 20,
-                        element: newElement
-                    });
-                    return remaining;
+                        element: elements[Math.floor(Math.random() * elements.length)]
+                    } : n);
                 });
                 setScore(s => s + 100 + (chain.length * 50));
                 setLastLinkResult('GOOD');
@@ -127,14 +116,19 @@ export default function ChainGame() {
             />
 
             {/* HUD */}
-            <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-start z-10">
-                <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 sm:px-5 py-2 sm:py-3 rounded-[1.5rem] shadow-sm">
-                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">スコア</p>
-                    <p className="text-2xl sm:text-3xl font-black tabular-nums text-slate-900">{score}</p>
+            <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-10">
+                <div className="flex items-center space-x-3">
+                    <Link href="/play" className="p-3 bg-white/90 backdrop-blur-sm border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-slate-900 transition active:scale-90">
+                        <X className="w-5 h-5" />
+                    </Link>
+                    <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 py-2 rounded-2xl shadow-sm">
+                        <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest mb-0.5 leading-none">スコア</p>
+                        <p className="text-xl sm:text-2xl font-black tabular-nums text-slate-900 leading-none">{score}</p>
+                    </div>
                 </div>
-                <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 sm:px-5 py-2 sm:py-3 rounded-[1.5rem] text-right shadow-sm">
-                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">残り時間</p>
-                    <p className={cn("text-2xl sm:text-3xl font-black tabular-nums", timeLeft < 10 ? "text-red-500 animate-pulse" : "text-blue-500")}>
+                <div className="bg-slate-50/90 backdrop-blur-sm border border-slate-100 px-4 py-2 rounded-2xl text-right shadow-sm">
+                    <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest mb-0.5 leading-none">残り時間</p>
+                    <p className={cn("text-xl sm:text-2xl font-black tabular-nums leading-none", timeLeft < 10 ? "text-red-500 animate-pulse" : "text-blue-500")}>
                         {timeLeft}秒
                     </p>
                 </div>
@@ -182,25 +176,45 @@ export default function ChainGame() {
                         )}
                     </div>
 
-                    {/* Nodes */}
-                    {nodes.map((node) => (
-                        <motion.button
-                            key={node.id}
-                            initial={{ scale: 0, rotate: -45 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            exit={{ scale: 0 }}
-                            whileTap={{ scale: 1.15 }}
-                            onPointerDown={() => handleNodeClick(node)}
-                            className={cn(
-                                "absolute w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl flex items-center justify-center text-2xl sm:text-3xl font-black border-[3px] sm:border-4 border-white transition-all ring-4 sm:ring-8 ring-slate-50/50 -translate-x-1/2 -translate-y-1/2",
-                                ELEMENT_COLORS[node.element]
-                            )}
-                            style={{ left: `${node.x}%`, top: `${node.y}%` }}
-                        >
-                            <span className="drop-shadow-md z-10">{ELEMENT_JP[node.element]}</span>
-                            <div className="absolute inset-0 bg-white/10 rounded-[1.5rem] sm:rounded-[2rem] opacity-30" />
-                        </motion.button>
-                    ))}
+                    {/* Grid Nodes */}
+                    <div className="absolute inset-0 flex items-center justify-center p-6 pt-20">
+                        <div className="grid grid-cols-3 gap-3 w-full max-w-sm aspect-square">
+                            {nodes.map((node) => (
+                                <motion.button
+                                    key={node.id}
+                                    initial={{ scale: 0, rotate: -45 }}
+                                    animate={{ scale: 1, rotate: 0 }}
+                                    exit={{ scale: 0 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onPointerDown={() => handleNodeClick(node)}
+                                    className={cn(
+                                        "w-full h-full rounded-[1.5rem] sm:rounded-[2rem] shadow-lg flex items-center justify-center text-3xl sm:text-4xl font-black border-4 border-white transition-all ring-4 ring-slate-50/50 relative overflow-hidden",
+                                        ELEMENT_COLORS[node.element]
+                                    )}
+                                >
+                                    <span className="drop-shadow-md z-10">{ELEMENT_JP[node.element]}</span>
+                                    <div className="absolute inset-0 bg-white/10 opacity-30" />
+                                </motion.button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Cycle Guide */}
+                    <div className="absolute top-24 sm:top-28 left-0 right-0 flex justify-center">
+                        <div className="bg-white/90 backdrop-blur-md border border-slate-100 px-6 py-3 rounded-full shadow-xl flex items-center space-x-3">
+                            {['Wood', 'Fire', 'Earth', 'Metal', 'Water'].map((el, i) => (
+                                <div key={el} className="flex items-center space-x-3">
+                                    <div className={cn(
+                                        "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black text-white shadow-sm",
+                                        ELEMENT_COLORS[el as Element]
+                                    )}>
+                                        {ELEMENT_JP[el as Element]}
+                                    </div>
+                                    {i < 4 && <div className="text-slate-200 font-black">→</div>}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
 

@@ -107,20 +107,29 @@ export function GameResult({ score, gainedExp, gainedCardIds, reaction, onRetry 
                     )}
                 </AnimatePresence>
 
-                <div className="grid grid-cols-2 gap-3 sm:gap-5 pt-6 sm:pt-10">
+                <div className="flex flex-col space-y-3 pt-6 sm:pt-10">
                     <button
                         onClick={onRetry}
-                        className="flex items-center justify-center space-x-2 sm:space-x-3 p-4 sm:p-6 bg-slate-100 text-slate-600 rounded-2xl sm:rounded-3xl font-black hover:bg-slate-200 active:scale-95 transition-all shadow-sm"
+                        className="w-full flex items-center justify-center space-x-3 p-5 sm:p-6 bg-slate-900 text-white rounded-[1.5rem] sm:rounded-3xl font-black shadow-2xl shadow-indigo-100 active:scale-95 transition-all"
                     >
-                        <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
-                        <span className="text-sm sm:text-base">修行へ</span>
+                        <RotateCcw className="w-6 h-6" />
+                        <span className="text-base sm:text-lg">リトライ</span>
                     </button>
-                    <Link href="/" className="w-full">
-                        <button className="w-full flex items-center justify-center space-x-2 sm:space-x-3 p-4 sm:p-6 bg-slate-900 text-white rounded-2xl sm:rounded-3xl font-black shadow-2xl shadow-indigo-100 active:scale-95 transition-all">
-                            <Home className="w-5 h-5 sm:w-6 sm:h-6" />
-                            <span className="text-sm sm:text-base">里に帰る</span>
-                        </button>
-                    </Link>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <Link href="/play" className="w-full">
+                            <button className="w-full h-full flex flex-col items-center justify-center p-4 bg-slate-100 text-slate-600 rounded-[1.5rem] font-black hover:bg-slate-200 active:scale-95 transition-all shadow-sm">
+                                <Sparkles className="w-5 h-5 mb-1 text-indigo-400" />
+                                <span className="text-[10px] sm:text-xs">他の修行を選ぶ</span>
+                            </button>
+                        </Link>
+                        <Link href="/" className="w-full">
+                            <button className="w-full h-full flex flex-col items-center justify-center p-4 bg-white border border-slate-100 text-slate-600 rounded-[1.5rem] font-black hover:bg-slate-50 active:scale-95 transition-all shadow-sm">
+                                <Home className="w-5 h-5 mb-1 text-slate-400" />
+                                <span className="text-[10px] sm:text-xs">ホームへ戻る</span>
+                            </button>
+                        </Link>
+                    </div>
                 </div>
 
             </motion.div>
