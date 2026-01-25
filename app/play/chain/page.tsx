@@ -27,14 +27,15 @@ export default function ChainGame() {
     const [nodes, setNodes] = useState<Node[]>([]);
     const [chain, setChain] = useState<Node[]>([]);
     const [lastLinkResult, setLastLinkResult] = useState<'GOOD' | 'BAD' | null>(null);
+    const [selectedLevel, setSelectedLevel] = useState<9 | 18 | 36 | null>(null);
 
-    const { gameCompleted } = useStore();
+    const { gameCompleted, gameProgress, unlockChainLevel } = useStore();
     const [resultData, setResultData] = useState<{ gainedCards: number[], gainedExp: number, reaction: string } | null>(null);
 
-    const spawnNodes = () => {
+    const spawnNodes = (count: number) => {
         const elements: Element[] = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'];
         const newNodes: Node[] = [];
-        for (let i = 0; i < 9; i++) {
+        for (let i = 0; i < count; i++) {
             newNodes.push({
                 id: Math.random(),
                 gridIndex: i,
@@ -46,7 +47,7 @@ export default function ChainGame() {
 
     useEffect(() => {
         if (gameState === 'PLAYING') {
-            spawnNodes();
+            spawnNodes(selectedLevel || 9); // Pass a default level (9) if selectedLevel is null
             const interval = setInterval(() => {
                 setTimeLeft((t) => {
                     if (t <= 1) {
@@ -67,12 +68,14 @@ export default function ChainGame() {
         }
     }, [gameState, score, gameCompleted]);
 
-    const handleStart = () => {
+    const handleStart = (level: 9 | 18 | 36 = 9) => {
         setScore(0);
         setTimeLeft(TIME_LIMIT);
         setGameState('PLAYING');
         setResultData(null);
         setChain([]);
+        setSelectedLevel(level);
+        spawnNodes(level);
     };
 
     const handleNodeClick = (node: Node) => {
@@ -95,25 +98,98 @@ export default function ChainGame() {
                         element: elements[Math.floor(Math.random() * elements.length)]
                     } : n);
                 });
-                setScore(s => s + 100 + (chain.length * 50));
+                setScore(s => {
+                    const multiplier = selectedLevel === 36 ? 3 : selectedLevel === 18 ? 2 : 1;
+                    return s + (100 + (chain.length * 50)) * multiplier;
+                });
                 setLastLinkResult('GOOD');
                 setTimeout(() => setLastLinkResult(null), 300);
             } else {
                 setLastLinkResult('BAD');
                 setChain([]);
-                spawnNodes();
+                spawnNodes(selectedLevel || 9);
                 setTimeout(() => setLastLinkResult(null), 300);
             }
         }
     };
+
+    const handleGameFinished = () => {
+        const rewards = gameCompleted(score, 'chain');
+        setResultData(rewards);
+
+        // Unlock next level if score is decent
+        if (score > 1000) {
+            if (selectedLevel === 9) unlockChainLevel(2);
+            if (selectedLevel === 18) unlockChainLevel(3);
+        }
+    };
+
+    useEffect(() => {
+        if (gameState === 'FINISHED') {
+            handleGameFinished();
+        }
+    }, [gameState]);
 
     return (
         <div className="h-[100dvh] bg-white relative overflow-hidden touch-none select-none font-sans text-slate-900">
             <TutorialOverlay
                 gameType="chain"
                 isOpen={gameState === 'TUTORIAL'}
-                onStart={handleStart}
+                onStart={() => setSelectedLevel(null)} // Handled by level selection UI
             />
+
+            {gameState === 'TUTORIAL' && !selectedLevel && (
+                <div className="absolute inset-0 z-50 bg-white/60 backdrop-blur-md flex flex-col items-center justify-center p-6 pb-20">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100 w-full max-w-sm flex flex-col items-center space-y-6"
+                    >
+                        <div className="text-center">
+                            <h3 className="text-2xl font-black text-slate-900 mb-2">修行レベルを選択</h3>
+                            <p className="text-xs text-slate-400 font-bold">難易度が高いほど獲得ポイントアップ！</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-3 w-full">
+                            {[
+                                { id: 1, count: 9, label: '初級', sub: '3x3 グリッド', minScore: 0 },
+                                { id: 2, count: 18, label: '中級', sub: '3x6 グリッド', minScore: 1000 },
+                                { id: 3, count: 36, label: '上級', sub: '6x6 グリッド', minScore: 1000 },
+                            ].map((lv) => {
+                                const isLocked = gameProgress.chainLevelsUnlocked < lv.id;
+                                return (
+                                    <button
+                                        key={lv.id}
+                                        disabled={isLocked}
+                                        onClick={() => handleStart(lv.count as 9 | 18 | 36)}
+                                        className={cn(
+                                            "w-full p-5 rounded-2xl flex items-center justify-between transition-all active:scale-95 border-2",
+                                            isLocked
+                                                ? "bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed"
+                                                : "bg-white border-indigo-50 hover:border-indigo-500 text-slate-900 shadow-sm hover:shadow-md"
+                                        )}
+                                    >
+                                        <div className="text-left">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-lg font-black">{lv.label}</span>
+                                                <span className="text-[10px] font-black px-2 py-0.5 bg-slate-100 rounded-full text-slate-400 uppercase">{lv.count}点</span>
+                                            </div>
+                                            <p className="text-[10px] font-bold text-slate-400">{lv.sub}</p>
+                                        </div>
+                                        {isLocked ? (
+                                            <div className="text-[10px] font-black text-red-400">Locked</div>
+                                        ) : (
+                                            <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white">
+                                                <div className="text-lg">→</div>
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </motion.div>
+                </div>
+            )}
 
             {/* HUD */}
             <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-10">
@@ -171,14 +247,19 @@ export default function ChainGame() {
                         {chain.length > 0 && <div className="text-slate-200 text-xl sm:text-3xl animate-pulse">→</div>}
                         {chain.length === 0 && (
                             <div className="text-slate-300 text-[10px] sm:text-xs font-bold tracking-widest bg-slate-50 px-4 py-1.5 sm:px-6 sm:py-2 rounded-full border border-slate-100">
-                                好きな属性から開始
+                                {selectedLevel === 9 ? '3x3 グリッド' : selectedLevel === 18 ? '3x6 グリッド' : '6x6 グリッド'}
                             </div>
                         )}
                     </div>
 
                     {/* Grid Nodes */}
-                    <div className="absolute inset-0 flex items-center justify-center p-6 pt-16 sm:pt-20">
-                        <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full max-w-[280px] sm:max-w-sm aspect-square">
+                    <div className="absolute inset-0 flex items-center justify-center p-4 pt-16 sm:pt-20">
+                        <div className={cn(
+                            "grid gap-2 sm:gap-3 w-full max-w-[340px] sm:max-w-xl aspect-square",
+                            selectedLevel === 9 ? "grid-cols-3 max-w-[280px]" :
+                                selectedLevel === 18 ? "grid-cols-3 aspect-[3/6] max-w-[240px]" :
+                                    "grid-cols-6"
+                        )}>
                             {nodes.map((node) => (
                                 <motion.button
                                     key={node.id}
@@ -188,8 +269,9 @@ export default function ChainGame() {
                                     whileTap={{ scale: 0.9 }}
                                     onPointerDown={() => handleNodeClick(node)}
                                     className={cn(
-                                        "w-full h-full rounded-2xl sm:rounded-[2rem] shadow-lg flex items-center justify-center text-2xl sm:text-4xl font-black border-2 sm:border-4 border-white transition-all ring-2 sm:ring-4 ring-slate-50/50 relative overflow-hidden",
-                                        ELEMENT_COLORS[node.element]
+                                        "w-full h-full rounded-xl sm:rounded-2xl shadow-lg flex items-center justify-center font-black border-2 border-white transition-all ring-2 ring-slate-50/50 relative overflow-hidden",
+                                        ELEMENT_COLORS[node.element],
+                                        selectedLevel === 36 ? "text-xs sm:text-xl" : "text-2xl sm:text-4xl"
                                     )}
                                 >
                                     <span className="drop-shadow-md z-10">{ELEMENT_JP[node.element]}</span>

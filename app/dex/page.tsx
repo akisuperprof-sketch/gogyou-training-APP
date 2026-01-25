@@ -56,9 +56,14 @@ export default function DexPage() {
                         <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase truncate max-w-[100px] sm:max-w-none">Collection History</p>
                     </div>
                 </div>
-                <Link href="/" className="p-4 bg-white border border-slate-100 rounded-[1.25rem] shadow-sm hover:bg-slate-50">
-                    <Home className="w-6 h-6 text-slate-700" />
-                </Link>
+                <div className="flex flex-col items-end">
+                    <div className="px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-xl shadow-sm text-right">
+                        <p className="text-[8px] text-indigo-400 font-black uppercase tracking-tighter leading-none mb-0.5">Total Collected</p>
+                        <p className="text-sm font-black text-indigo-600 leading-none">
+                            {allCards.reduce((acc, c) => acc + c.ownedCount, 0)} <span className="text-[10px]">個</span>
+                        </p>
+                    </div>
+                </div>
             </header>
 
             {/* Stats Card */}
@@ -69,7 +74,10 @@ export default function DexPage() {
                 <div className="flex-1">
                     <div className="flex justify-between items-end mb-3">
                         <span className="text-xs font-black text-slate-400 tracking-widest uppercase">現在の収集率</span>
-                        <span className="text-2xl font-black text-slate-900">{progress}%</span>
+                        <div className="text-right">
+                            <span className="text-2xl font-black text-slate-900">{progress}%</span>
+                            <span className="text-[10px] block font-bold text-slate-400">({discoveredCount} / {totalCount} 種)</span>
+                        </div>
                     </div>
                     <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden shadow-inner">
                         <motion.div

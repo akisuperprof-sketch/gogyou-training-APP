@@ -18,6 +18,7 @@ interface AppState {
     clearNewCardsFlag: () => void;
     checkGenkiDecay: () => void;
     toggleMasterMode: () => void;
+    unlockChainLevel: (level: number) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -37,6 +38,7 @@ export const useStore = create<AppState>()(
                 hasNewCards: false,
                 lastGenkiUpdate: Date.now(),
                 isMasterMode: false,
+                chainLevelsUnlocked: 1,
             },
 
             unlockSpirit: (id) => set((state) => ({
@@ -233,14 +235,20 @@ export const useStore = create<AppState>()(
                             acc[cid] = { ...state.cards[cid], ownedCount: Math.max(state.cards[cid].ownedCount, 99), discovered: true };
                             return acc;
                         }, {} as Record<number, Card>),
-                        gameProgress: { ...state.gameProgress, isMasterMode: true }
+                        gameProgress: { ...state.gameProgress, isMasterMode: true, chainLevelsUnlocked: 3 }
                     };
                 } else {
                     return {
                         gameProgress: { ...state.gameProgress, isMasterMode: false }
                     };
                 }
-            })
+            }),
+            unlockChainLevel: (level) => set((state) => ({
+                gameProgress: {
+                    ...state.gameProgress,
+                    chainLevelsUnlocked: Math.max(state.gameProgress.chainLevelsUnlocked, level)
+                }
+            }))
         }),
         {
             name: 'gogyou-storage-v6', // Incremented version to reset/update schema

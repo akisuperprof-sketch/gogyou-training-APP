@@ -21,6 +21,7 @@ export default function GuardGame() {
     const [options, setOptions] = useState<Element[]>([]);
     const [turnKey, setTurnKey] = useState(0);
     const [effect, setEffect] = useState<'CORRECT' | 'WRONG' | null>(null);
+    const [missedOptions, setMissedOptions] = useState<Set<Element>>(new Set());
 
     const { gameCompleted } = useStore();
     const [resultData, setResultData] = useState<{ gainedCards: number[], gainedExp: number, reaction: string } | null>(null);
@@ -37,6 +38,7 @@ export default function GuardGame() {
         const wrong2 = wrongPool.splice(Math.floor(Math.random() * wrongPool.length), 1)[0];
         const newOptions = [correct, wrong1, wrong2].sort(() => Math.random() - 0.5);
         setOptions(newOptions);
+        setMissedOptions(new Set());
     };
 
     useEffect(() => {
@@ -78,6 +80,8 @@ export default function GuardGame() {
     }
 
     const handleAnswer = (choice: Element) => {
+        if (missedOptions.has(choice) || effect) return;
+
         const correct = SOUKOKU[choice] === enemy;
         if (correct) {
             setScore(s => s + 200);
@@ -85,9 +89,10 @@ export default function GuardGame() {
             setTimeout(() => {
                 setEffect(null);
                 nextTurn();
-            }, 300);
+            }, 500);
         } else {
             setScore(s => Math.max(0, s - 50));
+            setMissedOptions(prev => new Set(prev).add(choice));
             setEffect('WRONG');
             setTimeout(() => setEffect(null), 300);
         }
@@ -128,9 +133,13 @@ export default function GuardGame() {
                             <motion.div
                                 key={`${enemy}-${turnKey}`}
                                 initial={{ scale: 0.1, z: -1000, opacity: 0.3 }}
-                                animate={{ scale: 1, z: 0, opacity: 1 }}
+                                animate={effect === 'CORRECT' ? {
+                                    scale: [1, 1.2, 0.8, 1],
+                                    rotate: [0, -10, 10, 0],
+                                    x: [0, -10, 10, 0]
+                                } : { scale: 1, z: 0, opacity: 1 }}
                                 exit={{ scale: 1.5, z: 500, opacity: 0 }}
-                                transition={{ duration: 5.5, ease: "linear" }}
+                                transition={effect === 'CORRECT' ? { duration: 0.4 } : { duration: 5.5, ease: "linear" }}
                                 className={cn("inline-flex items-center justify-center w-28 h-28 sm:w-48 sm:h-48 rounded-[2rem] sm:rounded-[3.5rem] text-4xl sm:text-8xl shadow-[0_30px_80px_rgba(0,0,0,0.3)] border-4 sm:border-8 border-white relative z-10",
                                     enemy === 'Fire' ? 'bg-red-500 text-white shadow-red-500/50' :
                                         enemy === 'Water' ? 'bg-blue-500 text-white shadow-blue-500/50' :
@@ -139,6 +148,20 @@ export default function GuardGame() {
                                                     'bg-yellow-600 text-white shadow-yellow-700/50'
                                 )}>
                                 <span className="drop-shadow-lg">{ELEMENT_JP[enemy]}</span>
+
+                                {/* Impact Burst Effect */}
+                                {effect === 'CORRECT' && (
+                                    <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+                                        {[...Array(8)].map((_, i) => (
+                                            <motion.div
+                                                key={i}
+                                                initial={{ scale: 0, x: 0, y: 0 }}
+                                                animate={{ scale: 1, x: (i % 2 === 0 ? 1 : -1) * (Math.random() * 100), y: (i < 4 ? 1 : -1) * (Math.random() * 100), opacity: 0 }}
+                                                className="absolute w-4 h-4 rounded-full bg-white sm:w-6 sm:h-6"
+                                            />
+                                        ))}
+                                    </div>
+                                )}
 
                                 {/* Defense Hit Effect Overlay */}
                                 <AnimatePresence>
@@ -185,23 +208,34 @@ export default function GuardGame() {
 
                     {/* Options */}
                     <div className="grid grid-cols-3 gap-2 sm:gap-5 px-4 sm:px-6 w-full max-w-md z-10 shrink-0">
-                        {options.map((opt, i) => (
-                            <motion.button
-                                key={`${opt}-${i}`}
-                                initial={{ y: 20, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ delay: i * 0.1 }}
-                                onClick={() => handleAnswer(opt)}
-                                whileTap={{ scale: 0.9, y: 5 }}
-                                className={cn(
-                                    "h-20 sm:h-32 rounded-[1.5rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center font-black text-lg sm:text-2xl shadow-xl border-b-[4px] sm:border-b-[8px] border-black/20 transition-all active:border-b-0",
-                                    ELEMENT_COLORS[opt]
-                                )}
-                            >
-                                <Shield className="w-5 h-5 sm:w-8 sm:h-8 mb-1 sm:mb-2 opacity-40 shrink-0" />
-                                <span className="drop-shadow-sm leading-none">{ELEMENT_JP[opt]}</span>
-                            </motion.button>
-                        ))}
+                        {options.map((opt, i) => {
+                            const isMissed = missedOptions.has(opt);
+                            return (
+                                <motion.button
+                                    key={`${opt}-${i}`}
+                                    initial={{ y: 20, opacity: 0 }}
+                                    animate={{ y: 0, opacity: isMissed ? 0.4 : 1 }}
+                                    transition={{ delay: i * 0.1 }}
+                                    onClick={() => handleAnswer(opt)}
+                                    whileTap={!isMissed ? { scale: 0.9, y: 5 } : {}}
+                                    className={cn(
+                                        "h-20 sm:h-32 rounded-[1.5rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center font-black text-lg sm:text-2xl shadow-xl border-b-[4px] sm:border-b-[8px] border-black/20 transition-all active:border-b-0 relative overflow-hidden",
+                                        ELEMENT_COLORS[opt],
+                                        isMissed && "grayscale cursor-not-allowed"
+                                    )}
+                                >
+                                    <Shield className="w-5 h-5 sm:w-8 sm:h-8 mb-1 sm:mb-2 opacity-40 shrink-0" />
+                                    <span className="drop-shadow-sm leading-none">
+                                        {isMissed ? 'miss' : ELEMENT_JP[opt]}
+                                    </span>
+                                    {isMissed && (
+                                        <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                                            <span className="text-white text-[10px] font-black uppercase tracking-tighter rotate-12">Fail</span>
+                                        </div>
+                                    )}
+                                </motion.button>
+                            );
+                        })}
                     </div>
                 </div>
             )}

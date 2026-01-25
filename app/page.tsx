@@ -69,7 +69,10 @@ export default function Home() {
             )}
             title="マスターモード"
           >
-            <Crown className="w-5 h-5 fill-current" />
+            <div className="flex items-center space-x-2">
+              <Crown className="w-5 h-5 fill-current" />
+              {gameProgress.isMasterMode && <span className="text-[10px] font-black uppercase tracking-tighter">Master</span>}
+            </div>
           </button>
           <button
             onClick={() => setStoryOpen(true)}
@@ -117,9 +120,22 @@ export default function Home() {
                   <motion.div
                     animate={isFocused ? { y: [0, -5, 0] } : {}}
                     transition={{ repeat: Infinity, duration: 3.5 }}
-                    className="text-5xl sm:text-7xl mb-2 sm:mb-4 drop-shadow-sm"
+                    className="relative w-24 h-24 sm:w-32 sm:h-32 mb-2 sm:mb-4 flex items-center justify-center"
                   >
-                    {spirit.element === 'Wood' ? '🌿' : spirit.element === 'Fire' ? '🔥' : spirit.element === 'Earth' ? '⛰️' : spirit.element === 'Metal' ? '💎' : '💧'}
+                    {gameProgress.isMasterMode ? (
+                      <div className="relative w-full h-full">
+                        <img
+                          src={spiritInfo.illustration}
+                          alt={spirit.name}
+                          className="w-full h-full object-contain drop-shadow-xl"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent pointer-events-none" />
+                      </div>
+                    ) : (
+                      <span className="text-5xl sm:text-7xl drop-shadow-sm">
+                        {spirit.element === 'Wood' ? '🌿' : spirit.element === 'Fire' ? '🔥' : spirit.element === 'Earth' ? '⛰️' : spirit.element === 'Metal' ? '💎' : '💧'}
+                      </span>
+                    )}
                   </motion.div>
                   <h2 className="text-lg sm:text-xl font-black text-slate-900 leading-none">{spirit.name}</h2>
                   <div className={cn(

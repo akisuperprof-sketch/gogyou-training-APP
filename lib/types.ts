@@ -52,4 +52,5 @@ export interface GameProgress {
     hasNewCards: boolean;
     lastGenkiUpdate?: number;
     isMasterMode: boolean;
+    chainLevelsUnlocked: number;
 }

@@ -128,8 +128,11 @@ export function CardModal({ card, onClose }: CardModalProps) {
                                     : "bg-slate-100 text-slate-300 shadow-none cursor-not-allowed"
                             )}
                         >
-                            <Zap className={cn("w-6 h-6", card.ownedCount > 0 ? "text-yellow-400 fill-current" : "")} />
-                            <span>このカードを処方する</span>
+                            <div className="flex flex-col items-center">
+                                <Zap className={cn("w-6 h-6 mb-1", card.ownedCount > 0 ? "text-yellow-400 fill-current" : "")} />
+                                <span className="leading-none">このカードを飲む</span>
+                                <span className="text-[10px] font-bold opacity-50 mt-1">精霊のごきげんを回復します</span>
+                            </div>
                         </button>
                     </div>
                 </motion.div>
