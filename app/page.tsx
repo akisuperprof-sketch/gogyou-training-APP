@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useStore } from '@/lib/store';
 import { SPIRIT_DATA, MOOD_COLORS, ELEMENT_COLORS } from '@/lib/data';
-import { HelpCircle, Sparkles, Crown, Book, History, Info, Zap, ChevronLeft, ChevronRight, X, BookOpen } from 'lucide-react';
+import { HelpCircle, Sparkles, Crown, Book, History, Info, Zap, ChevronLeft, ChevronRight, X, BookOpen, Settings } from 'lucide-react';
 import { StoryModal } from '@/components/StoryModal';
 import { GuideModal } from '@/components/GuideModal';
+import { SettingsModal } from '@/components/SettingsModal';
 import { DAILY_WISDOM } from '@/lib/wisdomData';
 import { DailyWisdom } from '@/lib/types';
 
@@ -21,7 +22,7 @@ export default function Home() {
   const [todayWisdom, setTodayWisdom] = useState<DailyWisdom | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
-  const [debugMenuOpen, setDebugMenuOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     if (mounted) {
@@ -150,48 +151,14 @@ export default function Home() {
             <div className="flex items-center space-x-2">
               <div className="relative">
                 <button
-                  onClick={() => setDebugMenuOpen(!debugMenuOpen)}
-                  className={cn(
-                    "p-2.5 rounded-2xl transition-all active:scale-90 border flex flex-col items-center justify-center space-y-0.5",
-                    gameProgress.isMasterMode ? "bg-amber-100 border-amber-200 text-amber-600" : "bg-white border-slate-100 text-slate-300"
-                  )}
+                  onClick={() => setSettingsOpen(true)}
+                  className="p-2.5 rounded-2xl transition-all active:scale-90 border flex flex-col items-center justify-center space-y-0.5 bg-white border-slate-100 text-slate-300 hover:text-slate-500"
                 >
-                  <Crown className="w-4 h-4" />
-                  <span className="text-[6px] font-black uppercase leading-none">Debug</span>
+                  <Settings className="w-4 h-4" />
+                  <span className="text-[6px] font-black uppercase leading-none">Settings</span>
                 </button>
 
-                <AnimatePresence>
-                  {debugMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-2 w-48 bg-white rounded-3xl shadow-2xl border border-slate-100 p-2 z-[60]"
-                    >
-                      {[
-                        { id: 'VISUAL', label: 'ビジュアルだけ', sub: 'UI要素の解放のみ' },
-                        { id: 'GAMES', label: 'ゲーム全部', sub: '全修行を解放' },
-                        { id: 'SPIRITS', label: '精霊全部', sub: '全精霊を解放' },
-                        { id: 'HALF_DRUGS', label: '生薬半分', sub: '収集状況50%' },
-                        { id: 'CRAFTING', label: '調合可能', sub: '素材+プレミアム' },
-                        { id: 'FULL', label: 'フル解放', sub: '全要素MAX' },
-                        { id: 'RESET', label: 'リセット', sub: '初期状態に戻す' },
-                      ].map((preset) => (
-                        <button
-                          key={preset.id}
-                          onClick={() => {
-                            applyDebugPreset(preset.id as any);
-                            setDebugMenuOpen(false);
-                          }}
-                          className="w-full text-left p-3 hover:bg-slate-50 rounded-2xl transition-colors group"
-                        >
-                          <p className="text-[10px] font-black text-slate-900 group-hover:text-indigo-600">{preset.label}</p>
-                          <p className="text-[8px] font-bold text-slate-400">{preset.sub}</p>
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
               </div>
               {gameProgress.isMasterMode && (
                 <button
