@@ -27,6 +27,7 @@ interface AppState {
     purchasePremium: () => void;
     applyDebugPreset: (preset: DebugPreset) => void;
     toggleBuruBuruMode: () => void;
+    toggleDebugFlag: (key: keyof import('./types').DebugFlags) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -64,10 +65,27 @@ export const useStore = create<AppState>()(
                 unlockedFormulaIds: [],
                 isPremiumUnlocked: true,
                 isBuruBuruMode: false,
+                debugFlags: {
+                    showImages: false,
+                    unlockAllGames: false,
+                    unlockAllSpirits: false,
+                    unlockAllItems: false,
+                    unlockPremium: false,
+                }
             },
 
             toggleBuruBuruMode: () => set((state) => ({
                 gameProgress: { ...state.gameProgress, isBuruBuruMode: !state.gameProgress.isBuruBuruMode }
+            })),
+
+            toggleDebugFlag: (key: keyof import('./types').DebugFlags) => set((state) => ({
+                gameProgress: {
+                    ...state.gameProgress,
+                    debugFlags: {
+                        ...state.gameProgress.debugFlags,
+                        [key]: !state.gameProgress.debugFlags[key]
+                    }
+                }
             })),
 
             unlockSpirit: (id) => set((state) => ({

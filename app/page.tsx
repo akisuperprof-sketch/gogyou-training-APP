@@ -92,8 +92,12 @@ export default function Home() {
     */
   }
 
-  const unlockedSpirits = spirits.filter(s => s.unlocked);
-  const spirit = unlockedSpirits[focusedIdx] || spirits[0];
+  // デバッグフラグがONなら全精霊を表示、そうでなければ解放済みのみ
+  const unlockedSpirits = gameProgress.debugFlags?.unlockAllSpirits
+    ? spirits
+    : spirits.filter(s => s.unlocked);
+
+  const spirit = unlockedSpirits[focusedIdx] || unlockedSpirits[0];
 
   const totalExp = spirits.reduce((acc, s) => acc + s.stats.jukuren, 0);
   const totalDrugs = Object.values(crudeDrugs).reduce((acc, c) => acc + c.ownedCount, 0);
@@ -303,7 +307,7 @@ export default function Home() {
                       }
                       transition={{ duration: 0.2, repeat: Infinity, repeatDelay: 1 }}
                     >
-                      {gameProgress.isMasterMode ? (
+                      {gameProgress.debugFlags?.showImages ? (
                         <img
                           src={spiritInfo.illustration}
                           alt={spirit.name}

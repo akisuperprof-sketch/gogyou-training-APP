@@ -81,6 +81,15 @@ export interface GameProgress {
     unlockedFormulaIds: number[];
     isPremiumUnlocked: boolean;
     isBuruBuruMode: boolean; // ぶるぶるモード (試験運用)
+    debugFlags: DebugFlags;
+}
+
+export interface DebugFlags {
+    showImages: boolean;      // 画像を表示する (OFFなら絵文字)
+    unlockAllGames: boolean;  // 全ゲーム解放
+    unlockAllSpirits: boolean;// 全精霊解放
+    unlockAllItems: boolean;  // 生薬・処方を解放
+    unlockPremium: boolean;   // プレミアム機能解放
 }
 
 export interface DailyWisdom {

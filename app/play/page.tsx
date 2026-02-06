@@ -72,7 +72,7 @@ export default function PlayMenu() {
 
             <div className="flex-1 flex flex-col space-y-3 sm:space-y-5 z-10 overflow-y-auto no-scrollbar">
                 {GAMES.map((game, idx) => {
-                    const isLocked = idx >= unlockedCount;
+                    const isLocked = !gameProgress.debugFlags?.unlockAllGames && idx >= unlockedCount;
                     return (
                         <div key={game.id} className="relative">
                             <Link

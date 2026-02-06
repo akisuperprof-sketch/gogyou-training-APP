@@ -170,28 +170,36 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                         exit={{ height: 0, opacity: 0 }}
                                         className="overflow-hidden space-y-4 pt-2"
                                     >
-                                        <div className="space-y-2">
-                                            <select
-                                                value={selectedPreset}
-                                                onChange={(e) => setSelectedPreset(e.target.value as DebugPreset)}
-                                                className="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-700 bg-slate-50"
-                                            >
-                                                <option value="FULL">フル解放 (開発用デフォルト)</option>
-                                                <option value="RESET">リセット (初期状態)</option>
-                                                <option value="VISUAL">ビジュアルだけ (UI確認)</option>
-                                                <option value="GAMES">ゲーム全部 (修行テスト)</option>
-                                                <option value="SPIRITS">精霊全部 (会話テスト)</option>
-                                                <option value="HALF_DRUGS">生薬半分 (収集テスト)</option>
-                                                <option value="CRAFTING">調合可能 (機能テスト)</option>
-                                            </select>
+                                        <div className="space-y-3">
+                                            <p className="text-xs font-bold text-slate-500">デバッグ機能 (個別ON/OFF)</p>
 
-
-                                            <button
-                                                onClick={handleApply}
-                                                className="w-full py-2 bg-slate-900 text-white font-bold rounded-lg text-sm"
-                                            >
-                                                設定を適用
-                                            </button>
+                                            <div className="grid grid-cols-1 gap-2">
+                                                {[
+                                                    { key: 'showImages', label: '🖼️ ビジュアル表示 (画像)' },
+                                                    { key: 'unlockAllGames', label: '🎮 ゲーム全解放' },
+                                                    { key: 'unlockAllSpirits', label: '👻 精霊全解放' },
+                                                    { key: 'unlockAllItems', label: '💊 アイテム全解放' },
+                                                    { key: 'unlockPremium', label: '👑 プレミアム解放' },
+                                                ].map((item) => (
+                                                    <div key={item.key} className="flex items-center justify-between bg-slate-50 p-2 rounded-lg">
+                                                        <span className="text-xs font-bold text-slate-700">{item.label}</span>
+                                                        <button
+                                                            onClick={() => useStore.getState().toggleDebugFlag(item.key as any)}
+                                                            className={cn(
+                                                                "relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none",
+                                                                gameProgress.debugFlags?.[item.key as keyof typeof gameProgress.debugFlags] ? "bg-indigo-500" : "bg-slate-300"
+                                                            )}
+                                                        >
+                                                            <span
+                                                                className={cn(
+                                                                    "inline-block h-2 w-2 transform rounded-full bg-white transition-transform",
+                                                                    gameProgress.debugFlags?.[item.key as keyof typeof gameProgress.debugFlags] ? "translate-x-4" : "translate-x-1"
+                                                                )}
+                                                            />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
 
                                             <div className="pt-2 border-t border-slate-100 mt-2">
                                                 <p className="text-[10px] text-slate-400 font-bold mb-1">ぶるぶるテスト用 (Genki SET)</p>
