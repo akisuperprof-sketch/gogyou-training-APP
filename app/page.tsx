@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useStore } from '@/lib/store';
+import { soundManager } from '@/lib/soundManager';
 import { SPIRIT_DATA, MOOD_COLORS, ELEMENT_COLORS } from '@/lib/data';
-import { HelpCircle, Sparkles, Crown, Book, History, Info, Zap, ChevronLeft, ChevronRight, X, BookOpen, Settings } from 'lucide-react';
+import { HelpCircle, Sparkles, Crown, Book, History, Info, Zap, ChevronLeft, ChevronRight, X, BookOpen, Settings, Brain } from 'lucide-react';
 import { StoryModal } from '@/components/StoryModal';
 import { GuideModal } from '@/components/GuideModal';
 import { SettingsModal } from '@/components/SettingsModal';
@@ -18,6 +19,35 @@ export default function Home() {
   const { spirits, crudeDrugs, formulas, gameProgress, setHasSeenStory, checkGenkiDecay, toggleMasterMode, applyDebugPreset, lastHealSpiritId, clearHealNotification, clearUnlockNotification } = useStore();
   const [mounted, setMounted] = useState(false);
   const [focusedIdx, setFocusedIdx] = useState(0);
+  const selectedSpirit = spirits[focusedIdx];
+
+  const [userMessage, setUserMessage] = useState('');
+  const [diagnosisResult, setDiagnosisResult] = useState('');
+  const [isDiagnosing, setIsDiagnosing] = useState(false);
+
+  const handleDiagnose = async () => {
+    if (!userMessage) return;
+    setIsDiagnosing(true);
+    try {
+      const res = await fetch('/api/diagnose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMessage,
+          spiritElement: selectedSpirit?.element
+        })
+      });
+      const data = await res.json();
+      if (data.text) {
+        setDiagnosisResult(data.text);
+        setUserMessage('');
+      }
+    } catch (error) {
+      setDiagnosisResult('通信に失敗しました。精霊も疲れているみたい...');
+    } finally {
+      setIsDiagnosing(false);
+    }
+  };
   const [storyOpen, setStoryOpen] = useState(false);
   const [isGlowActive, setIsGlowActive] = useState(false);
   const [todayWisdom, setTodayWisdom] = useState<DailyWisdom | null>(null);
@@ -75,6 +105,13 @@ export default function Home() {
       return () => clearTimeout(timer);
     }
   }, [lastHealSpiritId, focusedIdx, spirits, clearHealNotification]);
+
+  // Play SOS sound when spirit genki is low and VoiceMode is on
+  useEffect(() => {
+    if (gameProgress.isVoiceMode && spirits.some(s => s.stats.genki < 60)) {
+      soundManager.playSOS();
+    }
+  }, [spirits, gameProgress.isVoiceMode]);
 
   if (!mounted) return <div className="min-h-screen bg-white" />;
 
@@ -304,6 +341,10 @@ export default function Home() {
                       onClick={() => {
                         if (gameProgress.isCareMode) {
                           useStore.getState().petSpirit(spirit.id);
+                          if (gameProgress.isVoiceMode) {
+                            soundManager.playSoftTap();
+                            soundManager.vibrate(10);
+                          }
                           // TODO: Add heart effect here
                         }
                       }}
@@ -329,6 +370,34 @@ export default function Home() {
                         </div>
                       )}
 
+                      {/* AI Advisor Mode (Experimental) */}
+                      {gameProgress.isAiMode && (
+                        <div className="mt-4 p-4 bg-purple-50 rounded-2xl border border-purple-100 space-y-3">
+                          <div className="flex items-center space-x-2 text-purple-600">
+                            <Brain className="w-4 h-4" />
+                            <span className="text-xs font-black uppercase">AI Advisors</span>
+                          </div>
+                          <div className="text-[10px] text-purple-700 bg-white/50 p-2 rounded-lg italic">
+                            {diagnosisResult || "「最近、なんだかやる気が出ないんだ」みたいに話しかけてみて！"}
+                          </div>
+                          <div className="flex space-x-2">
+                            <input
+                              type="text"
+                              value={userMessage}
+                              onChange={(e) => setUserMessage(e.target.value)}
+                              placeholder="今の調子はどう？"
+                              className="flex-1 bg-white border border-purple-200 rounded-full px-3 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-purple-400"
+                            />
+                            <button
+                              onClick={handleDiagnose}
+                              disabled={isDiagnosing || !userMessage}
+                              className="bg-purple-500 text-white p-2 rounded-full active:scale-95 disabled:opacity-50 transition-all font-bold text-xs px-4"
+                            >
+                              {isDiagnosing ? "..." : "聞く"}
+                            </button>
+                          </div>
+                        </div>
+                      )}
                       {/* SOS Icon Overlay */}
                       {gameProgress.isBuruBuruMode && spirit.stats.genki < 70 && (
                         <motion.div
@@ -400,7 +469,13 @@ export default function Home() {
           {gameProgress.isCareMode && (
             <div className="mt-4 pt-4 border-t border-dashed border-slate-200 flex justify-center space-x-3">
               <button
-                onClick={() => useStore.getState().petSpirit(spirit.id)}
+                onClick={() => {
+                  useStore.getState().petSpirit(spirit.id);
+                  if (gameProgress.isVoiceMode) {
+                    soundManager.playSoftTap();
+                    soundManager.vibrate(20);
+                  }
+                }}
                 className="flex flex-col items-center space-y-1 p-2 active:scale-90 transition-transform"
               >
                 <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-500 shadow-sm border border-pink-200">
@@ -409,7 +484,13 @@ export default function Home() {
                 <span className="text-[10px] font-bold text-slate-400">なでる</span>
               </button>
               <button
-                onClick={() => useStore.getState().feedSpirit(spirit.id)}
+                onClick={() => {
+                  useStore.getState().feedSpirit(spirit.id);
+                  if (gameProgress.isVoiceMode) {
+                    soundManager.playSpiritHappy();
+                    soundManager.vibrate([30, 50, 30]);
+                  }
+                }}
                 className="flex flex-col items-center space-y-1 p-2 active:scale-90 transition-transform"
               >
                 <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 shadow-sm border border-orange-200">

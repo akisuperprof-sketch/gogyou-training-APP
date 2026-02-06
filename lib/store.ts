@@ -28,6 +28,10 @@ interface AppState {
     applyDebugPreset: (preset: DebugPreset) => void;
     toggleBuruBuruMode: () => void;
     toggleCareMode: () => void;
+    toggleVoiceMode: () => void;
+    toggleAiMode: () => void;
+    toggleEvolutionMode: () => void;
+    toggleCampaignMode: () => void;
     petSpirit: (id: string) => void;
     feedSpirit: (id: string) => void;
     toggleDebugFlag: (key: keyof import('./types').DebugFlags) => void;
@@ -70,6 +74,10 @@ export const useStore = create<AppState>()(
                 isPremiumUnlocked: true,
                 isBuruBuruMode: false,
                 isCareMode: false,
+                isVoiceMode: false,
+                isAiMode: false,
+                isEvolutionMode: false,
+                isCampaignMode: false,
                 debugFlags: {
                     showImages: false,
                     unlockAllGames: false,
@@ -85,6 +93,22 @@ export const useStore = create<AppState>()(
 
             toggleCareMode: () => set((state) => ({
                 gameProgress: { ...state.gameProgress, isCareMode: !state.gameProgress.isCareMode }
+            })),
+
+            toggleVoiceMode: () => set((state) => ({
+                gameProgress: { ...state.gameProgress, isVoiceMode: !state.gameProgress.isVoiceMode }
+            })),
+
+            toggleAiMode: () => set((state) => ({
+                gameProgress: { ...state.gameProgress, isAiMode: !state.gameProgress.isAiMode }
+            })),
+
+            toggleEvolutionMode: () => set((state) => ({
+                gameProgress: { ...state.gameProgress, isEvolutionMode: !state.gameProgress.isEvolutionMode }
+            })),
+
+            toggleCampaignMode: () => set((state) => ({
+                gameProgress: { ...state.gameProgress, isCampaignMode: !state.gameProgress.isCampaignMode }
             })),
 
             // なでなでアクション

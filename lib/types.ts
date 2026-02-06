@@ -82,6 +82,10 @@ export interface GameProgress {
     isPremiumUnlocked: boolean;
     isBuruBuruMode: boolean; // ぶるぶるモード (試験運用)
     isCareMode: boolean;     // お世話モード (試験運用: なでなで・お供え)
+    isVoiceMode: boolean;    // 音響・振動モード (試験運用: SE・ボイス)
+    isAiMode: boolean;       // 体質診断・AIモード (試験運用: Gemini診断)
+    isEvolutionMode: boolean; // コレクション・進化モード (試験運用)
+    isCampaignMode: boolean;  // キャンペーン・リアル連携モード (試験運用)
     debugFlags: DebugFlags;
 }
 

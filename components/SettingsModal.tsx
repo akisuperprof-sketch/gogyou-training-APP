@@ -15,7 +15,19 @@ interface SettingsModalProps {
 import { useSubscription } from '@/lib/hooks/useSubscription';
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-    const { gameProgress, toggleMasterMode, applyDebugPreset, toggleDebugFlag, toggleCareMode, setGamesUnlockedCount } = useStore();
+    const {
+        gameProgress,
+        toggleMasterMode,
+        toggleDebugFlag,
+        toggleCareMode,
+        toggleBuruBuruMode,
+        toggleVoiceMode,
+        toggleAiMode,
+        toggleEvolutionMode,
+        toggleCampaignMode,
+        setGamesUnlockedCount,
+        applyDebugPreset
+    } = useStore();
     const { isPremium, subscriptionStatus, loading, checkout } = useSubscription();
     const [selectedPreset, setSelectedPreset] = useState<DebugPreset>('FULL');
 
@@ -48,13 +60,27 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     >
                         {/* Header */}
                         <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                            <h3 className="text-xl font-black text-slate-900 flex items-center">
-                                <Settings className="w-5 h-5 mr-2" />
-                                設定
-                            </h3>
-                            <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
-                                <X className="w-5 h-5" />
-                            </button>
+                            <div className="flex items-center space-x-3">
+                                <Settings className="w-5 h-5 text-slate-400" />
+                                <div>
+                                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">App Settings</h3>
+                                    <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Environment & Debug</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <button
+                                    onClick={toggleMasterMode}
+                                    className={cn(
+                                        "px-2 py-1 rounded-md text-[8px] font-black uppercase transition-all",
+                                        gameProgress.isMasterMode ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-400"
+                                    )}
+                                >
+                                    Master
+                                </button>
+                                <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Content */}
@@ -114,79 +140,49 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                             <hr className="border-slate-100" />
 
-                            {/* Developer Mode Toggle */}
-                            <div className="flex items-center justify-between opacity-50 hover:opacity-100 transition-opacity">
-                                <div>
-                                    <h4 className="font-bold text-slate-900 flex items-center text-xs">
-                                        設定: 開発者モード
-                                    </h4>
+                            <div className="space-y-3">
+                                <h4 className="font-bold text-slate-900 flex items-center text-xs uppercase tracking-wider text-slate-400">
+                                    🧪 実験機能・先行開発モード
+                                </h4>
+                                <div className="grid grid-cols-1 gap-3">
+                                    {[
+                                        { key: 'isBuruBuruMode', label: '💓 ぶるぶるモード', desc: '精霊がSOSを出すようになります', toggle: toggleBuruBuruMode, color: 'pink' },
+                                        { key: 'isCareMode', label: '🍵 お世話モード', desc: 'なでなで・お供えが可能に', toggle: toggleCareMode, color: 'emerald' },
+                                        { key: 'isVoiceMode', label: '🔊 音響・振動モード', desc: 'SE・ボイス・振動演出', toggle: toggleVoiceMode, color: 'blue' },
+                                        { key: 'isAiMode', label: '🧠 体質診断・AIモード', desc: 'Geminiによる診断と助言', toggle: toggleAiMode, color: 'purple' },
+                                        { key: 'isEvolutionMode', label: '✨ 進化・コレクション', desc: '進化演出・シェア画像生成', toggle: toggleEvolutionMode, color: 'amber' },
+                                        { key: 'isCampaignMode', label: '🎁 キャンペーン連携', desc: '期間限定・リアル店舗連携', toggle: toggleCampaignMode, color: 'indigo' },
+                                    ].map((mode) => (
+                                        <div key={mode.key} className={cn(
+                                            "flex items-center justify-between p-3 rounded-xl border transition-all",
+                                            gameProgress[mode.key as keyof typeof gameProgress]
+                                                ? `bg-${mode.color}-50/50 border-${mode.color}-100`
+                                                : "bg-slate-50/50 border-slate-100"
+                                        )}>
+                                            <div>
+                                                <h5 className={cn(
+                                                    "font-bold text-xs",
+                                                    gameProgress[mode.key as keyof typeof gameProgress] ? `text-${mode.color}-700` : "text-slate-700"
+                                                )}>{mode.label}</h5>
+                                                <p className="text-[10px] text-slate-400 mt-0.5">{mode.desc}</p>
+                                            </div>
+                                            <button
+                                                onClick={mode.toggle}
+                                                className={cn(
+                                                    "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none",
+                                                    gameProgress[mode.key as keyof typeof gameProgress] ? `bg-${mode.color}-500` : "bg-slate-200"
+                                                )}
+                                            >
+                                                <span
+                                                    className={cn(
+                                                        "inline-block h-3 w-3 transform rounded-full bg-white transition-transform",
+                                                        gameProgress[mode.key as keyof typeof gameProgress] ? "translate-x-5" : "translate-x-1"
+                                                    )}
+                                                />
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
-                                <button
-                                    onClick={toggleMasterMode}
-                                    className={cn(
-                                        "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none",
-                                        gameProgress.isMasterMode ? "bg-indigo-600" : "bg-slate-200"
-                                    )}
-                                >
-                                    <span
-                                        className={cn(
-                                            "inline-block h-3 w-3 transform rounded-full bg-white transition-transform",
-                                            gameProgress.isMasterMode ? "translate-x-5" : "translate-x-1"
-                                        )}
-                                    />
-                                </button>
-                            </div>
-
-                            {/* BuruBuru Mode Toggle (Experimental) */}
-                            <div className="flex items-center justify-between bg-pink-50/50 p-3 rounded-xl border border-pink-100">
-                                <div>
-                                    <h4 className="font-bold text-slate-900 flex items-center text-xs text-pink-700">
-                                        🧪 実験機能: ぶるぶるモード
-                                    </h4>
-                                    <p className="text-[10px] text-pink-600 mt-1">
-                                        精霊がSOSサインを出すようになります
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={useStore.getState().toggleBuruBuruMode}
-                                    className={cn(
-                                        "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none",
-                                        gameProgress.isBuruBuruMode ? "bg-pink-500" : "bg-slate-200"
-                                    )}
-                                >
-                                    <span
-                                        className={cn(
-                                            "inline-block h-3 w-3 transform rounded-full bg-white transition-transform",
-                                            gameProgress.isBuruBuruMode ? "translate-x-5" : "translate-x-1"
-                                        )}
-                                    />
-                                </button>
-                            </div>
-
-                            {/* Care Mode Toggle (Experimental) */}
-                            <div className="flex items-center justify-between bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
-                                <div>
-                                    <h4 className="font-bold text-slate-900 flex items-center text-xs text-emerald-700">
-                                        🧪 実験機能: お世話モード
-                                    </h4>
-                                    <p className="text-[10px] text-emerald-600 mt-1">
-                                        なでなで・お供えができるようになります
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={toggleCareMode}
-                                    className={cn(
-                                        "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none",
-                                        gameProgress.isCareMode ? "bg-emerald-500" : "bg-slate-200"
-                                    )}
-                                >
-                                    <span
-                                        className={cn(
-                                            "inline-block h-3 w-3 transform rounded-full bg-white transition-transform",
-                                            gameProgress.isCareMode ? "translate-x-5" : "translate-x-1"
-                                        )}
-                                    />
-                                </button>
                             </div>
 
                             {/* Debug Options (Only visible when active) */}
