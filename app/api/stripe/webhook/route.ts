@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
                         subscription.customer as string, // Cast to string to fix linter error
                         subscription.id,
                         subscription.status,
-                        new Date(subscription.current_period_end * 1000)
+                        new Date((subscription as any).current_period_end * 1000)
                     );
                 } else {
                     // fallback: customer_id からユーザーを探すロジックが必要になる可能性がある
