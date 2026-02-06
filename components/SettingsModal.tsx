@@ -185,12 +185,37 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                 <option value="CRAFTING">調合可能 (機能テスト)</option>
                                             </select>
 
+
                                             <button
                                                 onClick={handleApply}
                                                 className="w-full py-2 bg-slate-900 text-white font-bold rounded-lg text-sm"
                                             >
                                                 設定を適用
                                             </button>
+
+                                            <div className="pt-2 border-t border-slate-100 mt-2">
+                                                <p className="text-[10px] text-slate-400 font-bold mb-1">ぶるぶるテスト用 (Genki SET)</p>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <button
+                                                        onClick={() => useStore.setState(state => ({
+                                                            ...state,
+                                                            spirits: state.spirits.map(s => ({ ...s, unlocked: true, stats: { ...s.stats, genki: 30 } }))
+                                                        }))}
+                                                        className="py-1 bg-red-100 text-red-600 text-[10px] font-bold rounded"
+                                                    >
+                                                        瀕死 (30%)
+                                                    </button>
+                                                    <button
+                                                        onClick={() => useStore.setState(state => ({
+                                                            ...state,
+                                                            spirits: state.spirits.map(s => ({ ...s, unlocked: true, stats: { ...s.stats, genki: 60 } }))
+                                                        }))}
+                                                        className="py-1 bg-orange-100 text-orange-600 text-[10px] font-bold rounded"
+                                                    >
+                                                        震え (60%)
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </motion.div>
                                 )}
