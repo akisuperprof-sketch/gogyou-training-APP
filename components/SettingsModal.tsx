@@ -15,7 +15,7 @@ interface SettingsModalProps {
 import { useSubscription } from '@/lib/hooks/useSubscription';
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-    const { gameProgress, toggleMasterMode, applyDebugPreset, toggleDebugFlag, toggleCareMode } = useStore();
+    const { gameProgress, toggleMasterMode, applyDebugPreset, toggleDebugFlag, toggleCareMode, setGamesUnlockedCount } = useStore();
     const { isPremium, subscriptionStatus, loading, checkout } = useSubscription();
     const [selectedPreset, setSelectedPreset] = useState<DebugPreset>('FULL');
 
@@ -204,7 +204,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                             <div className="grid grid-cols-1 gap-2">
                                                 {[
                                                     { key: 'showImages', label: '🖼️ ビジュアル表示 (画像)' },
-                                                    { key: 'unlockAllGames', label: '🎮 ゲーム全解放' },
+                                                    // { key: 'unlockAllGames', label: '🎮 ゲーム全解放' }, // ゲーム全解放フラグは一旦隠すか、下に移動
                                                     { key: 'unlockAllSpirits', label: '👻 精霊全解放' },
                                                     { key: 'unlockAllItems', label: '💊 アイテム全解放' },
                                                     { key: 'unlockPremium', label: '👑 プレミアム解放' },
@@ -227,6 +227,27 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                         </button>
                                                     </div>
                                                 ))}
+
+                                                {/* Game Unlock Stepper */}
+                                                <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg">
+                                                    <span className="text-xs font-bold text-slate-700">🎮 ゲーム解放レベル</span>
+                                                    <div className="flex space-x-1">
+                                                        {[1, 2, 3].map((level) => (
+                                                            <button
+                                                                key={level}
+                                                                onClick={() => setGamesUnlockedCount(level)}
+                                                                className={cn(
+                                                                    "w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold transition-all",
+                                                                    (gameProgress.gamesUnlockedCount >= level)
+                                                                        ? "bg-indigo-500 text-white shadow-sm"
+                                                                        : "bg-slate-200 text-slate-400"
+                                                                )}
+                                                            >
+                                                                {level}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div className="pt-2 border-t border-slate-100 mt-2">

@@ -31,6 +31,7 @@ interface AppState {
     petSpirit: (id: string) => void;
     feedSpirit: (id: string) => void;
     toggleDebugFlag: (key: keyof import('./types').DebugFlags) => void;
+    setGamesUnlockedCount: (count: number) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -156,6 +157,14 @@ export const useStore = create<AppState>()(
                     }
                 };
             }),
+
+            // デバッグ用: ゲーム解放数を強制セット
+            setGamesUnlockedCount: (count: number) => set((state) => ({
+                gameProgress: {
+                    ...state.gameProgress,
+                    gamesUnlockedCount: count
+                }
+            })),
 
             unlockSpirit: (id) => set((state) => ({
                 spirits: state.spirits.map((s) => s.id === id ? { ...s, unlocked: true } : s)
