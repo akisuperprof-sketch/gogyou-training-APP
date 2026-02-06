@@ -88,7 +88,7 @@ export interface GameProgress {
     unlockedWisdomIds: string[];
     unlockedFormulaIds: number[];
     isPremiumUnlocked: boolean;
-    isBuruBuruMode: boolean; // ぶるぶるモード (試験運用)
+    isBuruBuruMode: boolean; // ぷにぷにUIモード (画像模倣モード)
     isCareMode: boolean;     // お世話モード (試験運用: なでなで・お供え)
     isVoiceMode: boolean;    // 音響・振動モード (試験運用: SE・ボイス)
     isAiMode: boolean;       // 体質診断・AIモード (試験運用: Gemini診断)
