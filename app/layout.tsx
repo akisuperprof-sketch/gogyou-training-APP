@@ -28,7 +28,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const liffId = process.env.LIFF_ID || '';
+  const liffId = process.env.NEXT_PUBLIC_LIFF_ID || process.env.LIFF_ID || '';
+  console.log("Layout LIFF ID:", liffId ? "Set" : "Missing");
 
   return (
     <html lang="ja">
