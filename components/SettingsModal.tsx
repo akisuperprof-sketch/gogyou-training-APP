@@ -161,6 +161,32 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                 </button>
                             </div>
 
+                            {/* Care Mode Toggle (Experimental) */}
+                            <div className="flex items-center justify-between bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
+                                <div>
+                                    <h4 className="font-bold text-slate-900 flex items-center text-xs text-emerald-700">
+                                        🧪 実験機能: お世話モード
+                                    </h4>
+                                    <p className="text-[10px] text-emerald-600 mt-1">
+                                        なでなで・お供えができるようになります
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={useStore.getState().toggleCareMode}
+                                    className={cn(
+                                        "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none",
+                                        gameProgress.isCareMode ? "bg-emerald-500" : "bg-slate-200"
+                                    )}
+                                >
+                                    <span
+                                        className={cn(
+                                            "inline-block h-3 w-3 transform rounded-full bg-white transition-transform",
+                                            gameProgress.isCareMode ? "translate-x-5" : "translate-x-1"
+                                        )}
+                                    />
+                                </button>
+                            </div>
+
                             {/* Debug Options (Only visible when active) */}
                             <AnimatePresence>
                                 {gameProgress.isMasterMode && (

@@ -27,6 +27,9 @@ interface AppState {
     purchasePremium: () => void;
     applyDebugPreset: (preset: DebugPreset) => void;
     toggleBuruBuruMode: () => void;
+    toggleCareMode: () => void;
+    petSpirit: (id: string) => void;
+    feedSpirit: (id: string) => void;
     toggleDebugFlag: (key: keyof import('./types').DebugFlags) => void;
 }
 
@@ -65,6 +68,7 @@ export const useStore = create<AppState>()(
                 unlockedFormulaIds: [],
                 isPremiumUnlocked: true,
                 isBuruBuruMode: false,
+                isCareMode: false,
                 debugFlags: {
                     showImages: false,
                     unlockAllGames: false,
@@ -77,6 +81,61 @@ export const useStore = create<AppState>()(
             toggleBuruBuruMode: () => set((state) => ({
                 gameProgress: { ...state.gameProgress, isBuruBuruMode: !state.gameProgress.isBuruBuruMode }
             })),
+
+            toggleCareMode: () => set((state) => ({
+                gameProgress: { ...state.gameProgress, isCareMode: !state.gameProgress.isCareMode }
+            })),
+
+            // なでなでアクション
+            petSpirit: (id: string) => set((state) => {
+                const spirits = [...state.spirits];
+                const idx = spirits.findIndex(s => s.id === id);
+                if (idx === -1) return state;
+
+                const spirit = spirits[idx];
+                let newGenki = spirit.stats.genki;
+                let newKizuna = spirit.stats.kizuna;
+
+                // 瀕死時に撫でると少し回復 (応急処置)
+                if (spirit.stats.genki < 40) {
+                    newGenki = Math.min(40, spirit.stats.genki + 5);
+                } else {
+                    // 通常時は絆などが上がる（上限あり）
+                    newKizuna = Math.min(100, spirit.stats.kizuna + 1);
+                }
+
+                spirits[idx] = {
+                    ...spirit,
+                    stats: {
+                        ...spirit.stats,
+                        genki: newGenki,
+                        kizuna: newKizuna
+                    }
+                };
+
+                return { spirits };
+            }),
+
+            // お供えアクション (簡易実装: 数値上のアイテムが減るわけではないが、いったんアクションとして実装)
+            // 将来的にはアイテムIDを受け取って減らす
+            feedSpirit: (id: string) => set((state) => {
+                const spirits = [...state.spirits];
+                const idx = spirits.findIndex(s => s.id === id);
+                if (idx === -1) return state;
+
+                const spirit = spirits[idx];
+                // 大幅回復
+                const newGenki = Math.min(100, spirit.stats.genki + 50);
+
+                spirits[idx] = {
+                    ...spirit,
+                    stats: {
+                        ...spirit.stats,
+                        genki: newGenki
+                    }
+                };
+                return { spirits };
+            }),
 
             toggleDebugFlag: (key: keyof import('./types').DebugFlags) => set((state) => ({
                 gameProgress: {

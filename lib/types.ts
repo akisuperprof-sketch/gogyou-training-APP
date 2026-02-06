@@ -81,6 +81,7 @@ export interface GameProgress {
     unlockedFormulaIds: number[];
     isPremiumUnlocked: boolean;
     isBuruBuruMode: boolean; // ぶるぶるモード (試験運用)
+    isCareMode: boolean;     // お世話モード (試験運用: なでなで・お供え)
     debugFlags: DebugFlags;
 }
 

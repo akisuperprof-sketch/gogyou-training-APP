@@ -299,7 +299,14 @@ export default function Home() {
                     </div>
 
                     <motion.div
-                      className="relative w-24 h-24 sm:w-32 sm:h-32 mb-6"
+                      className="relative w-24 h-24 sm:w-32 sm:h-32 mb-6 cursor-pointer"
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => {
+                        if (gameProgress.isCareMode) {
+                          useStore.getState().petSpirit(spirit.id);
+                          // TODO: Add heart effect here
+                        }
+                      }}
                       animate={
                         (gameProgress.isBuruBuruMode && spirit.stats.genki < 70)
                           ? { x: [-2, 2, -2, 2, 0] }
@@ -312,12 +319,12 @@ export default function Home() {
                           src={spiritInfo.illustration}
                           alt={spirit.name}
                           className={cn(
-                            "w-full h-full object-contain transition-all duration-500",
+                            "w-full h-full object-contain transition-all duration-500 select-none",
                             (gameProgress.isBuruBuruMode && spirit.stats.genki < 40) ? "grayscale contrast-125 brightness-90" : ""
                           )}
                         />
                       ) : (
-                        <div className="text-6xl sm:text-7xl flex items-center justify-center h-full">
+                        <div className="text-6xl sm:text-7xl flex items-center justify-center h-full select-none">
                           {spirit.element === 'Wood' ? '🌿' : spirit.element === 'Fire' ? '🔥' : spirit.element === 'Earth' ? '⛰️' : spirit.element === 'Metal' ? '💎' : '💧'}
                         </div>
                       )}
@@ -327,9 +334,9 @@ export default function Home() {
                         <motion.div
                           initial={{ scale: 0, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-black text-xs border-2 border-white shadow-md z-20"
+                          className="absolute -top-2 -right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-black text-xs border-2 border-white shadow-md z-20 pointer-events-none"
                         >
-                          Please!
+                          <span className="animate-pulse">SOS</span>
                         </motion.div>
                       )}
                     </motion.div>
@@ -388,6 +395,30 @@ export default function Home() {
               : `"${SPIRIT_DATA[spirit.id].moodLines[spirit.mood][0]}"`
             }
           </p>
+
+          {/* Action Buttons (Care Mode) */}
+          {gameProgress.isCareMode && (
+            <div className="mt-4 pt-4 border-t border-dashed border-slate-200 flex justify-center space-x-3">
+              <button
+                onClick={() => useStore.getState().petSpirit(spirit.id)}
+                className="flex flex-col items-center space-y-1 p-2 active:scale-90 transition-transform"
+              >
+                <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-500 shadow-sm border border-pink-200">
+                  <span className="text-lg">👋</span>
+                </div>
+                <span className="text-[10px] font-bold text-slate-400">なでる</span>
+              </button>
+              <button
+                onClick={() => useStore.getState().feedSpirit(spirit.id)}
+                className="flex flex-col items-center space-y-1 p-2 active:scale-90 transition-transform"
+              >
+                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 shadow-sm border border-orange-200">
+                  <span className="text-lg">🍵</span>
+                </div>
+                <span className="text-[10px] font-bold text-slate-400">あげる</span>
+              </button>
+            </div>
+          )}
         </motion.div>
 
         {/* Daily Wisdom Section (Developer Only) */}
