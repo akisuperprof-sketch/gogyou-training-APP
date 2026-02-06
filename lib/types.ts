@@ -58,6 +58,11 @@ export interface SpiritRequest {
     expiryTime: number; // timestamp
 }
 
+export interface UnlockNotification {
+    title: string;
+    message: string;
+}
+
 export interface GameProgress {
     bestScores: {
         chain: number;
@@ -79,7 +84,7 @@ export interface GameProgress {
     chainMediumClears: number;
     guardEasyClears: number;
     guardMediumClears: number;
-    unlockNotification: string | null;
+    unlockNotification: UnlockNotification | null;
     unlockedWisdomIds: number[];
     unlockedFormulaIds: number[];
     isPremiumUnlocked: boolean;
