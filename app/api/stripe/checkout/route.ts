@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 const STRIPE_PRICE_ID_MONTHLY = process.env.STRIPE_PRICE_ID_MONTHLY;
@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
         // ここではLINE IDと紐付けるため明示的に管理しても良い。あるいは session作成時に metadata を渡すだけでも可。
         // 今回はシンプルに、Checkout Session作成時にメタデータを付与し、Webhookで顧客ID保存を行うフローとする。
 
+        const stripe = getStripe();
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [
