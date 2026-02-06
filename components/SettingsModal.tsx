@@ -146,7 +146,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                 </h4>
                                 <div className="grid grid-cols-1 gap-3">
                                     {[
-                                        { key: 'isBuruBuruMode', label: '💓 ぶるぶるモード', desc: '精霊がSOSを出すようになります', toggle: toggleBuruBuruMode, color: 'pink' },
+                                        { key: 'isBuruBuruMode', label: '🍮 UI模倣モード (ぷにぷに)', desc: '画像のようなポップなUIに変更', toggle: toggleBuruBuruMode, color: 'orange' },
                                         { key: 'isCareMode', label: '🍵 お世話モード', desc: 'なでなで・お供えが可能に', toggle: toggleCareMode, color: 'emerald' },
                                         { key: 'isVoiceMode', label: '🔊 音響・振動モード', desc: 'SE・ボイス・振動演出', toggle: toggleVoiceMode, color: 'blue' },
                                         { key: 'isAiMode', label: '🧠 体質診断・AIモード', desc: 'Geminiによる診断と助言', toggle: toggleAiMode, color: 'purple' },
