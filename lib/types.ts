@@ -42,6 +42,7 @@ export interface Formula {
     reading: string;
     element: Element;
     description: string;
+    flavor: string;
     effectValue: number;
     recipe: { crudeDrugId: number; count: number }[];
     ownedCount: number;
