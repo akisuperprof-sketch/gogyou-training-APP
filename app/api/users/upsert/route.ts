@@ -23,7 +23,8 @@ export async function POST(req: NextRequest) {
 
         if (error) {
             console.error("[upsert] supabase error", error);
-            return NextResponse.json({ ok: false, error }, { status: 500 });
+            console.error("[upsert] params", { lineUserId, displayName });
+            return NextResponse.json({ ok: false, error, details: error.message }, { status: 500 });
         }
 
         return NextResponse.json({ ok: true }, { status: 200 });

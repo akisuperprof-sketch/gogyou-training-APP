@@ -76,6 +76,9 @@ export const LiffProvider = ({ children, liffId }: { children: React.ReactNode; 
             } else {
                 const err = await res.json();
                 console.error('users upsert failed', err);
+                if (process.env.NODE_ENV === 'development') {
+                    window.alert(`User sync failed: ${JSON.stringify(err)}`);
+                }
             }
         } catch (e) {
             console.error('users upsert exception', e);
