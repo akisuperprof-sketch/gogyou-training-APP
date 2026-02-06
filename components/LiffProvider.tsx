@@ -92,12 +92,11 @@ export const LiffProvider = ({ children, liffId }: { children: React.ReactNode; 
             } else {
                 const err = await res.json();
                 console.error('users upsert failed', err);
-                if (process.env.NODE_ENV === 'development') {
-                    window.alert(`User sync failed: ${JSON.stringify(err)}`);
-                }
+                setError(`Upsert Failed: ${err.details || err.error || JSON.stringify(err)}`);
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error('users upsert exception', e);
+            setError(`Upsert Exception: ${e.message || e.toString()}`);
         }
     };
 
@@ -141,6 +140,27 @@ export const LiffProvider = ({ children, liffId }: { children: React.ReactNode; 
                 logout,
             }}
         >
+            {error && (
+                <div className="fixed inset-0 z-[9999] bg-white text-red-600 p-8 flex flex-col items-center justify-center text-center space-y-4">
+                    <h2 className="text-xl font-bold">Error Occurred</h2>
+                    <p className="text-sm break-all font-mono bg-red-50 p-4 rounded">{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="bg-slate-900 text-white px-6 py-2 rounded-full"
+                    >
+                        Reload
+                    </button>
+                    <button
+                        onClick={() => {
+                            liff.logout();
+                            window.location.reload();
+                        }}
+                        className="text-slate-500 text-sm underline"
+                    >
+                        Try Logout & Reload
+                    </button>
+                </div>
+            )}
             {children}
             {process.env.NODE_ENV === 'development' && (
                 <div className="fixed bottom-1 left-1 z-[9999] opacity-50 hover:opacity-100 p-1 bg-black/80 rounded h-min text-[10px] text-white flex flex-col gap-1">
