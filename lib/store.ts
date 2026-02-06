@@ -637,7 +637,7 @@ export const useStore = create<AppState>()(
             }))
         }),
         {
-            name: 'gogyou-storage-v14',
+            name: 'gogyou-storage-v15',
             storage: createJSONStorage(() => localStorage),
             partialize: (state) => ({
                 crudeDrugs: state.crudeDrugs,

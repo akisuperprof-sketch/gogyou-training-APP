@@ -212,7 +212,7 @@ export default function Home() {
               <AnimatePresence mode="popLayout">
                 {spirits.map((spirit, idx) => {
                   const isFocused = idx === focusedIdx;
-                  if (!isFocused && !gameProgress.debugFlags.showImages && Math.abs(idx - focusedIdx) > 1) return null; // Optimization
+                  if (!isFocused && !gameProgress.debugFlags?.showImages && Math.abs(idx - focusedIdx) > 1) return null; // Optimization
 
                   // Only show current, prev, next or all if needed. For simplicity, showing all but filtered by style
 
