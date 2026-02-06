@@ -204,7 +204,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                             <div className="grid grid-cols-1 gap-2">
                                                 {[
                                                     { key: 'showImages', label: '🖼️ ビジュアル表示 (画像)' },
-                                                    // { key: 'unlockAllGames', label: '🎮 ゲーム全解放' }, // ゲーム全解放フラグは一旦隠すか、下に移動
                                                     { key: 'unlockAllSpirits', label: '👻 精霊全解放' },
                                                     { key: 'unlockAllItems', label: '💊 アイテム全解放' },
                                                     { key: 'unlockPremium', label: '👑 プレミアム解放' },
@@ -235,12 +234,20 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                         {[1, 2, 3].map((level) => (
                                                             <button
                                                                 key={level}
-                                                                onClick={() => setGamesUnlockedCount(level)}
+                                                                onClick={() => {
+                                                                    // レベル指定時は「全解放」フラグを強制OFFにする
+                                                                    if (gameProgress.debugFlags?.unlockAllGames) {
+                                                                        toggleDebugFlag('unlockAllGames');
+                                                                    }
+                                                                    setGamesUnlockedCount(level);
+                                                                }}
                                                                 className={cn(
                                                                     "w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold transition-all",
-                                                                    (gameProgress.gamesUnlockedCount >= level)
+                                                                    (!gameProgress.debugFlags?.unlockAllGames && gameProgress.gamesUnlockedCount === level)
                                                                         ? "bg-indigo-500 text-white shadow-sm"
-                                                                        : "bg-slate-200 text-slate-400"
+                                                                        : (gameProgress.gamesUnlockedCount >= level)
+                                                                            ? "bg-indigo-100 text-indigo-400"
+                                                                            : "bg-slate-200 text-slate-400"
                                                                 )}
                                                             >
                                                                 {level}
