@@ -1,5 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export async function POST(req: NextRequest) {
     try {
@@ -11,22 +11,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ ok: false, error: "lineUserId required" }, { status: 400 });
         }
 
-        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-        if (!url || !serviceKey) {
-            return NextResponse.json(
-                { ok: false, error: "Missing env NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY" },
-                { status: 500 }
-            );
-        }
-
-        const supabase = createClient(url, serviceKey, {
-            auth: {
-                persistSession: false,
-                autoRefreshToken: false,
-            }
-        });
+        const supabase = getSupabaseAdmin();
 
         const { error } = await supabase
             .from("users")

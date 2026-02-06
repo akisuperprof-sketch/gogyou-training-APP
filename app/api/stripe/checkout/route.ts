@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 const STRIPE_PRICE_ID_MONTHLY = process.env.STRIPE_PRICE_ID_MONTHLY;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
         }
 
         // 既存の顧客IDがあるか確認
+        const supabaseAdmin = getSupabaseAdmin();
         const { data: subscription } = await supabaseAdmin
             .from('subscriptions')
             .select('stripe_customer_id')

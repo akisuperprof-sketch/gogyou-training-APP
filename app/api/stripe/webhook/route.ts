@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import Stripe from 'stripe';
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
@@ -89,6 +89,7 @@ async function upsertSubscription(
     status: string,
     currentPeriodEnd: Date
 ) {
+    const supabaseAdmin = getSupabaseAdmin();
     const { error } = await supabaseAdmin
         .from('subscriptions')
         .upsert({

@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
     try {
-        const { lineUserId } = await req.json();
+        const { lineUserId } = await request.json();
 
         if (!lineUserId) {
             return NextResponse.json({ error: 'Missing lineUserId' }, { status: 400 });
         }
+
+        const supabaseAdmin = getSupabaseAdmin();
 
         // ユーザー情報の取得
         const { data: user, error: userError } = await supabaseAdmin

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 const LINE_CHANNEL_ID = process.env.LINE_CHANNEL_ID;
 
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
     try {
-        const { idToken } = await req.json();
+        const { idToken } = await request.json();
 
         if (!idToken) {
             return NextResponse.json({ error: 'Missing idToken' }, { status: 400 });
@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
         // ここで 403 を返しても良いが、UX的にはフロントで制御し、APIはデータ保存に徹する設計にする。
 
         // 3. Supabase users テーブルに Upsert
+        const supabaseAdmin = getSupabaseAdmin();
         const { error: upsertError } = await supabaseAdmin
             .from('users')
             .upsert({
