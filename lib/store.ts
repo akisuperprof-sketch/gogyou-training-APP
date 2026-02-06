@@ -137,15 +137,25 @@ export const useStore = create<AppState>()(
                 return { spirits };
             }),
 
-            toggleDebugFlag: (key: keyof import('./types').DebugFlags) => set((state) => ({
-                gameProgress: {
-                    ...state.gameProgress,
-                    debugFlags: {
-                        ...state.gameProgress.debugFlags,
-                        [key]: !state.gameProgress.debugFlags[key]
+            toggleDebugFlag: (key: keyof import('./types').DebugFlags) => set((state) => {
+                const currentFlags = state.gameProgress.debugFlags || {
+                    showImages: false,
+                    unlockAllGames: false,
+                    unlockAllSpirits: false,
+                    unlockAllItems: false,
+                    unlockPremium: false,
+                };
+
+                return {
+                    gameProgress: {
+                        ...state.gameProgress,
+                        debugFlags: {
+                            ...currentFlags,
+                            [key]: !currentFlags[key]
+                        }
                     }
-                }
-            })),
+                };
+            }),
 
             unlockSpirit: (id) => set((state) => ({
                 spirits: state.spirits.map((s) => s.id === id ? { ...s, unlocked: true } : s)

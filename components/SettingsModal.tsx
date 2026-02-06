@@ -15,7 +15,7 @@ interface SettingsModalProps {
 import { useSubscription } from '@/lib/hooks/useSubscription';
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-    const { gameProgress, toggleMasterMode, applyDebugPreset } = useStore();
+    const { gameProgress, toggleMasterMode, applyDebugPreset, toggleDebugFlag, toggleCareMode } = useStore();
     const { isPremium, subscriptionStatus, loading, checkout } = useSubscription();
     const [selectedPreset, setSelectedPreset] = useState<DebugPreset>('FULL');
 
@@ -58,7 +58,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         </div>
 
                         {/* Content */}
-                        <div className="p-6 space-y-8 overflow-y-auto max-h-[70vh]">
+                        <div className="p-6 space-y-8 overflow-y-auto max-h-[80vh] overscroll-contain">
+
+                            {/* ... (Existing Contnet) ... */}
 
                             {/* Subscription Section */}
                             <div className="space-y-4">
@@ -172,7 +174,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                     </p>
                                 </div>
                                 <button
-                                    onClick={useStore.getState().toggleCareMode}
+                                    onClick={toggleCareMode}
                                     className={cn(
                                         "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none",
                                         gameProgress.isCareMode ? "bg-emerald-500" : "bg-slate-200"
@@ -210,16 +212,16 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                     <div key={item.key} className="flex items-center justify-between bg-slate-50 p-2 rounded-lg">
                                                         <span className="text-xs font-bold text-slate-700">{item.label}</span>
                                                         <button
-                                                            onClick={() => useStore.getState().toggleDebugFlag(item.key as any)}
+                                                            onClick={() => toggleDebugFlag(item.key as any)}
                                                             className={cn(
                                                                 "relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none",
-                                                                gameProgress.debugFlags?.[item.key as keyof typeof gameProgress.debugFlags] ? "bg-indigo-500" : "bg-slate-300"
+                                                                !!gameProgress.debugFlags?.[item.key as keyof typeof gameProgress.debugFlags] ? "bg-indigo-500" : "bg-slate-300"
                                                             )}
                                                         >
                                                             <span
                                                                 className={cn(
                                                                     "inline-block h-2 w-2 transform rounded-full bg-white transition-transform",
-                                                                    gameProgress.debugFlags?.[item.key as keyof typeof gameProgress.debugFlags] ? "translate-x-4" : "translate-x-1"
+                                                                    !!gameProgress.debugFlags?.[item.key as keyof typeof gameProgress.debugFlags] ? "translate-x-4" : "translate-x-1"
                                                                 )}
                                                             />
                                                         </button>
@@ -255,6 +257,13 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                 )}
                             </AnimatePresence>
 
+                            {/* Close Button */}
+                            <button
+                                onClick={onClose}
+                                className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl active:scale-95 transition-transform"
+                            >
+                                閉じる
+                            </button>
                         </div>
                     </motion.div>
                 </motion.div>
