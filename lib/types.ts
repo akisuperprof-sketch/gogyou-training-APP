@@ -16,6 +16,9 @@ export interface Spirit {
     stats: SpiritStats;
     dialogueCode: string; // For greeting logic
     unlocked: boolean;
+    evolutionLevel?: number; // 進化段階 (1:通常, 2:覚醒, 3:神格)
+    currentOutfit?: string;  // 着せ替えID
+    description?: string;
     mood: Mood;
 }
 
@@ -39,11 +42,9 @@ export interface Formula {
     reading: string;
     element: Element;
     description: string;
-    flavor: string; // Added
     effectValue: number;
     recipe: { crudeDrugId: number; count: number }[];
     ownedCount: number;
-    usedCount: number; // Added
     discovered: boolean;
     imageUrl?: string;
 }

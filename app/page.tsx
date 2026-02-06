@@ -7,10 +7,11 @@ import { useEffect, useState } from 'react';
 import { useStore } from '@/lib/store';
 import { soundManager } from '@/lib/soundManager';
 import { SPIRIT_DATA, MOOD_COLORS, ELEMENT_COLORS } from '@/lib/data';
-import { HelpCircle, Sparkles, Crown, Book, History, Info, Zap, ChevronLeft, ChevronRight, X, BookOpen, Settings, Brain } from 'lucide-react';
+import { HelpCircle, Sparkles, Crown, Book, History, Info, Zap, ChevronLeft, ChevronRight, X, BookOpen, Settings, Brain, Share2 } from 'lucide-react';
 import { StoryModal } from '@/components/StoryModal';
 import { GuideModal } from '@/components/GuideModal';
 import { SettingsModal } from '@/components/SettingsModal';
+import { ShareCard } from '@/components/ShareCard';
 import { DAILY_WISDOM } from '@/lib/wisdomData';
 import { DailyWisdom } from '@/lib/types';
 import { useSubscription } from '@/lib/hooks/useSubscription';
@@ -54,6 +55,14 @@ export default function Home() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+
+  const handleEvolution = (spiritId: string) => {
+    // 進化演出 (仮)
+    setIsGlowActive(true);
+    setTimeout(() => setIsGlowActive(false), 2000);
+    // ストアの個体データを更新するアクションが必要
+  };
 
   useEffect(() => {
     if (mounted) {
@@ -429,6 +438,27 @@ export default function Home() {
                           )}
                         />
                       </div>
+                      {/* Evolution & Collection Hub (Experimental) */}
+                      {gameProgress.isEvolutionMode && (
+                        <div className="mt-4 flex justify-center space-x-4">
+                          <button
+                            onClick={() => setShareOpen(true)}
+                            className="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm"
+                          >
+                            <Share2 className="w-4 h-4" />
+                            <span>シェア画像生成</span>
+                          </button>
+
+                          {selectedSpirit?.stats.kizuna >= 80 && (
+                            <button
+                              onClick={() => handleEvolution(selectedSpirit.id)}
+                              className="bg-gradient-to-r from-amber-400 to-orange-500 text-white px-4 py-2 rounded-xl text-xs font-black shadow-lg shadow-amber-200 animate-pulse active:scale-95 transition-all"
+                            >
+                              ✨ 進化させる
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -622,6 +652,33 @@ export default function Home() {
           </Link>
         </div>
       </main>
+
+      {/* Campaign / Event Banner (Experimental) */}
+      {gameProgress.isCampaignMode && (
+        <div className="mx-6 mt-8 p-6 bg-gradient-to-br from-indigo-900 to-indigo-800 rounded-[2.5rem] shadow-2xl relative overflow-hidden group active:scale-95 transition-all cursor-pointer">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 blur-3xl -mr-16 -mt-16 group-hover:bg-indigo-400/30 transition-colors" />
+          <div className="relative flex justify-between items-center">
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <span className="px-2 py-0.5 bg-indigo-500 text-[8px] font-black text-white rounded-full uppercase tracking-widest">Limited Event</span>
+              </div>
+              <h4 className="text-white font-black text-lg">春の「木霊」キャンペーン</h4>
+              <p className="text-indigo-200 text-[10px] font-bold">提携生薬店「五行の庭」で、<br />アプリ画面を見せると薬膳茶をプレゼント！</p>
+            </div>
+            <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-3xl">
+              🍵
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedSpirit && (
+        <ShareCard
+          isOpen={shareOpen}
+          onClose={() => setShareOpen(false)}
+          spirit={selectedSpirit}
+        />
+      )}
 
       {/* Footer / Info */}
       <footer className="mt-20 pb-12 px-6 max-w-lg mx-auto text-center space-y-4">
