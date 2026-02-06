@@ -23,7 +23,7 @@ interface AppState {
     lastHealSpiritId: string | null;
     clearHealNotification: () => void;
     clearUnlockNotification: () => void;
-    unlockWisdom: (id: number) => void;
+    unlockWisdom: (id: string) => void;
     purchasePremium: () => void;
     applyDebugPreset: (preset: DebugPreset) => void;
     toggleBuruBuruMode: () => void;

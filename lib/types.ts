@@ -85,7 +85,7 @@ export interface GameProgress {
     guardEasyClears: number;
     guardMediumClears: number;
     unlockNotification: UnlockNotification | null;
-    unlockedWisdomIds: number[];
+    unlockedWisdomIds: string[];
     unlockedFormulaIds: number[];
     isPremiumUnlocked: boolean;
     isBuruBuruMode: boolean; // ぶるぶるモード (試験運用)
@@ -106,7 +106,7 @@ export interface DebugFlags {
 }
 
 export interface DailyWisdom {
-    id: number;
+    id: string;
     title: string;
     content: string;
     element: Element | 'Balance';
