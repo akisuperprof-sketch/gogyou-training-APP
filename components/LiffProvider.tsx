@@ -33,8 +33,24 @@ export const LiffProvider = ({ children, liffId }: { children: React.ReactNode; 
         if (typeof window === 'undefined') return;
 
         // LIFF初期化
+        // URL形式 (https://liff.line.me/XXX-YYY) が誤って設定されている場合のガード
+        let cleanLiffId = liffId;
+        if (liffId.startsWith('http')) {
+            try {
+                const url = new URL(liffId);
+                // パス部分の最後のセグメントを取得 (例: /XXX-YYY -> XXX-YYY)
+                const pathParts = url.pathname.split('/').filter(p => p.length > 0);
+                if (pathParts.length > 0) {
+                    cleanLiffId = pathParts[pathParts.length - 1];
+                    console.log('Validating LIFF ID: extracted from URL', cleanLiffId);
+                }
+            } catch (e) {
+                console.error('Invalid LIFF ID format', liffId);
+            }
+        }
+
         liff
-            .init({ liffId })
+            .init({ liffId: cleanLiffId })
             .then(async () => {
                 setLiffObject(liff);
                 if (liff.isLoggedIn()) {
