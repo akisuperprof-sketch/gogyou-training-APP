@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState, createContext, useContext } from 'react';
-import liff from '@line/liff';
 
+// Define context type with loose typing for liff to avoid import issues
 interface LiffContextType {
-    liff: typeof liff | null;
+    liff: any | null;
     lineProfile: { userId: string; displayName: string; pictureUrl?: string } | null;
     isLoggedIn: boolean;
     error: string | null;
@@ -24,62 +24,11 @@ const LiffContext = createContext<LiffContextType>({
 export const useLiff = () => useContext(LiffContext);
 
 export const LiffProvider = ({ children, liffId }: { children: React.ReactNode; liffId: string }) => {
-    const [liffObject, setLiffObject] = useState<typeof liff | null>(null);
+    const [liffObject, setLiffObject] = useState<any | null>(null);
     const [lineProfile, setLineProfile] = useState<LiffContextType['lineProfile']>(null);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        // SSR回避
-        if (typeof window === 'undefined') return;
-
-        // LIFF初期化
-        // URL形式 (https://liff.line.me/XXX-YYY) が誤って設定されている場合のガード
-        let cleanLiffId = liffId;
-        if (liffId.startsWith('http')) {
-            try {
-                const url = new URL(liffId);
-                // パス部分の最後のセグメントを取得 (例: /XXX-YYY -> XXX-YYY)
-                const pathParts = url.pathname.split('/').filter(p => p.length > 0);
-                if (pathParts.length > 0) {
-                    cleanLiffId = pathParts[pathParts.length - 1];
-                    console.log('Validating LIFF ID: extracted from URL', cleanLiffId);
-                }
-            } catch (e) {
-                console.error('Invalid LIFF ID format', liffId);
-            }
-        }
-
-        liff
-            .init({ liffId: cleanLiffId })
-            .then(async () => {
-                setLiffObject(liff);
-                if (liff.isLoggedIn()) {
-                    try {
-                        const profile = await liff.getProfile();
-                        setLineProfile(profile);
-
-                        // Supabase Sync (Upsert)
-                        upsertUser(profile.userId, profile.displayName);
-
-                        // Optional Verify
-                        verifyToken(liff.getIDToken());
-
-                    } catch (e: any) {
-                        console.error('LIFF getProfile error', e);
-                        setError(e.toString());
-                    }
-                } else {
-                    // Force login if not logged in
-                    liff.login();
-                    return;
-                }
-            })
-            .catch((e: any) => {
-                console.error('LIFF Init Error', e);
-                setError(e.toString());
-            });
-    }, [liffId]);
-
+    // Define helper functions first
     const upsertUser = async (lineUserId: string, displayName: string) => {
         try {
             const res = await fetch('/api/users/upsert', {
@@ -115,6 +64,64 @@ export const LiffProvider = ({ children, liffId }: { children: React.ReactNode; 
             console.error('Verify API error', e);
         }
     };
+
+    useEffect(() => {
+        // SSR Check
+        if (typeof window === 'undefined') return;
+
+        const initLiff = async () => {
+            try {
+                // Dynamic import to avoid SSR issues
+                const liffModule = await import('@line/liff');
+                const liff = liffModule.default || liffModule;
+
+                // Handle URL format in LIFF ID (e.g. from copy-paste errors)
+                let cleanLiffId = liffId;
+                if (liffId.startsWith('http')) {
+                    try {
+                        const url = new URL(liffId);
+                        const pathParts = url.pathname.split('/').filter(p => p.length > 0);
+                        if (pathParts.length > 0) {
+                            cleanLiffId = pathParts[pathParts.length - 1];
+                            console.log('Validating LIFF ID: extracted from URL', cleanLiffId);
+                        }
+                    } catch (e) {
+                        console.error('Invalid LIFF ID format', liffId);
+                    }
+                }
+
+                await liff.init({ liffId: cleanLiffId });
+                setLiffObject(liff);
+
+                if (liff.isLoggedIn()) {
+                    try {
+                        const profile = await liff.getProfile();
+                        setLineProfile(profile);
+
+                        // Sync User Data
+                        await upsertUser(profile.userId, profile.displayName);
+
+                        // Optional Verify
+                        verifyToken(liff.getIDToken());
+
+                    } catch (e: any) {
+                        console.error('LIFF getProfile error', e);
+                        setError(`Profile Error: ${e.message || e.toString()}`);
+                    }
+                } else {
+                    // Force login if not logged in
+                    liff.login();
+                }
+            } catch (e: any) {
+                console.error('LIFF Init Error', e);
+                setError(`LIFF Init Error: ${e.message || e.toString()}`);
+            }
+        };
+
+        if (liffId) {
+            initLiff();
+        }
+    }, [liffId]);
 
     const login = () => {
         if (liffObject && !liffObject.isLoggedIn()) {
@@ -152,7 +159,7 @@ export const LiffProvider = ({ children, liffId }: { children: React.ReactNode; 
                     </button>
                     <button
                         onClick={() => {
-                            liff.logout();
+                            if (liffObject) liffObject.logout();
                             window.location.reload();
                         }}
                         className="text-slate-500 text-sm underline"
@@ -166,12 +173,6 @@ export const LiffProvider = ({ children, liffId }: { children: React.ReactNode; 
                 <div className="fixed bottom-1 left-1 z-[9999] opacity-50 hover:opacity-100 p-1 bg-black/80 rounded h-min text-[10px] text-white flex flex-col gap-1">
                     <div>DEV DEBUG</div>
                     <div>Logged In: {liffObject?.isLoggedIn() ? 'YES' : 'NO'}</div>
-                    <button
-                        onClick={() => upsertUser('U_MOCK_USER_12345', 'Mock User')}
-                        className="bg-blue-600 px-2 py-1 rounded hover:bg-blue-500"
-                    >
-                        Force Upsert Mock
-                    </button>
                 </div>
             )}
         </LiffContext.Provider>
