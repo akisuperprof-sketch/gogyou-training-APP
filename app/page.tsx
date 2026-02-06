@@ -61,6 +61,13 @@ export default function Home() {
     setTodayWisdom(DAILY_WISDOM[dayOfYear % DAILY_WISDOM.length]);
   }, [checkGenkiDecay]);
 
+  // ハイドレーションエラー回避: マウントされるまでは何も表示しない
+  if (!mounted) {
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+    </div>;
+  }
+
   const isBuruUI = gameProgress.isBuruBuruMode;
 
   return (
