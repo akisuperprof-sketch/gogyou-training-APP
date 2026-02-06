@@ -204,6 +204,12 @@ export function CardModal({ card, onClose }: CardModalProps) {
                                 </div>
                             </button>
                         )}
+
+                        <div className="pt-4 border-t border-slate-50">
+                            <p className="text-[9px] font-bold text-slate-300 leading-relaxed text-center">
+                                ※記載されている内容や効果は、五行思想に基づいたゲーム内の演出であり、実際の効能を保証するものではありません。
+                            </p>
+                        </div>
                     </div>
                 </motion.div>
             </motion.div>

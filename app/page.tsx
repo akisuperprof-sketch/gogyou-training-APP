@@ -12,6 +12,7 @@ import { GuideModal } from '@/components/GuideModal';
 import { SettingsModal } from '@/components/SettingsModal';
 import { DAILY_WISDOM } from '@/lib/wisdomData';
 import { DailyWisdom } from '@/lib/types';
+import { useSubscription } from '@/lib/hooks/useSubscription';
 
 export default function Home() {
   const { spirits, crudeDrugs, formulas, gameProgress, setHasSeenStory, checkGenkiDecay, toggleMasterMode, applyDebugPreset, lastHealSpiritId, clearHealNotification, clearUnlockNotification } = useStore();
@@ -36,11 +37,24 @@ export default function Home() {
     }
   }, [mounted, gameProgress.unlockedWisdomIds]);
 
+  const { isAllowed, loading: subLoading } = useSubscription();
+
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
     checkGenkiDecay();
   }, [checkGenkiDecay]);
+
+  // Force close for unauthorized users after check
+  useEffect(() => {
+    // TODO: 本番環境ではこのコメントアウトを外して厳密に制御する
+    /*
+    if (!subLoading && !isAllowed) {
+        // alert('開発中によりアクセスが制限されています');
+        // liff.closeWindow(); 
+    }
+    */
+  }, [isAllowed, subLoading]);
 
   // Story / Tutorial auto-open
   useEffect(() => {
@@ -63,6 +77,20 @@ export default function Home() {
   }, [lastHealSpiritId, focusedIdx, spirits, clearHealNotification]);
 
   if (!mounted) return <div className="min-h-screen bg-white" />;
+
+  // Block unauthorized users visually (Blocking UI)
+  if (!subLoading && !isAllowed) {
+    /*
+    // こちらも本番時に有効化する
+    return (
+        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white p-8 text-center space-y-6">
+            <Info className="w-16 h-16 text-slate-500" />
+            <h1 className="text-2xl font-black">メンテナンス中</h1>
+            <p className="text-sm font-bold text-slate-400">現在開発者プレビュー期間中です。<br/>許可されたアカウントのみアクセス可能です。</p>
+        </div>
+    );
+    */
+  }
 
   const unlockedSpirits = spirits.filter(s => s.unlocked);
   const spirit = unlockedSpirits[focusedIdx] || spirits[0];
@@ -266,15 +294,41 @@ export default function Home() {
                       <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest mt-1">{spirit.element} Element</p>
                     </div>
 
-                    <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-6">
+                    <motion.div
+                      className="relative w-24 h-24 sm:w-32 sm:h-32 mb-6"
+                      animate={
+                        (gameProgress.isBuruBuruMode && spirit.stats.genki < 70)
+                          ? { x: [-2, 2, -2, 2, 0] }
+                          : {}
+                      }
+                      transition={{ duration: 0.2, repeat: Infinity, repeatDelay: 1 }}
+                    >
                       {gameProgress.isMasterMode ? (
-                        <img src={spiritInfo.illustration} alt={spirit.name} className="w-full h-full object-contain" />
+                        <img
+                          src={spiritInfo.illustration}
+                          alt={spirit.name}
+                          className={cn(
+                            "w-full h-full object-contain transition-all duration-500",
+                            (gameProgress.isBuruBuruMode && spirit.stats.genki < 40) ? "grayscale contrast-125 brightness-90" : ""
+                          )}
+                        />
                       ) : (
                         <div className="text-6xl sm:text-7xl flex items-center justify-center h-full">
                           {spirit.element === 'Wood' ? '🌿' : spirit.element === 'Fire' ? '🔥' : spirit.element === 'Earth' ? '⛰️' : spirit.element === 'Metal' ? '💎' : '💧'}
                         </div>
                       )}
-                    </div>
+
+                      {/* SOS Icon Overlay */}
+                      {gameProgress.isBuruBuruMode && spirit.stats.genki < 70 && (
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-black text-xs border-2 border-white shadow-md z-20"
+                        >
+                          Please!
+                        </motion.div>
+                      )}
+                    </motion.div>
 
                     <div className="w-full space-y-2">
                       <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-400 tracking-tighter">
@@ -308,11 +362,27 @@ export default function Home() {
           key={spirit.id}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-8 bg-white p-6 rounded-[2rem] shadow-xl border border-slate-100 max-w-sm w-full relative"
+          className={cn(
+            "mt-8 p-6 rounded-[2rem] shadow-xl border max-w-sm w-full relative transition-colors duration-500",
+            (gameProgress.isBuruBuruMode && spirit.stats.genki < 70)
+              ? "bg-red-50 border-red-200"
+              : "bg-white border-slate-100"
+          )}
         >
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white border-l border-t border-slate-100 rotate-45" />
-          <p className="text-center font-bold text-slate-600 italic leading-relaxed">
-            "{SPIRIT_DATA[spirit.id].moodLines[spirit.mood][0]}"
+          <div className={cn(
+            "absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 border-l border-t rotate-45 transition-colors duration-500",
+            (gameProgress.isBuruBuruMode && spirit.stats.genki < 70)
+              ? "bg-red-50 border-red-200"
+              : "bg-white border-slate-100"
+          )} />
+          <p className={cn(
+            "text-center font-bold italic leading-relaxed",
+            (gameProgress.isBuruBuruMode && spirit.stats.genki < 70) ? "text-red-800" : "text-slate-600"
+          )}>
+            {(gameProgress.isBuruBuruMode && spirit.stats.genki < 70)
+              ? (spirit.stats.genki < 40 ? "ねえ、もうだめかも...たすけて..." : "あの...少し体が重い気がするの...")
+              : `"${SPIRIT_DATA[spirit.id].moodLines[spirit.mood][0]}"`
+            }
           </p>
         </motion.div>
 
@@ -438,8 +508,13 @@ export default function Home() {
       </main>
 
       {/* Footer / Info */}
-      <footer className="mt-20 pb-12 text-center">
-        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Gogyou Training App v1.2</p>
+      <footer className="mt-20 pb-12 px-6 max-w-lg mx-auto text-center space-y-4">
+        <div className="p-4 bg-slate-100/50 rounded-2xl">
+          <p className="text-[10px] font-bold text-slate-400 leading-relaxed text-left">
+            【免責事項】本アプリは、五行思想や漢方の概念を学ぶための教育用ゲームプログラムであり、診断、処方、治療などの医療行為や、医学的アドバイスを提供するものではありません。アプリ内の描写や調合などは演出であり、実生活での自己判断による服用等は避けてください。
+          </p>
+        </div>
+        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Gogyou Training App v1.2.1</p>
       </footer>
     </div >
   );

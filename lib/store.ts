@@ -26,6 +26,7 @@ interface AppState {
     unlockWisdom: (id: string) => void;
     purchasePremium: () => void;
     applyDebugPreset: (preset: DebugPreset) => void;
+    toggleBuruBuruMode: () => void;
 }
 
 export const useStore = create<AppState>()(
@@ -62,7 +63,12 @@ export const useStore = create<AppState>()(
                 unlockedWisdomIds: [],
                 unlockedFormulaIds: [],
                 isPremiumUnlocked: true,
+                isBuruBuruMode: false,
             },
+
+            toggleBuruBuruMode: () => set((state) => ({
+                gameProgress: { ...state.gameProgress, isBuruBuruMode: !state.gameProgress.isBuruBuruMode }
+            })),
 
             unlockSpirit: (id) => set((state) => ({
                 spirits: state.spirits.map((s) => s.id === id ? { ...s, unlocked: true } : s)

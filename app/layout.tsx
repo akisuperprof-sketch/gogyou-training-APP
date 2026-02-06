@@ -9,6 +9,8 @@ const noto = Noto_Sans_JP({
   display: 'swap',
 });
 
+import { LiffProvider } from "@/components/LiffProvider";
+
 export const metadata: Metadata = {
   title: "五行精霊と漢方図鑑",
   description: "楽しく五行を学ぶ漢方アプリ",
@@ -26,12 +28,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const liffId = process.env.LIFF_ID || '';
+
   return (
     <html lang="ja">
       <body className={`${noto.variable} font-sans bg-slate-50 min-h-screen text-slate-900 overflow-x-hidden antialiased`}>
-        <main className="max-w-[480px] mx-auto min-h-screen relative shadow-sm bg-white border-x border-slate-100">
-          {children}
-        </main>
+        <LiffProvider liffId={liffId}>
+          <main className="max-w-[480px] mx-auto min-h-screen relative shadow-sm bg-white border-x border-slate-100">
+            {children}
+          </main>
+        </LiffProvider>
       </body>
     </html>
   );

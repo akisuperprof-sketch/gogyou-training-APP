@@ -12,13 +12,21 @@ interface SettingsModalProps {
     onClose: () => void;
 }
 
+import { useSubscription } from '@/lib/hooks/useSubscription';
+
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     const { gameProgress, toggleMasterMode, applyDebugPreset } = useStore();
+    const { isPremium, subscriptionStatus, loading, checkout } = useSubscription();
     const [selectedPreset, setSelectedPreset] = useState<DebugPreset>('FULL');
 
     const handleApply = () => {
         applyDebugPreset(selectedPreset);
         onClose();
+    };
+
+    const periodEndStr = (dateStr?: string) => {
+        if (!dateStr) return '';
+        return new Date(dateStr).toLocaleDateString();
     };
 
     return (
@@ -39,7 +47,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
-                        <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+                        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <h3 className="text-xl font-black text-slate-900 flex items-center">
                                 <Settings className="w-5 h-5 mr-2" />
                                 設定
@@ -50,32 +58,110 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         </div>
 
                         {/* Content */}
-                        <div className="p-6 space-y-6">
-                            
+                        <div className="p-6 space-y-8 overflow-y-auto max-h-[70vh]">
+
+                            {/* Subscription Section */}
+                            <div className="space-y-4">
+                                <h4 className="font-bold text-slate-900 flex items-center text-sm uppercase tracking-wider text-slate-400">
+                                    アカウントプラン
+                                </h4>
+                                <div className={cn(
+                                    "p-5 rounded-2xl border-2 flex flex-col items-center text-center space-y-2",
+                                    isPremium ? "bg-amber-50 border-amber-200" : "bg-slate-50 border-slate-100"
+                                )}>
+                                    {isPremium ? (
+                                        <>
+                                            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mb-1">
+                                                <Crown className="w-6 h-6 text-amber-500 fill-current" />
+                                            </div>
+                                            <h5 className="font-black text-lg text-amber-900">プレミアム会員</h5>
+                                            <p className="text-xs font-bold text-amber-700">
+                                                全ての機能が解放されています
+                                            </p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-1">
+                                                <div className="w-6 h-6 text-slate-400">FREE</div>
+                                            </div>
+                                            <h5 className="font-black text-lg text-slate-700">フリープラン</h5>
+                                            <p className="text-xs text-slate-500 max-w-[200px]">
+                                                一部の機能が制限されています。<br />プレミアムプランで全開放しましょう。
+                                            </p>
+                                        </>
+                                    )}
+
+                                    {!isPremium && (
+                                        <button
+                                            onClick={checkout}
+                                            disabled={loading}
+                                            className="mt-4 w-full py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-black rounded-xl shadow-lg shadow-indigo-200 active:scale-95 transition-all flex items-center justify-center space-x-2"
+                                        >
+                                            {loading ? (
+                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            ) : (
+                                                <>
+                                                    <Crown className="w-4 h-4" />
+                                                    <span>プレミアムに登録する</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            <hr className="border-slate-100" />
+
                             {/* Developer Mode Toggle */}
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between opacity-50 hover:opacity-100 transition-opacity">
                                 <div>
-                                    <h4 className="font-bold text-slate-900 flex items-center">
-                                        <Crown className="w-4 h-4 mr-1 text-amber-500" />
-                                        開発者モード
+                                    <h4 className="font-bold text-slate-900 flex items-center text-xs">
+                                        設定: 開発者モード
                                     </h4>
-                                    <p className="text-xs text-slate-500 mt-1">詳細なデバッグ情報を表示したり、実験的な機能を試したりできます。</p>
                                 </div>
                                 <button
                                     onClick={toggleMasterMode}
                                     className={cn(
-                                        "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none",
+                                        "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none",
                                         gameProgress.isMasterMode ? "bg-indigo-600" : "bg-slate-200"
                                     )}
                                 >
                                     <span
                                         className={cn(
-                                            "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
-                                            gameProgress.isMasterMode ? "translate-x-6" : "translate-x-1"
+                                            "inline-block h-3 w-3 transform rounded-full bg-white transition-transform",
+                                            gameProgress.isMasterMode ? "translate-x-5" : "translate-x-1"
                                         )}
                                     />
                                 </button>
                             </div>
+
+                            {/* BuruBuru Mode Toggle (Experimental) */}
+                            {gameProgress.isMasterMode && (
+                                <div className="flex items-center justify-between bg-pink-50/50 p-3 rounded-xl border border-pink-100">
+                                    <div>
+                                        <h4 className="font-bold text-slate-900 flex items-center text-xs text-pink-700">
+                                            🧪 実験機能: ぶるぶるモード
+                                        </h4>
+                                        <p className="text-[10px] text-pink-600 mt-1">
+                                            精霊がSOSサインを出すようになります
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={useStore.getState().toggleBuruBuruMode}
+                                        className={cn(
+                                            "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none",
+                                            gameProgress.isBuruBuruMode ? "bg-pink-500" : "bg-slate-200"
+                                        )}
+                                    >
+                                        <span
+                                            className={cn(
+                                                "inline-block h-3 w-3 transform rounded-full bg-white transition-transform",
+                                                gameProgress.isBuruBuruMode ? "translate-x-5" : "translate-x-1"
+                                            )}
+                                        />
+                                    </button>
+                                </div>
+                            )}
 
                             {/* Debug Options (Only visible when active) */}
                             <AnimatePresence>
@@ -84,21 +170,13 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                         initial={{ height: 0, opacity: 0 }}
                                         animate={{ height: 'auto', opacity: 1 }}
                                         exit={{ height: 0, opacity: 0 }}
-                                        className="overflow-hidden space-y-4"
+                                        className="overflow-hidden space-y-4 pt-2"
                                     >
-                                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                                            <p className="text-sm font-bold text-yellow-800 mb-1">開発者モード有効中:</p>
-                                            <p className="text-xs text-yellow-700">全ての機能制限が解除され、デバッグログが表示されます。</p>
-                                        </div>
-
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-900 block">
-                                                診断ロジック（実験的）:
-                                            </label>
                                             <select
                                                 value={selectedPreset}
                                                 onChange={(e) => setSelectedPreset(e.target.value as DebugPreset)}
-                                                className="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                                className="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-700 bg-slate-50"
                                             >
                                                 <option value="FULL">フル解放 (開発用デフォルト)</option>
                                                 <option value="RESET">リセット (初期状態)</option>
@@ -108,28 +186,17 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                 <option value="HALF_DRUGS">生薬半分 (収集テスト)</option>
                                                 <option value="CRAFTING">調合可能 (機能テスト)</option>
                                             </select>
-                                            <p className="text-[10px] text-slate-400">
-                                                ※ プリセットを選ぶと、現在の進行状況が上書きされます。
-                                            </p>
+
+                                            <button
+                                                onClick={handleApply}
+                                                className="w-full py-2 bg-slate-900 text-white font-bold rounded-lg text-sm"
+                                            >
+                                                設定を適用
+                                            </button>
                                         </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
-
-                            {/* Action Button */}
-                             <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="pt-2"
-                             >
-                                <button
-                                    onClick={handleApply}
-                                    disabled={!gameProgress.isMasterMode}
-                                    className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                >
-                                    完了
-                                </button>
-                             </motion.div>
 
                         </div>
                     </motion.div>
@@ -138,3 +205,5 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         </AnimatePresence>
     );
 }
+
+// Add these to interface if imported from generic type file, otherwise keep imports

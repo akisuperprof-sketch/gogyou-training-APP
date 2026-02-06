@@ -80,6 +80,7 @@ export interface GameProgress {
     unlockedWisdomIds: string[];
     unlockedFormulaIds: number[];
     isPremiumUnlocked: boolean;
+    isBuruBuruMode: boolean; // ぶるぶるモード (試験運用)
 }
 
 export interface DailyWisdom {

@@ -8,7 +8,10 @@
 - **Frontend**: Next.js (App Router), TypeScript
 - **Styling**: Vanilla CSS + Tailwind CSS (Utility classes)
 - **State Management**: Zustand
-- **Persistence**: localStorage (Hydrate/Save) - current version: `v14`
+- **Backend/DB**: Supabase (Planned migration for user sync & LIFF integration)
+- **Persistence**: 
+  - 現状: localStorage (Hydrate/Save) - version `v14`
+  - 将来: Supabase Auth + PostgreSQL (LINEアカウント連携用)
 - **Animations**: Framer Motion, Lucide React (Icons)
 - **Assets**: AI-generated images (nanobananapro style)
 
