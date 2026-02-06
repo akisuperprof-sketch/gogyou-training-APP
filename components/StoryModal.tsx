@@ -4,10 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowRight, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
+import { Spirit } from '@/lib/types';
 
 interface StoryModalProps {
     isOpen: boolean;
     onClose: () => void;
+    spirit?: Spirit;
 }
 
 const STORY_STEPS = [
