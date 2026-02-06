@@ -136,32 +136,30 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             </div>
 
                             {/* BuruBuru Mode Toggle (Experimental) */}
-                            {gameProgress.isMasterMode && (
-                                <div className="flex items-center justify-between bg-pink-50/50 p-3 rounded-xl border border-pink-100">
-                                    <div>
-                                        <h4 className="font-bold text-slate-900 flex items-center text-xs text-pink-700">
-                                            🧪 実験機能: ぶるぶるモード
-                                        </h4>
-                                        <p className="text-[10px] text-pink-600 mt-1">
-                                            精霊がSOSサインを出すようになります
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={useStore.getState().toggleBuruBuruMode}
-                                        className={cn(
-                                            "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none",
-                                            gameProgress.isBuruBuruMode ? "bg-pink-500" : "bg-slate-200"
-                                        )}
-                                    >
-                                        <span
-                                            className={cn(
-                                                "inline-block h-3 w-3 transform rounded-full bg-white transition-transform",
-                                                gameProgress.isBuruBuruMode ? "translate-x-5" : "translate-x-1"
-                                            )}
-                                        />
-                                    </button>
+                            <div className="flex items-center justify-between bg-pink-50/50 p-3 rounded-xl border border-pink-100">
+                                <div>
+                                    <h4 className="font-bold text-slate-900 flex items-center text-xs text-pink-700">
+                                        🧪 実験機能: ぶるぶるモード
+                                    </h4>
+                                    <p className="text-[10px] text-pink-600 mt-1">
+                                        精霊がSOSサインを出すようになります
+                                    </p>
                                 </div>
-                            )}
+                                <button
+                                    onClick={useStore.getState().toggleBuruBuruMode}
+                                    className={cn(
+                                        "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none",
+                                        gameProgress.isBuruBuruMode ? "bg-pink-500" : "bg-slate-200"
+                                    )}
+                                >
+                                    <span
+                                        className={cn(
+                                            "inline-block h-3 w-3 transform rounded-full bg-white transition-transform",
+                                            gameProgress.isBuruBuruMode ? "translate-x-5" : "translate-x-1"
+                                        )}
+                                    />
+                                </button>
+                            </div>
 
                             {/* Debug Options (Only visible when active) */}
                             <AnimatePresence>

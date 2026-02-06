@@ -123,6 +123,18 @@ export const LiffProvider = ({ children, liffId }: { children: React.ReactNode; 
             }}
         >
             {children}
+            {process.env.NODE_ENV === 'development' && (
+                <div className="fixed bottom-1 left-1 z-[9999] opacity-50 hover:opacity-100 p-1 bg-black/80 rounded h-min text-[10px] text-white flex flex-col gap-1">
+                    <div>DEV DEBUG</div>
+                    <div>Logged In: {liffObject?.isLoggedIn() ? 'YES' : 'NO'}</div>
+                    <button
+                        onClick={() => upsertUser('U_MOCK_USER_12345', 'Mock User')}
+                        className="bg-blue-600 px-2 py-1 rounded hover:bg-blue-500"
+                    >
+                        Force Upsert Mock
+                    </button>
+                </div>
+            )}
         </LiffContext.Provider>
     );
 };
