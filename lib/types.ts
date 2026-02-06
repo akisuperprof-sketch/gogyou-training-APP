@@ -41,11 +41,12 @@ export interface Formula {
     name: string;
     reading: string;
     element: Element;
-    description: string;
     flavor: string;
+    description: string;
     effectValue: number;
     recipe: { crudeDrugId: number; count: number }[];
     ownedCount: number;
+    usedCount: number;
     discovered: boolean;
     imageUrl?: string;
 }
@@ -63,24 +64,9 @@ export interface GameProgress {
         guard: number;
         sort: number;
     };
-    dailyStreak: number;
-    lastPlayedDate: string; // ISO date
-    currentRequest: SpiritRequest | null;
-    hasSeenStory: boolean;
-    hasNewCards: boolean;
-    lastGenkiUpdate?: number;
+    unlockedWisdomIds: number[];
     isMasterMode: boolean;
-    chainLevelsUnlocked: number;
-    guardLevelsUnlocked: number;
     gamesUnlockedCount: number;
-    totalSessionsPlayed: number;
-    chainEasyClears: number;
-    chainMediumClears: number;
-    guardEasyClears: number;
-    guardMediumClears: number;
-    unlockNotification: { title: string; message: string } | null;
-    unlockedWisdomIds: string[];
-    unlockedFormulaIds: number[];
     isPremiumUnlocked: boolean;
     isBuruBuruMode: boolean; // ぶるぶるモード (試験運用)
     isCareMode: boolean;     // お世話モード (試験運用: なでなで・お供え)
@@ -92,18 +78,19 @@ export interface GameProgress {
 }
 
 export interface DebugFlags {
-    showImages: boolean;      // 画像を表示する (OFFなら絵文字)
-    unlockAllGames: boolean;  // 全ゲーム解放
-    unlockAllSpirits: boolean;// 全精霊解放
-    unlockAllItems: boolean;  // 生薬・処方を解放
-    unlockPremium: boolean;   // プレミアム機能解放
+    showImages: boolean;
+    unlockAllGames: boolean;
+    unlockAllSpirits: boolean;
+    unlockAllItems: boolean;
+    unlockPremium: boolean;
 }
 
 export interface DailyWisdom {
-    id: string;
-    element: Element | 'Balance';
+    id: number;
     title: string;
     content: string;
-    tag?: string; // e.g. 抑平, 相生, etc.
+    element: Element | 'Balance';
+    tag: string;
 }
-export type DebugPreset = 'VISUAL' | 'GAMES' | 'SPIRITS' | 'HALF_DRUGS' | 'CRAFTING' | 'FULL' | 'RESET';
+
+export type DebugPreset = 'NONE' | 'BASIC' | 'FULL';
