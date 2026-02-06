@@ -64,9 +64,24 @@ export interface GameProgress {
         guard: number;
         sort: number;
     };
-    unlockedWisdomIds: number[];
+    dailyStreak: number;
+    lastPlayedDate: string;
+    currentRequest: SpiritRequest | null;
+    hasSeenStory: boolean;
+    hasNewCards: boolean;
+    lastGenkiUpdate: number;
     isMasterMode: boolean;
+    chainLevelsUnlocked: number;
+    guardLevelsUnlocked: number;
     gamesUnlockedCount: number;
+    totalSessionsPlayed: number;
+    chainEasyClears: number;
+    chainMediumClears: number;
+    guardEasyClears: number;
+    guardMediumClears: number;
+    unlockNotification: string | null;
+    unlockedWisdomIds: number[];
+    unlockedFormulaIds: number[];
     isPremiumUnlocked: boolean;
     isBuruBuruMode: boolean; // ぶるぶるモード (試験運用)
     isCareMode: boolean;     // お世話モード (試験運用: なでなで・お供え)
@@ -93,4 +108,4 @@ export interface DailyWisdom {
     tag: string;
 }
 
-export type DebugPreset = 'NONE' | 'BASIC' | 'FULL';
+export type DebugPreset = 'NONE' | 'BASIC' | 'VISUAL' | 'GAMES' | 'SPIRITS' | 'HALF_DRUGS' | 'CRAFTING' | 'FULL' | 'RESET';
