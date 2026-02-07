@@ -34,9 +34,6 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${noto.variable} font-sans bg-slate-50 min-h-screen text-slate-900 overflow-x-hidden antialiased`}>
-        <div style={{ position: 'fixed', top: 0, left: 0, zIndex: 99999, fontSize: '10px', background: 'rgba(0,0,0,0.5)', color: 'white', pointerEvents: 'none' }}>
-          RefID: {liffId ? liffId.substring(0, 5) + '...' : 'MISSING'}
-        </div>
         <LiffProvider liffId={liffId}>
           <main className="max-w-[480px] mx-auto min-h-screen relative shadow-sm bg-white border-x border-slate-100">
             {children}
